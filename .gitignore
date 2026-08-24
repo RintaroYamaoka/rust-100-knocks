@@ -1,0 +1,16 @@
+# Rust
+/target
+**/*.rs.bk
+
+# Trunk output
+/dist
+
+# Vercel
+.vercel
+
+# project-bootstrap ephemeral markers (commit しない)
+.bootstrap/lane
+docs/bootstrap/sprint/.gate
+
+# OS/editor
+.DS_Store
