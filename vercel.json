@@ -2,10 +2,5 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "buildCommand": "bash scripts/build-frontend.sh",
   "outputDirectory": "dist",
-  "framework": null,
-  "functions": {
-    "api/execute.rs": {
-      "runtime": "vercel-rust@4.0.11"
-    }
-  }
+  "framework": null
 }

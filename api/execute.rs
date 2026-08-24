@@ -1,32 +1,44 @@
 //! POST /api/execute — Rust Playground へのバリデーション付きプロキシ。
 //! 契約・許可リスト検証は shared::playground に集約し、ここは HTTP glue のみ。
+//! Vercel 公式 Rust ランタイム (vercel_runtime 2.x) 上で動く。
 
 use std::time::Duration;
 
+use http_body_util::BodyExt;
+use hyper::StatusCode;
 use shared::playground::{validate, ExecuteRequest, ExecuteResponse};
-use vercel_runtime::{run, Body, Error, Request, Response, StatusCode};
+use vercel_runtime::{run, service_fn, Error, Request, Response};
 
 const UPSTREAM: &str = "https://play.rust-lang.org/execute";
 const UPSTREAM_TIMEOUT: Duration = Duration::from_secs(40);
 
 #[tokio::main]
 async fn main() -> Result<(), Error> {
-    run(handler).await
+    run(service_fn(handler)).await
 }
 
-fn json_error(status: StatusCode, message: &str) -> Result<Response<Body>, Error> {
+fn json_response(status: StatusCode, body: String) -> Result<Response<String>, Error> {
     Ok(Response::builder()
         .status(status)
         .header("content-type", "application/json; charset=utf-8")
-        .body(serde_json::json!({ "error": message }).to_string().into())?)
+        .header("cache-control", "no-store")
+        .body(body)?)
 }
 
-pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
-    if req.method() != "POST" {
+fn json_error(status: StatusCode, message: &str) -> Result<Response<String>, Error> {
+    json_response(status, serde_json::json!({ "error": message }).to_string())
+}
+
+pub async fn handler(req: Request) -> Result<Response<String>, Error> {
+    if req.method() != hyper::Method::POST {
         return json_error(StatusCode::METHOD_NOT_ALLOWED, "POST のみ受け付けます");
     }
 
-    let exec_req: ExecuteRequest = match serde_json::from_slice(req.body()) {
+    let body = match req.into_body().collect().await {
+        Ok(collected) => collected.to_bytes(),
+        Err(_) => return json_error(StatusCode::BAD_REQUEST, "リクエストボディを読めませんでした"),
+    };
+    let exec_req: ExecuteRequest = match serde_json::from_slice(&body) {
         Ok(r) => r,
         Err(_) => return json_error(StatusCode::BAD_REQUEST, "リクエストボディが不正です"),
     };
@@ -34,10 +46,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         return json_error(StatusCode::BAD_REQUEST, &msg);
     }
 
-    let client = reqwest::Client::builder()
-        .timeout(UPSTREAM_TIMEOUT)
-        .build()
-        .map_err(Error::from)?;
+    let client = reqwest::Client::builder().timeout(UPSTREAM_TIMEOUT).build()?;
 
     let upstream = match client.post(UPSTREAM).json(&exec_req).send().await {
         Ok(resp) => resp,
@@ -55,7 +64,7 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         }
     };
 
-    if upstream.status() == StatusCode::TOO_MANY_REQUESTS {
+    if upstream.status() == reqwest::StatusCode::TOO_MANY_REQUESTS {
         return json_error(
             StatusCode::TOO_MANY_REQUESTS,
             "実行サービスが混雑しています。少し待ってから再試行してください",
@@ -70,9 +79,5 @@ pub async fn handler(req: Request) -> Result<Response<Body>, Error> {
         Err(_) => return json_error(StatusCode::BAD_GATEWAY, "実行サービスの応答を解釈できませんでした"),
     };
 
-    Ok(Response::builder()
-        .status(StatusCode::OK)
-        .header("content-type", "application/json; charset=utf-8")
-        .header("cache-control", "no-store")
-        .body(serde_json::to_string(&exec_resp)?.into())?)
+    json_response(StatusCode::OK, serde_json::to_string(&exec_resp)?)
 }
