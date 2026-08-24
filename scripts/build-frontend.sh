@@ -19,7 +19,8 @@ rustup target add wasm32-unknown-unknown
 
 # cargo install trunk は遅すぎるので prebuilt バイナリを使う
 if ! command -v trunk >/dev/null 2>&1; then
-  curl -sL "https://github.com/trunk-rs/trunk/releases/download/${TRUNK_VERSION}/trunk-x86_64-unknown-linux-gnu.tar.gz" \
+  # musl (静的リンク) 版を使う: gnu 版は GLIBC 2.35 を要求し、Vercel build image の glibc より新しくて起動できない
+  curl -sL "https://github.com/trunk-rs/trunk/releases/download/${TRUNK_VERSION}/trunk-x86_64-unknown-linux-musl.tar.gz" \
     | tar -xz -C "$BIN_DIR"
 fi
 
