@@ -12,8 +12,10 @@ use shared::progress::{
 };
 
 use crate::console::{ConsolePane, RunState};
+use crate::layout::{load_layout, LayoutSizes, SplitTarget};
 use crate::list::Sidebar;
 use crate::problem_view::ProblemPane;
+use crate::splitter::Splitter;
 use crate::{api, editor, storage};
 
 /// 判定結果による進捗ステータス遷移。一度 Passed になったら失敗しても降格しない。
@@ -194,6 +196,11 @@ pub fn App() -> impl IntoView {
         editor::mount_retrying("editor-host", String::new(), on_mounted);
     });
 
+    let layout: RwSignal<LayoutSizes> = RwSignal::new(load_layout());
+    // ドラッグ中は iframe/エディタがポインタイベントを奪わないよう .main に resizing を付ける
+    let layout_dragging = RwSignal::new(false);
+    provide_context(layout_dragging);
+
     let selected_id = Signal::derive(move || selected.with(|s| s.as_ref().map(|p| p.id.clone())));
     let passed_in_level = Memo::new(move |_| {
         let ps = problems.get();
@@ -239,7 +246,7 @@ pub fn App() -> impl IntoView {
                     </div>
                 </div>
             </header>
-            <div class="main">
+            <div class="main" class:resizing=move || layout_dragging.get() style=move || layout.with(|l| l.css_vars())>
                 <Sidebar
                     problems=problems
                     progress=progress
@@ -249,7 +256,9 @@ pub fn App() -> impl IntoView {
                     load_error=load_error
                     on_select=select_problem
                 />
+                <Splitter target=SplitTarget::Sidebar sizes=layout/>
                 <ProblemPane problem=selected.into() progress=progress revealed=revealed/>
+                <Splitter target=SplitTarget::Problem sizes=layout/>
                 <section class="workbench">
                     <div class="workbench-toolbar">
                         <button
@@ -277,6 +286,7 @@ pub fn App() -> impl IntoView {
                         <button class="reset-btn" on:click=reset_code title="コードを初期状態に戻す">"リセット"</button>
                     </div>
                     <div class="editor-host" id="editor-host"></div>
+                    <Splitter target=SplitTarget::Console sizes=layout/>
                     <ConsolePane
                         state=Signal::derive(move || run_state.get())
                         on_next=Callback::new(move |()| nav(1))

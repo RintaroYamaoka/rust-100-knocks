@@ -58,15 +58,15 @@ a:hover { text-decoration: underline; }
 }
 .brand {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 8px;
   font-weight: 700;
   font-size: 16px;
+  line-height: 1;
   white-space: nowrap;
 }
-.brand .mark { display: inline-flex; color: var(--accent); }
-.brand .mark svg { width: 22px; height: 22px; }
-.brand .mark svg { animation: none; transition: transform 0.5s ease; }
+.brand .mark { display: inline-flex; align-items: center; color: var(--accent); }
+.brand .mark svg { display: block; width: 22px; height: 22px; transition: transform 0.5s ease; }
 .brand:hover .mark svg { transform: rotate(60deg); }
 .brand .knocks { color: var(--accent); }
 .level-tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; }
@@ -84,11 +84,31 @@ a:hover { text-decoration: underline; }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 3px; transition: width 0.4s ease; }
 
 /* ---- 3 pane layout ---- */
-.main { display: flex; flex: 1; min-height: 0; }
+.main {
+  --sidebar-w: 300px;
+  --problem-w: 560px;
+  --console-h: 260px;
+  display: flex;
+  flex: 1;
+  min-height: 0;
+}
+/* ドラッグ中はエディタ等にポインタを奪われないようにし、カーソルを固定する */
+.main.resizing { user-select: none; cursor: col-resize; }
+.main.resizing .editor-host, .main.resizing .console-body, .main.resizing .problem-body { pointer-events: none; }
+
+/* splitters (Zed 風: 細いバーで、ホバー/ドラッグ時にアクセント色) */
+.splitter { flex-shrink: 0; position: relative; z-index: 2; background: var(--border); transition: background 0.15s; }
+.splitter::after { content: ""; position: absolute; inset: 0; }
+.splitter-h { width: 1px; cursor: col-resize; }
+.splitter-h::after { left: -4px; right: -4px; }
+.splitter-v { height: 1px; cursor: row-resize; }
+.splitter-v::after { top: -4px; bottom: -4px; }
+.splitter:hover, .splitter.dragging { background: var(--accent); }
+.splitter.dragging { box-shadow: 0 0 0 1px rgb(240 113 58 / 0.4); }
 
 /* sidebar */
 .sidebar {
-  width: 300px;
+  width: var(--sidebar-w);
   flex-shrink: 0;
   display: flex;
   flex-direction: column;
@@ -145,11 +165,11 @@ a:hover { text-decoration: underline; }
 
 /* problem pane */
 .problem-pane {
-  flex: 1;
-  min-width: 320px;
+  width: var(--problem-w);
+  flex-shrink: 0;
+  min-width: 280px;
   display: flex;
   flex-direction: column;
-  border-right: 1px solid var(--border);
   min-height: 0;
   background: var(--bg);
 }
@@ -230,7 +250,7 @@ a:hover { text-decoration: underline; }
 .answer-section h2 { font-size: 15px; margin: 16px 0 8px; color: var(--accent); }
 
 /* workbench */
-.workbench { flex: 1.15; min-width: 380px; display: flex; flex-direction: column; min-height: 0; background: var(--bg-panel); }
+.workbench { flex: 1; min-width: 320px; display: flex; flex-direction: column; min-height: 0; background: var(--bg-panel); }
 .workbench-toolbar {
   display: flex;
   align-items: center;
@@ -264,9 +284,8 @@ a:hover { text-decoration: underline; }
 
 /* console */
 .console {
-  height: 260px;
+  height: var(--console-h);
   flex-shrink: 0;
-  border-top: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   background: var(--bg);
@@ -346,6 +365,7 @@ a:hover { text-decoration: underline; }
 @media (max-width: 1100px) {
   .main { flex-direction: column; overflow-y: auto; }
   .sidebar { width: 100%; max-height: 300px; }
-  .problem-pane, .workbench { min-width: 0; }
+  .problem-pane, .workbench { min-width: 0; width: 100%; }
+  .splitter-h { display: none; }
   body { overflow: auto; }
 }

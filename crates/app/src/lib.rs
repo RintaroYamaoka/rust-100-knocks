@@ -5,9 +5,11 @@ pub mod api;
 pub mod app;
 pub mod console;
 pub mod editor;
+pub mod layout;
 pub mod list;
 pub mod md;
 pub mod problem_view;
+pub mod splitter;
 pub mod storage;
 
 pub use app::next_status;
