@@ -1,0 +1,38 @@
+[
+  {
+    "id": "i001",
+    "level": "intermediate",
+    "title": "Option で先頭文字を返す",
+    "description_md": "文字列 `s` の **先頭の文字** を `Option<char>` で返す関数 `first_char` を完成させましょう。\n\n```rust\nfirst_char(\"rust\") // => Some('r')\nfirst_char(\"\")     // => None\n```\n\n空文字列のときに panic せず `None` を返すのがポイントです。",
+    "starter_code": "pub fn first_char(s: &str) -> Option<char> {\n    // TODO: 空文字列なら None\n    None\n}\n",
+    "hidden_tests": "#[test]\nfn some_for_nonempty() { assert_eq!(first_char(\"rust\"), Some('r')); }\n#[test]\nfn none_for_empty() { assert_eq!(first_char(\"\"), None); }\n#[test]\nfn multibyte() { assert_eq!(first_char(\"さび\"), Some('さ')); }\n",
+    "answer_code": "pub fn first_char(s: &str) -> Option<char> {\n    s.chars().next()\n}\n",
+    "explanation_md": "`chars()` イテレータの `next()` は、要素があれば `Some(char)`、なければ `None` を返します — まさに求める仕様そのものです。\n\n```rust\ns.chars().next()\n```\n\n**やりがちな NG**: `s.chars().nth(0).unwrap()` のように `unwrap()` すると空文字列で panic します。「無いかもしれない値」は `Option` のまま返すのが Rust の流儀で、呼び出し側が `match` や `if let` で分岐します。\n\nなお `s[0]` のようなインデックスアクセスは `&str` ではコンパイルエラーです (UTF-8 の途中バイトを指せてしまうため意図的に禁止されています)。",
+    "hints": ["`s.chars()` の `next()` の戻り値の型を確認してみましょう。"],
+    "tags": ["Option", "文字列", "イテレータ"]
+  },
+  {
+    "id": "i002",
+    "level": "intermediate",
+    "title": "トレイトを実装する",
+    "description_md": "図形の面積を表すトレイト `Area` があります。長方形 `Rect` に `Area` を実装しましょう。\n\n```rust\npub trait Area {\n    fn area(&self) -> f64;\n}\n\npub struct Rect { pub width: f64, pub height: f64 }\n```\n\n`Rect { width: 3.0, height: 4.0 }.area()` が `12.0` になるようにしてください。",
+    "starter_code": "pub trait Area {\n    fn area(&self) -> f64;\n}\n\npub struct Rect {\n    pub width: f64,\n    pub height: f64,\n}\n\n// TODO: Rect に Area を実装する\n",
+    "hidden_tests": "#[test]\nfn rect_area() {\n    let r = Rect { width: 3.0, height: 4.0 };\n    assert_eq!(r.area(), 12.0);\n}\n#[test]\nfn works_as_trait_object() {\n    let shapes: Vec<Box<dyn Area>> = vec![Box::new(Rect { width: 2.0, height: 5.0 })];\n    assert_eq!(shapes[0].area(), 10.0);\n}\n",
+    "answer_code": "pub trait Area {\n    fn area(&self) -> f64;\n}\n\npub struct Rect {\n    pub width: f64,\n    pub height: f64,\n}\n\nimpl Area for Rect {\n    fn area(&self) -> f64 {\n        self.width * self.height\n    }\n}\n",
+    "explanation_md": "トレイトの実装は `impl Trait for Type` ブロックで行います:\n\n```rust\nimpl Area for Rect {\n    fn area(&self) -> f64 {\n        self.width * self.height\n    }\n}\n```\n\n- `&self` はメソッドのレシーバで、`self: &Rect` の省略形です\n- トレイトを実装すると、`Box<dyn Area>` のような **トレイトオブジェクト** としても扱えるようになります (2つ目のテストがこれを確認しています)\n- トレイトは他言語のインターフェースに近いですが、既存の型に後付けで実装できる点が強力です",
+    "hints": ["`impl Area for Rect { ... }` ブロックを書き、その中に `fn area(&self) -> f64` を実装します。"],
+    "tags": ["トレイト", "構造体"]
+  },
+  {
+    "id": "i003",
+    "level": "intermediate",
+    "title": "偶数だけを集める",
+    "description_md": "整数スライスから **偶数だけ** を集めた `Vec<i32>` を返す関数 `evens` を完成させましょう。\n\n```rust\nevens(&[1, 2, 3, 4]) // => vec![2, 4]\n```\n\nイテレータの `filter` と `collect` を使うのが定番です。",
+    "starter_code": "pub fn evens(v: &[i32]) -> Vec<i32> {\n    // TODO: filter + collect\n    Vec::new()\n}\n",
+    "hidden_tests": "#[test]\nfn keeps_evens() { assert_eq!(evens(&[1, 2, 3, 4]), vec![2, 4]); }\n#[test]\nfn empty_in_empty_out() { assert_eq!(evens(&[]), Vec::<i32>::new()); }\n#[test]\nfn keeps_negatives_and_zero() { assert_eq!(evens(&[-2, -1, 0]), vec![-2, 0]); }\n",
+    "answer_code": "pub fn evens(v: &[i32]) -> Vec<i32> {\n    v.iter().filter(|&&x| x % 2 == 0).copied().collect()\n}\n",
+    "explanation_md": "イテレータチェーンの典型形です:\n\n```rust\nv.iter()                        // Iterator<Item = &i32>\n    .filter(|&&x| x % 2 == 0)   // 条件を満たす要素だけ通す\n    .copied()                   // &i32 → i32 にコピー\n    .collect()                  // Vec<i32> に集める\n```\n\n- `filter` のクロージャは `&&i32` (参照の参照) を受けるため、パターン `|&&x|` で剥がしています。`|x| *x % 2 == 0` でも同じです\n- `copied()` は参照のイテレータを値のイテレータに変換します (`cloned()` の Copy 型版)\n- `collect()` は戻り値の型注釈から「何に集めるか」を推論します\n\n`into_iter().filter(...).collect()` との違い (所有権を消費するか) も意識できると中級卒業です。",
+    "hints": ["`v.iter().filter(|x| ...)` で絞り込み、`.copied().collect()` で Vec にします。", "偶数判定は `x % 2 == 0` です。"],
+    "tags": ["イテレータ", "クロージャ", "filter"]
+  }
+]

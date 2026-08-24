@@ -84,7 +84,8 @@ pub fn run_problem(scratch_dir: &Path, code: &str, hidden_tests: &str) -> std::i
     if !manifest.exists() {
         fs::write(
             &manifest,
-            "[package]\nname = \"knock-scratch\"\nversion = \"0.0.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n",
+            // 空の [workspace] で親 workspace への取り込みを防ぐ (repo 内 target/ 配下で動かすため)
+            "[package]\nname = \"knock-scratch\"\nversion = \"0.0.0\"\nedition = \"2024\"\n\n[lib]\npath = \"src/lib.rs\"\n\n[workspace]\n",
         )?;
     }
     fs::write(src_dir.join("lib.rs"), compose_submission(code, hidden_tests))?;

@@ -1,0 +1,62 @@
+[
+  {
+    "id": "b001",
+    "level": "beginner",
+    "title": "2倍にする関数",
+    "description_md": "整数 `n` を受け取り、**2倍にして返す** 関数 `double` を完成させましょう。\n\n```rust\ndouble(2)  // => 4\ndouble(-3) // => -6\n```\n\nRust では関数の最後の式が戻り値になります (`return` と `;` は不要)。",
+    "starter_code": "pub fn double(n: i32) -> i32 {\n    // TODO: n を 2 倍にして返す\n    0\n}\n",
+    "hidden_tests": "#[test]\nfn doubles_positive() { assert_eq!(double(2), 4); }\n#[test]\nfn doubles_negative() { assert_eq!(double(-3), -6); }\n#[test]\nfn doubles_zero() { assert_eq!(double(0), 0); }\n",
+    "answer_code": "pub fn double(n: i32) -> i32 {\n    n * 2\n}\n",
+    "explanation_md": "Rust の関数本体は **ブロック式** で、最後に書いた式 (セミコロンなし) がそのまま戻り値になります。\n\n```rust\npub fn double(n: i32) -> i32 {\n    n * 2   // ← セミコロンを付けないことで「式」として値を返す\n}\n```\n\n`return n * 2;` と書いても動きますが、関数末尾では式スタイルが慣用的です。\n`n * 2;` とセミコロンを付けると文になり `()` が返ってしまい、型エラー `E0308` になります。",
+    "hints": ["最後の式がそのまま戻り値になります。セミコロンを付けないのがポイントです。"],
+    "tags": ["関数", "式と文"]
+  },
+  {
+    "id": "b002",
+    "level": "beginner",
+    "title": "あいさつ文を作る",
+    "description_md": "名前 `name` を受け取り、`こんにちは、{name}さん!` という `String` を返す関数 `greet` を完成させましょう。\n\n```rust\ngreet(\"太郎\") // => \"こんにちは、太郎さん!\"\n```",
+    "starter_code": "pub fn greet(name: &str) -> String {\n    // TODO: format! マクロを使ってみよう\n    String::new()\n}\n",
+    "hidden_tests": "#[test]\nfn greets_taro() { assert_eq!(greet(\"太郎\"), \"こんにちは、太郎さん!\"); }\n#[test]\nfn greets_empty() { assert_eq!(greet(\"\"), \"こんにちは、さん!\"); }\n",
+    "answer_code": "pub fn greet(name: &str) -> String {\n    format!(\"こんにちは、{name}さん!\")\n}\n",
+    "explanation_md": "文字列の組み立てには `format!` マクロを使います。`println!` と同じ書式で、出力する代わりに `String` を返します。\n\n```rust\nformat!(\"こんにちは、{name}さん!\")\n```\n\nRust 2021 以降は `{}` の中に直接変数名を書けます (`format!(\"...{}...\", name)` と同じ意味)。\n\n- `&str` は文字列スライス (借用)、`String` は所有権を持つ可変な文字列です\n- 引数は `&str` で受けると `String` も文字列リテラルもどちらも渡せて便利です",
+    "hints": ["`format!(\"...{}...\", name)` または `format!(\"...{name}...\")` が使えます。"],
+    "tags": ["文字列", "format!"]
+  },
+  {
+    "id": "b003",
+    "level": "beginner",
+    "title": "絶対値",
+    "description_md": "整数 `n` の **絶対値** を返す関数 `abs_val` を、`if` を使って実装しましょう。\n\n```rust\nabs_val(5)  // => 5\nabs_val(-5) // => 5\n```\n\n※ 標準ライブラリの `abs()` を使わずに書いてみてください。",
+    "starter_code": "pub fn abs_val(n: i32) -> i32 {\n    // TODO: if を「式」として使ってみよう\n    n\n}\n",
+    "hidden_tests": "#[test]\nfn positive_stays() { assert_eq!(abs_val(5), 5); }\n#[test]\nfn negative_flips() { assert_eq!(abs_val(-5), 5); }\n#[test]\nfn zero_is_zero() { assert_eq!(abs_val(0), 0); }\n",
+    "answer_code": "pub fn abs_val(n: i32) -> i32 {\n    if n < 0 { -n } else { n }\n}\n",
+    "explanation_md": "Rust の `if` は **式** なので、値を返せます。三項演算子 (`? :`) が無い代わりにこう書きます:\n\n```rust\nif n < 0 { -n } else { n }\n```\n\n- 両方の分岐が同じ型を返す必要があります\n- `else` を省略すると `()` を返す扱いになるため、値を返す `if` 式では必須です\n\n`let x = if cond { a } else { b };` のように変数の初期化にもよく使います。",
+    "hints": ["`if n < 0 { -n } else { n }` — if も値を返す式です。"],
+    "tags": ["制御構文", "式と文"]
+  },
+  {
+    "id": "b004",
+    "level": "beginner",
+    "title": "借用で文字数を数える",
+    "description_md": "文字列スライス `s` の **文字数** (バイト数ではなく `char` の数) を返す関数 `count_chars` を完成させましょう。\n\n```rust\ncount_chars(\"hello\") // => 5\ncount_chars(\"こんにちは\") // => 5\n```\n\n日本語のようなマルチバイト文字では `s.len()` (バイト数) と文字数が一致しないことに注意してください。",
+    "starter_code": "pub fn count_chars(s: &str) -> usize {\n    // TODO: s.len() だとバイト数になってしまう…\n    s.len()\n}\n",
+    "hidden_tests": "#[test]\nfn ascii() { assert_eq!(count_chars(\"hello\"), 5); }\n#[test]\nfn japanese() { assert_eq!(count_chars(\"こんにちは\"), 5); }\n#[test]\nfn empty() { assert_eq!(count_chars(\"\"), 0); }\n",
+    "answer_code": "pub fn count_chars(s: &str) -> usize {\n    s.chars().count()\n}\n",
+    "explanation_md": "`&str` の `len()` は **UTF-8 のバイト数** を返します。`\"こんにちは\".len()` は 15 (3バイト × 5文字) です。\n\n文字単位で数えるには `chars()` イテレータを使います:\n\n```rust\ns.chars().count()\n```\n\n- `chars()` は Unicode スカラー値 (`char`) 単位のイテレータを返します\n- 引数を `&str` (借用) で受けているので、呼び出し側の文字列の所有権は移動しません",
+    "hints": ["`s.chars()` で文字単位のイテレータが得られます。", "イテレータの要素数は `.count()` で数えられます。"],
+    "tags": ["文字列", "借用", "イテレータ"]
+  },
+  {
+    "id": "b005",
+    "level": "beginner",
+    "title": "スライスの合計",
+    "description_md": "整数スライス `v` の **合計** を返す関数 `sum` を完成させましょう。\n\n```rust\nsum(&[1, 2, 3]) // => 6\nsum(&[])        // => 0\n```\n\n`for` ループでも書けますが、イテレータの `sum()` メソッドを使うとより簡潔です。",
+    "starter_code": "pub fn sum(v: &[i32]) -> i32 {\n    // TODO: 合計を計算する\n    0\n}\n",
+    "hidden_tests": "#[test]\nfn sums_values() { assert_eq!(sum(&[1, 2, 3]), 6); }\n#[test]\nfn empty_is_zero() { assert_eq!(sum(&[]), 0); }\n#[test]\nfn negatives() { assert_eq!(sum(&[-1, 1, -2]), -2); }\n",
+    "answer_code": "pub fn sum(v: &[i32]) -> i32 {\n    v.iter().sum()\n}\n",
+    "explanation_md": "スライスの合計はイテレータ + `sum()` が定番です:\n\n```rust\nv.iter().sum()\n```\n\n- `iter()` は要素への参照 (`&i32`) のイテレータを返します\n- `sum()` は戻り値の型から合計の型を推論します (今回は関数の戻り値 `i32`)\n\n`for` ループ版も書けます:\n\n```rust\nlet mut total = 0;\nfor x in v {\n    total += x;\n}\ntotal\n```\n\nどちらも正解ですが、イテレータ版のほうが意図が明確で Rust らしい書き方です。",
+    "hints": ["`v.iter().sum()` — 型推論が効くのでこれだけで動きます。"],
+    "tags": ["イテレータ", "スライス"]
+  }
+]

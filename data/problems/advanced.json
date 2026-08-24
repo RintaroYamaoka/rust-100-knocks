@@ -1,0 +1,38 @@
+[
+  {
+    "id": "a001",
+    "level": "advanced",
+    "title": "ライフタイム注釈",
+    "description_md": "2つの文字列スライスのうち **長いほう** を返す関数 `longest` があります。しかし今のままでは **コンパイルが通りません**。\n\nまず実行してエラー `E0106` (missing lifetime specifier) を確認し、適切な **ライフタイム注釈** を追加して直しましょう。\n\n```rust\nlongest(\"short\", \"longer\") // => \"longer\"\n```",
+    "starter_code": "// このままではコンパイルエラーになる。ライフタイム注釈を追加して直そう。\npub fn longest(a: &str, b: &str) -> &str {\n    if a.len() >= b.len() { a } else { b }\n}\n",
+    "hidden_tests": "#[test]\nfn returns_longer() { assert_eq!(longest(\"short\", \"longer\"), \"longer\"); }\n#[test]\nfn ties_return_first() { assert_eq!(longest(\"abc\", \"xyz\"), \"abc\"); }\n",
+    "answer_code": "pub fn longest<'a>(a: &'a str, b: &'a str) -> &'a str {\n    if a.len() >= b.len() { a } else { b }\n}\n",
+    "explanation_md": "戻り値の `&str` が **どちらの引数から借りたものか** コンパイラには分からないため、明示的なライフタイム注釈が必要になります:\n\n```rust\npub fn longest<'a>(a: &'a str, b: &'a str) -> &'a str\n```\n\nこの `'a` は「戻り値は `a` と `b` の **両方が生きている間** だけ有効」という契約です。\n\n- ライフタイムは実行時の何かを変えるものではなく、**コンパイル時の借用チェックのための注釈** です\n- 引数が1つだけの関数では「省略規則 (lifetime elision)」により注釈不要です。引数が2つ以上あり、どちらかを返す可能性があるときに初めて明示が必要になります\n- エラーメッセージ `E0106` は `rustc --explain E0106` で詳しい解説が読めます (コンソールのエラーコードリンクからも飛べます)",
+    "hints": ["エラーメッセージが `expected named lifetime parameter` と提案してくれています。", "`fn longest<'a>(a: &'a str, b: &'a str) -> &'a str` の形にします。"],
+    "tags": ["ライフタイム", "借用"]
+  },
+  {
+    "id": "a002",
+    "level": "advanced",
+    "title": "ジェネリクスとトレイト境界",
+    "description_md": "スライスの **最大値** を返すジェネリック関数 `largest` を完成させましょう。どんな比較可能な型 (`i32`, `f64`, `char`, ...) でも動く必要があります。\n\n```rust\nlargest(&[1, 5, 3])       // => 5\nlargest(&['a', 'z', 'm']) // => 'z'\n```\n\n空スライスは呼び出し側の責任とし、考えなくて構いません。適切な **トレイト境界** を付けるのがポイントです。",
+    "starter_code": "// TODO: T に適切なトレイト境界を付けて実装する\npub fn largest<T>(v: &[T]) -> T {\n    todo!()\n}\n",
+    "hidden_tests": "#[test]\nfn largest_i32() { assert_eq!(largest(&[1, 5, 3]), 5); }\n#[test]\nfn largest_char() { assert_eq!(largest(&['a', 'z', 'm']), 'z'); }\n#[test]\nfn largest_negative() { assert_eq!(largest(&[-5, -1, -9]), -1); }\n",
+    "answer_code": "pub fn largest<T: PartialOrd + Copy>(v: &[T]) -> T {\n    let mut max = v[0];\n    for &x in &v[1..] {\n        if x > max {\n            max = x;\n        }\n    }\n    max\n}\n",
+    "explanation_md": "ジェネリック関数で比較 (`>`) とコピーを使うには、その能力を **トレイト境界** で宣言する必要があります:\n\n```rust\npub fn largest<T: PartialOrd + Copy>(v: &[T]) -> T\n```\n\n- `PartialOrd` — `>` などの比較演算子を使えるようにする\n- `Copy` — `let mut max = v[0]` のようにムーブではなくコピーで取り出せるようにする\n\n境界を付けずに `x > max` と書くと `E0369` (binary operation cannot be applied) が出ます。**「T には何でも入る」からこそ、使う操作は明示的に要求する** — これが Rust のジェネリクスの設計です。\n\n`Copy` を要求しない設計 (`&T` を返す / `Clone` を使う) も可能で、実務では要件に応じて選びます。",
+    "hints": ["比較には `PartialOrd`、値の取り出しには `Copy` 境界が必要です。", "`<T: PartialOrd + Copy>` として、先頭要素を max に置いてループで更新します。"],
+    "tags": ["ジェネリクス", "トレイト境界"]
+  },
+  {
+    "id": "a003",
+    "level": "advanced",
+    "title": "クロージャを返す関数",
+    "description_md": "整数 `x` を受け取り、「引数に `x` を足すクロージャ」を返す関数 `make_adder` を完成させましょう。\n\n```rust\nlet add5 = make_adder(5);\nadd5(10) // => 15\nadd5(-5) // => 0\n```\n\nクロージャは呼び出しごとに何度でも使える必要があります。戻り値の型の書き方と、環境のキャプチャ方法がポイントです。",
+    "starter_code": "// TODO: 戻り値の型と、x のキャプチャ方法を考えよう\npub fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    todo!()\n}\n",
+    "hidden_tests": "#[test]\nfn adds_captured_value() {\n    let add5 = make_adder(5);\n    assert_eq!(add5(10), 15);\n    assert_eq!(add5(-5), 0);\n}\n#[test]\nfn independent_closures() {\n    let add1 = make_adder(1);\n    let add2 = make_adder(2);\n    assert_eq!(add1(0) + add2(0), 3);\n}\n",
+    "answer_code": "pub fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |n| n + x\n}\n",
+    "explanation_md": "```rust\npub fn make_adder(x: i32) -> impl Fn(i32) -> i32 {\n    move |n| n + x\n}\n```\n\n2つの重要な要素があります:\n\n**1. `impl Fn(i32) -> i32` (impl Trait 戻り値)**\nクロージャの具体的な型は名前が付けられない匿名型なので、「`Fn(i32) -> i32` を実装した何か」として返します。\n\n**2. `move` キーワード**\n`move` がないとクロージャは `x` を参照でキャプチャしようとしますが、`x` は関数終了時に破棄されるため `E0373` (closure may outlive the current function) になります。`move` で所有権ごとクロージャに移すことで、クロージャが自立します。\n\n**Fn / FnMut / FnOnce の違い** も押さえておきましょう:\n- `Fn` — 環境を不変借用。何度でも呼べる (今回)\n- `FnMut` — 環境を可変借用。状態を変えながら何度でも呼べる\n- `FnOnce` — 環境を消費。一度しか呼べない",
+    "hints": ["`move |n| n + x` — move を忘れると E0373 になります。実際に外して実行してみると勉強になります。"],
+    "tags": ["クロージャ", "move", "impl Trait"]
+  }
+]

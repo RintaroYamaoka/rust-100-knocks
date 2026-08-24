@@ -9,12 +9,15 @@ shared = { path = "../shared" }
 leptos = { version = "0.8", features = ["csr"] }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
+
+# wasm 専用依存 (host テストビルドには含めない)
+[target.'cfg(target_arch = "wasm32")'.dependencies]
 wasm-bindgen = "0.2"
 js-sys = "0.3"
 gloo-net = { version = "0.6", default-features = false, features = ["http", "json"] }
-pulldown-cmark = { version = "0.13", default-features = false, features = ["html"] }
 console_error_panic_hook = "0.1"
 
-[dependencies.web-sys]
+[target.'cfg(target_arch = "wasm32")'.dependencies.web-sys]
 version = "0.3"
-features = ["Window", "Storage", "Document", "HtmlElement", "KeyboardEvent"]
+features = ["Window", "Storage", "Document", "HtmlElement"]

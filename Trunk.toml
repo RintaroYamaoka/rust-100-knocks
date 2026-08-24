@@ -1,0 +1,12 @@
+[build]
+target = "index.html"
+dist = "dist"
+
+[serve]
+addresses = ["127.0.0.1"]
+port = 8080
+
+# ローカル開発: /api/execute を Playground へ直接プロキシ (契約が Playground 互換なので成立する)
+[[proxy]]
+rewrite = "/api/execute"
+backend = "https://play.rust-lang.org/execute"
