@@ -1,0 +1,11 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "bash build.sh",
+  "outputDirectory": "dist",
+  "framework": null,
+  "functions": {
+    "api/execute.rs": {
+      "runtime": "vercel-rust@4.0.11"
+    }
+  }
+}
