@@ -44,4 +44,5 @@ data/problems/   問題データ (beginner / intermediate / advanced)
 
 ## デプロイ
 
-Vercel にそのままデプロイできます (`vercel.json` + `build.sh`)。静的フロント + `api/execute` の Rust Function 構成です。
+Vercel にそのままデプロイできます (`vercel.json` + `scripts/build-frontend.sh`)。静的フロント + `api/execute` の Rust Function 構成です。
+(注意: リポジトリ直下の `build.sh` は vercel-rust が関数ビルドフックとして実行するため、フロントのビルドスクリプトは `scripts/` に置いています)

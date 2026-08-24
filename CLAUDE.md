@@ -51,5 +51,6 @@ vercel dev
 ## 既知の地雷
 
 - Playground API は非公式・レート制限あり。問題コンテンツの検証は必ず `verifier`(ローカル cargo)で行い、Playground に一括負荷をかけない
-- Vercel ビルドで `cargo install trunk` は遅すぎる。`build.sh` は prebuilt バイナリをダウンロードする
+- Vercel ビルドで `cargo install trunk` は遅すぎる。`scripts/build-frontend.sh` は prebuilt バイナリをダウンロードする
+- リポジトリ直下に `build.sh` を置いてはならない: vercel-rust ランタイムが関数ビルド前フックとして自動実行してしまう (2026-08-25 のデプロイ失敗の原因)
 - `crates/app` を `cargo test --workspace` に含めると wasm 前提コードが host ビルドで壊れることがある。テストは `--exclude app` で回し、app の純ロジックは shared 側に置く
