@@ -64,7 +64,10 @@ a:hover { text-decoration: underline; }
   font-size: 16px;
   white-space: nowrap;
 }
-.brand .mark { font-size: 18px; }
+.brand .mark { display: inline-flex; color: var(--accent); }
+.brand .mark svg { width: 22px; height: 22px; }
+.brand .mark svg { animation: none; transition: transform 0.5s ease; }
+.brand:hover .mark svg { transform: rotate(60deg); }
 .brand .knocks { color: var(--accent); }
 .level-tabs { display: flex; gap: 4px; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius); padding: 3px; }
 .level-tab {
@@ -330,7 +333,8 @@ a:hover { text-decoration: underline; }
 /* empty state */
 .empty-pane { flex: 1; display: grid; place-items: center; color: var(--text-faint); }
 .empty-pane .empty-inner { text-align: center; }
-.empty-pane .mark { font-size: 42px; margin-bottom: 12px; }
+.empty-pane .mark { margin-bottom: 12px; color: var(--text-faint); }
+.empty-pane .mark svg { width: 52px; height: 52px; }
 
 /* nav buttons */
 .nav-btns { display: flex; gap: 4px; }

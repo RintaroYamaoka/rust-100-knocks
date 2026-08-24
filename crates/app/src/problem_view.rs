@@ -124,7 +124,7 @@ pub fn ProblemPane(
                 None => view! {
                     <div class="empty-pane">
                         <div class="empty-inner">
-                            <div class="mark">"⚙️"</div>
+                            <div class="mark" inner_html=crate::GEAR_SVG></div>
                             <div>"左の一覧から問題を選んでください"</div>
                         </div>
                     </div>

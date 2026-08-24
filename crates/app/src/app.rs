@@ -212,7 +212,7 @@ pub fn App() -> impl IntoView {
         <div class="app">
             <header class="header">
                 <div class="brand">
-                    <span class="mark">"⚙️"</span>
+                    <span class="mark" inner_html=crate::GEAR_SVG></span>
                     <span>"Rust " <span class="knocks">"100本ノック"</span></span>
                 </div>
                 <div class="level-tabs">
