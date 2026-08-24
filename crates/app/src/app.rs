@@ -212,7 +212,7 @@ pub fn App() -> impl IntoView {
         <div class="app">
             <header class="header">
                 <div class="brand">
-                    <span class="crab">"🦀"</span>
+                    <span class="mark">"⚙️"</span>
                     <span>"Rust " <span class="knocks">"100本ノック"</span></span>
                 </div>
                 <div class="level-tabs">
