@@ -8,7 +8,7 @@ Rust コーディング練習アプリ「Rust 100本ノック」。ブラウザ�
 
 - 言語: Rust(フロント・バック共通)。フロントは Leptos (CSR) を wasm32-unknown-unknown + Trunk でビルド
 - エディタ: CodeMirror 6(`assets/vendor/` に vendor、wasm-bindgen JS interop)
-- バックエンド: Vercel Rust Functions (`vercel_runtime`) — `api/execute.rs` が play.rust-lang.org/execute をプロキシ
+- バックエンド: Vercel **公式** Rust ランタイム (`vercel_runtime = "2"`, hyper 1 ベース) — `api/execute.rs` が play.rust-lang.org/execute をプロキシ。`vercel.json` に `functions.runtime` は書かない (Cargo.toml の `[[bin]]` を自動検出)
 - 問題データ: `data/problems/*.json`(静的配信)。スキーマは `crates/shared`
 - 進捗保存: ブラウザ localStorage(サーバー状態なし)
 - テスト: cargo test(workspace)。問題コンテンツの品質検証は `crates/verifier`
@@ -52,5 +52,7 @@ vercel dev
 
 - Playground API は非公式・レート制限あり。問題コンテンツの検証は必ず `verifier`(ローカル cargo)で行い、Playground に一括負荷をかけない
 - Vercel ビルドで `cargo install trunk` は遅すぎる。`scripts/build-frontend.sh` は prebuilt バイナリをダウンロードする
-- リポジトリ直下に `build.sh` を置いてはならない: vercel-rust ランタイムが関数ビルド前フックとして自動実行してしまう (2026-08-25 のデプロイ失敗の原因)
+- リポジトリ直下に `build.sh` を置いてはならない: Rust ランタイムが関数ビルド前フックとして自動実行してしまう (2026-08-25 のデプロイ失敗の原因)
+- `vercel-rust` (vercel-community/rust, `vercel_runtime 1.x`) は 2026-01 アーカイブ済み。使うと本番で `FUNCTION_INVOCATION_FAILED`。詳細: `docs/bootstrap/incidents/2026-08-25-vercel-rust-deploy-failures.md`
+- Vercel build image は glibc が古い。prebuilt バイナリ (trunk 等) は musl 版を使う
 - `crates/app` を `cargo test --workspace` に含めると wasm 前提コードが host ビルドで壊れることがある。テストは `--exclude app` で回し、app の純ロジックは shared 側に置く

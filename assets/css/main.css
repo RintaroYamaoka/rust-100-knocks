@@ -366,6 +366,10 @@ a:hover { text-decoration: underline; }
   .main { flex-direction: column; overflow-y: auto; }
   .sidebar { width: 100%; max-height: 300px; }
   .problem-pane, .workbench { min-width: 0; width: 100%; }
+  .problem-pane { max-height: 60vh; }
+  /* 縦積み時はエディタが潰れないよう最低高を確保 (横幅ドラッグは無効) */
+  .workbench { flex: none; min-height: 90vh; }
+  .editor-host { min-height: 360px; }
   .splitter-h { display: none; }
   body { overflow: auto; }
 }
