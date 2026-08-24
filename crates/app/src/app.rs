@@ -103,10 +103,13 @@ pub fn App() -> impl IntoView {
         }
     });
 
-    // 問題データ到着時、未選択なら先頭を自動選択
+    // 問題データ到着時 / レベル切替時: 未選択か別レベルの問題が残っていたら先頭を自動選択
     Effect::new(move |_| {
         let ps = problems.get();
-        if selected.with_untracked(|s| s.is_none()) {
+        let needs_select = selected.with_untracked(|s| {
+            s.as_ref().is_none_or(|p| p.level != level.get_untracked())
+        });
+        if needs_select {
             if let Some(first) = ps.first() {
                 select_problem.run(first.clone());
             }

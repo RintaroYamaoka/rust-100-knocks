@@ -256,6 +256,8 @@ a:hover { text-decoration: underline; }
 .reset-btn:hover { color: var(--text); border-color: var(--border-strong); }
 .editor-host { flex: 1; min-height: 0; overflow: hidden; }
 .editor-host .cm-editor { height: 100%; }
+/* リガチャで -> が → に見えると初学者が混乱するため無効化 */
+.editor-host .cm-content, .md pre code, .console-body { font-variant-ligatures: none; }
 
 /* console */
 .console {
