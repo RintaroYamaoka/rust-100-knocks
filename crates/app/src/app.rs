@@ -277,7 +277,10 @@ pub fn App() -> impl IntoView {
                         <button class="reset-btn" on:click=reset_code title="コードを初期状態に戻す">"リセット"</button>
                     </div>
                     <div class="editor-host" id="editor-host"></div>
-                    <ConsolePane state=Signal::derive(move || run_state.get())/>
+                    <ConsolePane
+                        state=Signal::derive(move || run_state.get())
+                        on_next=Callback::new(move |()| nav(1))
+                    />
                 </section>
             </div>
         </div>

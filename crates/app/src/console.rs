@@ -84,7 +84,7 @@ fn outcome_banner(outcome: Outcome) -> impl IntoView {
 }
 
 #[component]
-pub fn ConsolePane(state: Signal<RunState>) -> impl IntoView {
+pub fn ConsolePane(state: Signal<RunState>, on_next: Callback<()>) -> impl IntoView {
     let head_extra = move || match state.get() {
         RunState::Running => Some(view! { <span class="outcome-banner"><span class="spinner"></span>" コンパイル・実行中…"</span> }.into_any()),
         RunState::Done { outcome, .. } => Some(outcome_banner(outcome).into_any()),
@@ -133,9 +133,17 @@ pub fn ConsolePane(state: Signal<RunState>) -> impl IntoView {
         }
     };
 
+    let next_cta = move || {
+        matches!(state.get(), RunState::Done { outcome: Outcome::Passed, .. }).then(|| {
+            view! {
+                <button class="next-cta" on:click=move |_| on_next.run(())>"次の問題へ →"</button>
+            }
+        })
+    };
+
     view! {
         <div class="console">
-            <div class="console-head">"実行結果" {head_extra}</div>
+            <div class="console-head">"実行結果" {head_extra} <span class="toolbar-spacer"></span> {next_cta}</div>
             <div class="console-body">{body}</div>
         </div>
     }

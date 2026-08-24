@@ -304,6 +304,18 @@ a:hover { text-decoration: underline; }
 .error-code-link:hover { color: var(--blue); }
 .console-section-label { color: var(--text-faint); font-size: 11px; margin: 10px 0 2px; font-family: var(--font-sans); }
 
+.next-cta {
+  padding: 3px 14px;
+  border-radius: 12px;
+  background: rgb(63 185 80 / 0.15);
+  color: var(--green);
+  font-weight: 700;
+  font-size: 12px;
+  border: 1px solid rgb(63 185 80 / 0.4);
+  transition: background 0.15s;
+}
+.next-cta:hover { background: rgb(63 185 80 / 0.3); }
+
 .spinner {
   width: 14px;
   height: 14px;
