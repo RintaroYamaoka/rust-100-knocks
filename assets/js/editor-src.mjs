@@ -4,6 +4,7 @@
 import { basicSetup } from "codemirror";
 import { EditorView, keymap } from "@codemirror/view";
 import { indentWithTab } from "@codemirror/commands";
+import { indentUnit } from "@codemirror/language";
 import { rust } from "@codemirror/lang-rust";
 import { oneDark } from "@codemirror/theme-one-dark";
 
@@ -35,6 +36,8 @@ const api = {
           indentWithTab,
         ]),
         basicSetup,
+        // Rust 標準 (rustfmt / Zed / VSCode) に合わせて改行時の自動インデントを 4 スペースに
+        indentUnit.of("    "),
         rust(),
         oneDark,
         EditorView.updateListener.of((u) => {
