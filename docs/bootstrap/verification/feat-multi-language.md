@@ -3,7 +3,7 @@
 DoD の各行に外部オラクルを与えて記録する。OPEN が 1 行でも残っている間は統合しない。
 オラクルの定義は WO-0001 の 9 節が正本。
 
-最終更新: 2026-08-29 (統合レビュー反映後)
+最終更新: 2026-08-30 (全 2100 問完成・7 言語のブラウザ検証まで通過)
 
 | # | 条件 | 状態 | 証拠 |
 |---|---|---|---|
@@ -12,18 +12,18 @@ DoD の各行に外部オラクルを与えて記録する。OPEN が 1 行で�
 | D3 | C# の MSBuild ノイズ除去、error/warning 行は残る | **CLOSED** | `csharp_noise_is_removed_entirely_on_success` / `csharp_diagnostics_survive_noise_removal` / `csharp_noise_removal_keeps_any_line_mentioning_error_or_warning` |
 | D4 | 5 種の Outcome が 7 言語で正しく分類される | **CLOSED** | shared のテスト 41 件。固定値はすべて実測値。**統合レビューで 1 件の実バグを検出・修正**: cargo test が失敗時に stderr へ出す `error: test failed` を rustc 診断と誤認し、Rust のテスト失敗が全件「コンパイルエラー」と表示されていた |
 | D5 | verifier の docker run がバッチあたり 2 回以内 | **CLOSED** | `a_whole_batch_needs_exactly_one_container` (7言語)、`container_count_does_not_grow_with_problem_count`。実行時も「コンテナ起動 1 回」と報告 |
-| D6 | 21 ファイル × 各 100 問 | **OPEN** | 6/21 完了 (rust 3 + javascript 3)。残り 5 言語を生成中 |
-| D7 | 全 2100 問で answer 通過 / starter 失敗、件数が数値で確認できる | **OPEN** | Rust 300 問・JavaScript 300 問が `--expect 300` で緑 (計 600/2100)。残り 1500 問は生成中 |
+| D6 | 21 ファイル × 各 100 問 | **CLOSED** | 21/21 ファイル・各 100 問。`ls data/problems/*/[abi]*.json` が 21、各ファイル 100 件 |
+| D7 | 全 2100 問で answer 通過 / starter 失敗、件数が数値で確認できる | **CLOSED** | `verifier --expect 2100` → 「検証 2100 問 / 問題あり 0 件 / コンテナ起動 18 回」(26分30秒)、終了コード 0 |
 | D8 | 既存 Rust 300 問が無変更 (移動と language 付与のみ) | **CLOSED (例外1件)** | `git diff --numstat` が 3 ファイルとも「追加 100 / 削除 0」。**ただし a006 は差し替えた** — 新設の重複検査が a001 との同一問題を検出したため (WO 11.5 節 E1 に記録) |
 | D9 | 言語切替で一覧とエディタが追従、未収録言語は出ない | **CLOSED** | Playwright: セレクタの option が `["rust"]` のみ (他 6 言語は未収録)。レベル切替と問題選択も動作 |
 | D10 | 進捗が言語ごとに独立、旧 Rust 進捗が失われない | **CLOSED** | shared 10 件 + app の進捗キーテスト 4 件 (`migrate_legacy_keys` の冪等性・二重移行しない・言語間で下書きが混ざらない) |
-| D11 | trunk build --release 成功、dist に 21 個の問題 JSON | **PARTIAL** | ビルドは成功。JSON は現在 3 個 (Rust のみ) — コンテンツ生成待ち |
-| D12 | 実ブラウザで 7 言語それぞれ正解判定 | **PARTIAL** | Rust / JavaScript 完了 (`D12-rust.png` / `D12-javascript.png`)。残り 5 言語はデータ待ち |
-| D13 | 実ブラウザで実診断が出て、エラー行が着色される | **PARTIAL** | Rust / JavaScript 完了。Rust は `error[E0308]` が赤・`-->` が青・E0308 がリンク、JS は本物の `SyntaxError` |
-| D14 | 無作為抽出した問題が starter で不正解・answer で正解 | **PARTIAL** | Rust 3/3・JavaScript 3/3 (seed 固定で再現可能)。残り 5 言語はデータ待ち |
+| D11 | trunk build --release 成功、dist に 21 個の問題 JSON | **CLOSED** | `trunk build --release` 成功、`dist/data/problems/*/*.json` が 21 個 |
+| D12 | 実ブラウザで 7 言語それぞれ正解判定 | **CLOSED** | 7/7。各言語のスクリーンショット `D12-<lang>.png` |
+| D13 | 実ブラウザで実診断が出て、エラー行が着色される | **CLOSED** | 7/7。rustc `error[E0308]` / gcc `prog.cc:2:13: error:` / Roslyn `error CS0029` / javac `prog.java:3: error:` / CPython `File "prog.py", line 1` / tsc `error TS2322` / Node `SyntaxError`。いずれも `.line-error` で着色 |
+| D14 | 無作為抽出した問題が starter で不正解・answer で正解 | **CLOSED** | 21/21 (7 言語 × 3 問、seed 固定で再現可能) |
 | D15 | preview デプロイでも 7 言語が実診断を返す | **OPEN (利用者の判断待ち)** | ブランチ push で preview は**ビルド成功** (`5b3dd13f`)。ただし Vercel の Deployment Protection が既定で有効なため、preview への HTTP は 401 (`Protected deployment`) になり自動検証できない。本番 (`rust-100-knocks.vercel.app`) は公開されている。下記「preview 検証の選択肢」参照 |
 | D16 | 「テスト未実行で exit 0」が正解にならない | **CLOSED** | `exit_zero_without_ok_marker_is_not_passed` / `empty_output_with_exit_zero_is_not_passed` / app 側 1 件。加えて verifier に実コンテナで `sys.exit(0)` を投げて検出されることを実測 |
-| D17 | 生成した問題に使い回しが無い | **CLOSED (機構)** | `validate_static` の title / answer_code 重複検査 + `merge-batches` の同検査 (テスト 10 件)。実データへの適用は D7 と同時 |
+| D17 | 生成した問題に使い回しが無い | **CLOSED** | 全 2100 問で題名の重複 0・模範解答の重複 0 を機械確認。難易度をまたぐ重複の検査 (`validate_across_levels`) も追加し、既存 Rust の 2 組を検出して差し替えた |
 | D18 | UI から Rust 固定の文言が消えている | **CLOSED** | `index.html` の grep 0 件。app 側の残りは規則を説明したコメントと `match backend()` の Rust 分岐のみ。スクリーンショットでブランドが「100本ノック」、stderr ラベルが「診断出力 (stderr)」であることを確認 |
 
 ## 残る穴 (正直な記録)
@@ -83,3 +83,38 @@ preview は Vercel の Deployment Protection (既定で有効) により 401 を
 
 検証ハーネスは `scratchpad/pw/verify-deploy.mjs` に用意済み。URL を渡せば
 7 言語の「正解→Passed / 壊れたコード→CompileError + 言語固有の診断」を一度に確認する。
+
+
+## 2026-08-30 — 完成時点の記録
+
+全 2100 問 (7 言語 × 3 難易度 × 100 問) が揃い、D15 (本番デプロイでの疎通) を除く
+すべての DoD がクローズした。
+
+### 実測サマリ
+
+| 検証 | 結果 |
+|---|---|
+| 全問の機械検証 | 2100 問 / 問題あり 0 件 / コンテナ起動 18 回 (26分30秒) |
+| 重複 | 題名 0・模範解答 0 (難易度をまたぐものを含む) |
+| ブラウザ (D14) | 21/21 (7 言語 × 無作為 3 問、seed 固定) |
+| ブラウザ (D13) | 7/7 (各言語で実物の診断が出て着色される) |
+| テスト | workspace 126 / app 51 / js 25 |
+| 実上流への疎通 | 7 言語すべてで 正解→Passed / 未実装→Passed でない / 壊れたコード→CompileError |
+
+### 検証ハーネス自身の欠陥 (2026-08-30 に発見)
+
+ブラウザ検証で typescript/i065 だけが落ちたが、問題は正しく、**ハーネス側の欠陥**だった。
+ブラウザ検証用にプロキシを JS で書き直しており、本番に入れた `compiler-option-raw`
+(TypeScript の `--target es2020`) がハーネスに入っていなかった。
+
+判定に関わるコードを二重に持つ限り再発するので、検証サーバーを
+`tools/local_server.rs` に置き換え、`#[path = "../api/execute.rs"]` で
+**本番のプロキシをそのまま取り込む**形にした。プロキシの実装は 1 つだけになった。
+
+置き場所を `api/` にしなかったのは、Vercel の Rust ランタイムが `api/` 配下の `.rs` を
+関数として自動検出するため (TCP リスナーがデプロイ対象に混入する)。
+`.vercelignore` に `tools/` を入れるのも不可 — `Cargo.toml` の `[[bin]]` が
+参照するファイルが消えてビルドが壊れる。
+
+この乖離を捕まえる回帰テストを `tests/local_server.rs` に置いた
+(`Object.fromEntries` は `--target es2020` が無いと TS2550 になることを利用)。
