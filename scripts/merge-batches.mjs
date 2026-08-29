@@ -2,12 +2,13 @@
 //
 // usage: node scripts/merge-batches.mjs <lang> [level]
 //        node scripts/merge-batches.mjs --all
+//        (--clean を付けると、統合に成功したバッチディレクトリを削除する)
 //
 // バッチは data/problems/<lang>/_batches/<level>-NN.json に置かれている前提。
 // 統合時に「連番・重複なし・件数一致・language/level 整合・使い回しなし」を検査し、
 // 1 つでも崩れていたら**書き出さずに失敗する** (壊れたデータを収録しないため)。
 
-import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, readdirSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { join } from "node:path";
 
 export class MergeError extends Error {}
@@ -95,8 +96,16 @@ function mergeOne(lang, level, expected) {
   return { count: out.length, batches: batches.length, target };
 }
 
+/// 統合に成功したバッチを片付ける。
+/// trunk は data/ を丸ごと dist へコピーするので、_batches を残すと中間成果物が本番に載る。
+function cleanBatches(lang) {
+  const dir = join("data/problems", lang, "_batches");
+  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
+}
+
 function main() {
-  const args = process.argv.slice(2);
+  const args = process.argv.slice(2).filter((a) => a !== "--clean");
+  const clean = process.argv.slice(2).includes("--clean");
   const expected = 100;
   let langs;
   let levels = LEVELS;
@@ -139,6 +148,10 @@ function main() {
         failed++;
       }
     }
+  }
+  if (clean && failed === 0) {
+    for (const lang of langs) cleanBatches(lang);
+    console.log("バッチディレクトリを削除しました (--clean)");
   }
   console.log(`---\n統合 ${merged} ファイル / 失敗 ${failed} 件`);
   process.exit(failed === 0 ? 0 : 1);

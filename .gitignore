@@ -20,3 +20,7 @@ docs/bootstrap/sprint/.gate
 
 # 並列 lane の隔離 worktree (ephemeral)
 .claude/worktrees/
+
+# 問題生成の中間成果物 (統合後は <難易度>.json が正本)
+# trunk が data/ を丸ごと dist へコピーするので、置きっぱなしだと本番に載る
+data/problems/*/_batches/
