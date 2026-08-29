@@ -15,6 +15,22 @@ pub const MAX_CODE_BYTES: usize = 64 * 1024;
 pub const TEST_OK_MARKER: &str = "test result: ok";
 /// テスト失敗の目印。stdout に出る。
 pub const TEST_FAILED_MARKER: &str = "test result: FAILED";
+/// 「判定テストがともかく最後まで走った」ことを示す接頭辞。
+pub const TEST_RESULT_PREFIX: &str = "test result:";
+
+/// 判定テストが実際に走ったか (成否は問わない)。
+///
+/// これが真なら**コンパイルは成功している**。診断テキストにエラー行があっても
+/// コンパイルエラーとして扱ってはいけない。
+///
+/// この判定が要る理由: `cargo test` はテストが落ちたときに stderr へ
+/// `error: test failed, to rerun pass \`--lib\`` を出す。これは rustc の診断ではなく
+/// cargo 自身の要約だが、行頭が `error:` なので診断走査に引っかかる。
+/// 見落とすと、**Rust のテスト失敗が全件「コンパイルエラー」と表示される**
+/// (利用者がいちばん頻繁に見る画面が壊れる)。
+pub fn harness_ran(stdout: &str) -> bool {
+    stdout.contains(TEST_RESULT_PREFIX)
+}
 
 /// `/api/execute` の受信契約。
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -190,8 +206,13 @@ pub fn strip_csharp_build_noise(s: &str) -> String {
 pub struct WandboxRequest {
     pub compiler: String,
     pub code: String,
+    /// コンパイラごとに定義された**選択肢の ID** (例: gcc の "warning,c++17")。生フラグではない。
     #[serde(skip_serializing_if = "Option::is_none")]
     pub options: Option<String>,
+    /// 生のコンパイラフラグ (改行区切り)。選択肢が用意されていないコンパイラは
+    /// こちらでしかフラグを渡せない (typescript がそれ)。
+    #[serde(rename = "compiler-option-raw", skip_serializing_if = "Option::is_none")]
+    pub compiler_option_raw: Option<String>,
     pub save: bool,
 }
 
@@ -219,6 +240,13 @@ impl WandboxResponse {
         self.compiler_error.contains("OCI runtime error")
             || self.compiler_error.contains("Resource temporarily unavailable")
     }
+
+    /// シグナルで殺された実行か (SIGKILL によるメモリ超過、SIGSEGV など)。
+    /// 上流は status を空文字にすることがあるので、シグナルの有無も見ないと
+    /// 「異常終了なのに Passed」の経路が残る。
+    pub fn killed_by_signal(&self) -> bool {
+        !self.signal.trim().is_empty()
+    }
 }
 
 /// `Language` に対応する Wandbox リクエストを組む。Rust (Playground) には None。
@@ -229,6 +257,12 @@ pub fn wandbox_request(language: Language, code: &str) -> Option<WandboxRequest>
             compiler: compiler.to_string(),
             code: code.to_string(),
             options: options.map(String::from),
+            // typescript には選択肢が無いので生フラグで target を指定する。
+            // ここを渡し忘れると ES2019+ の API を使う正解が TS2550 で落ちる
+            compiler_option_raw: match language {
+                Language::Typescript => Some(crate::language::tsc_flags_wandbox_raw()),
+                _ => None,
+            },
             save: false,
         }),
     }
@@ -257,8 +291,12 @@ pub fn normalize_wandbox(language: Language, raw: &WandboxResponse) -> ExecuteRe
     // Python / JavaScript は構文エラーがプログラムの stderr に出るので、そこも走査する。
     // コンパイル段階を持つ言語では走査しない (プログラムが "error:" を印字しただけで
     // コンパイルエラーと誤判定してしまうため)。
-    let compile_failed = has_compile_error(language, &diagnostics)
-        || (!has_separate_compile_phase(language) && has_compile_error(language, &raw.program_error));
+    // 判定テストが走ったなら、その時点でコンパイルは成功している。
+    // 診断にエラー行が残っていても (警告扱いの行やランナーの要約) コンパイルエラーにしない。
+    let compile_failed = !harness_ran(&raw.program_output)
+        && (has_compile_error(language, &diagnostics)
+            || (!has_separate_compile_phase(language)
+                && has_compile_error(language, &raw.program_error)));
 
     let mut stderr = diagnostics;
     if !raw.program_error.trim().is_empty() {
@@ -269,7 +307,8 @@ pub fn normalize_wandbox(language: Language, raw: &WandboxResponse) -> ExecuteRe
     }
 
     ExecuteResponse {
-        success: raw.status == "0",
+        // シグナルで殺された実行は成功にしない
+        success: raw.status == "0" && !raw.killed_by_signal(),
         stdout: raw.program_output.clone(),
         stderr,
         compile_failed,
@@ -323,7 +362,10 @@ pub fn normalize_playground(raw: &PlaygroundResponse) -> ExecuteResponse {
         success: raw.success,
         stdout: raw.stdout.clone(),
         stderr: raw.stderr.clone(),
-        compile_failed: has_compile_error(Language::Rust, &raw.stderr),
+        // cargo test はテスト失敗時に stderr へ `error: test failed` を出す。
+        // 判定テストが走った証拠があるならコンパイルは通っている
+        compile_failed: !harness_ran(&raw.stdout)
+            && has_compile_error(Language::Rust, &raw.stderr),
     }
 }
 

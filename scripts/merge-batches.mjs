@@ -96,11 +96,23 @@ function mergeOne(lang, level, expected) {
   return { count: out.length, batches: batches.length, target };
 }
 
-/// 統合に成功したバッチを片付ける。
-/// trunk は data/ を丸ごと dist へコピーするので、_batches を残すと中間成果物が本番に載る。
-function cleanBatches(lang) {
+/// 統合に成功した **その難易度の** バッチだけを片付ける。
+///
+/// ディレクトリごと消してはいけない: `merge-batches.mjs python beginner --clean` のように
+/// 難易度を絞って実行できるので、丸ごと削ると未統合の intermediate / advanced
+/// (生成に数時間かかった中間成果物) まで消える。_batches は .gitignore 対象なので
+/// git からも復元できない。
+function cleanBatches(lang, level) {
   const dir = join("data/problems", lang, "_batches");
-  if (existsSync(dir)) rmSync(dir, { recursive: true, force: true });
+  if (!existsSync(dir)) return 0;
+  let removed = 0;
+  for (const f of readdirSync(dir)) {
+    if (f.startsWith(`${level.slug}-`) && f.endsWith(".json")) {
+      rmSync(join(dir, f), { force: true });
+      removed++;
+    }
+  }
+  return removed;
 }
 
 function main() {
@@ -133,6 +145,7 @@ function main() {
 
   let failed = 0;
   let merged = 0;
+  const cleanable = [];
   for (const lang of langs) {
     for (const level of levels) {
       try {
@@ -142,6 +155,7 @@ function main() {
         } else {
           console.log(`✓ ${r.target}: ${r.count} 問 (バッチ ${r.batches} 個)`);
           merged++;
+          cleanable.push([lang, level]);
         }
       } catch (e) {
         console.error(`✗ ${lang}/${level.slug}: ${e.message}`);
@@ -150,8 +164,11 @@ function main() {
     }
   }
   if (clean && failed === 0) {
-    for (const lang of langs) cleanBatches(lang);
-    console.log("バッチディレクトリを削除しました (--clean)");
+    let removed = 0;
+    for (const [lang, level] of cleanable) removed += cleanBatches(lang, level);
+    console.log(`統合済みバッチ ${removed} 個を削除しました (--clean)`);
+  } else if (clean) {
+    console.error("失敗があるのでバッチは削除しません");
   }
   console.log(`---\n統合 ${merged} ファイル / 失敗 ${failed} 件`);
   process.exit(failed === 0 ? 0 : 1);

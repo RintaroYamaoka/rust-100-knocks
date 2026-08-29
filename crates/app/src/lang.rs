@@ -57,9 +57,15 @@ pub fn selector_languages(
         return available.to_vec();
     }
     if current_loaded {
-        vec![current]
+        return vec![current];
+    }
+    // ここに来るのは「どの言語の存在も確認できず、現在の言語も読めていない」とき。
+    // 空の Vec を返すと option が 0 個になり、**別の言語に戻す手段が UI から消える**
+    // (保存された言語のデータが無くなった利用者が詰む)。必ず既定の Rust を残す。
+    if current == Language::Rust {
+        vec![Language::Rust]
     } else {
-        Vec::new()
+        vec![Language::Rust, current]
     }
 }
 

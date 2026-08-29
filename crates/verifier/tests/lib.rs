@@ -34,7 +34,7 @@ fn cpp_problem(id: &str) -> Problem {
         title: format!("テスト用 {id}"),
         description_md: description(),
         starter_code: "int add(int a, int b) {\n    return 0; // TODO\n}".into(),
-        hidden_tests: "#include <iostream>\nstatic int f=0;\nstatic void check(bool c,const char*n){ if(!c){ std::cerr<<\"FAILED: \"<<n<<\"\\n\"; f++; } }\nint main(){ check(add(1,2)==3,\"a\"); check(add(0,0)==0,\"b\"); if(f){ std::cout<<\"test result: FAILED\\n\"; return 1;} std::cout<<\"test result: ok\\n\"; return 0; }".into(),
+        hidden_tests: "#include <iostream>\nstatic int f=0;\nstatic void check(bool c,const char*n){ if(!c){ std::cerr<<\"FAILED: \"<<n<<\"\\n\"; f++; } }\nint main(){ check(add(1,2)==3,\"add_positive\"); check(add(0,0)==0,\"add_zero\"); if(f){ std::cout<<\"test result: FAILED\\n\"; return 1;} std::cout<<\"test result: ok\\n\"; return 0; }".into(),
         answer_code: format!("int add(int a, int b) {{ return a + b; }} // {id}"),
         explanation_md: "解説".into(),
         hints: vec![],
@@ -163,4 +163,59 @@ fn rejects_empty_hidden_tests() {
 fn rejects_bad_id_format() {
     let issues = validate_static(&[rust_problem("beginner-1")], Language::Rust, Level::Beginner);
     assert!(messages(&issues).contains("id の形式"), "{}", messages(&issues));
+}
+
+#[test]
+fn distinct_check_names_does_not_count_the_markers() {
+    use verifier::distinct_check_names;
+    // 目印はヘルパ関数の中に 1 回ずつ現れる定数なので、検査の件数にならない
+    let only_helper = r#"
+static void chk(bool c, const char* n) { if (!c) { std::cerr << "FAILED: " << n; } }
+std::cout << "test result: ok";
+std::cout << "test result: FAILED";
+"#;
+    assert_eq!(distinct_check_names(only_helper), 0, "目印を検査として数えている");
+}
+
+#[test]
+fn distinct_check_names_counts_each_check() {
+    use verifier::distinct_check_names;
+    let two = r#"chk(add(1,2)==3, "positive"); chk(add(0,0)==0, "zero");"#;
+    assert_eq!(distinct_check_names(two), 2);
+    let one = r#"chk(add(1,2)==3, "positive");"#;
+    assert_eq!(distinct_check_names(one), 1);
+}
+
+#[test]
+fn a_single_check_is_rejected_for_non_rust() {
+    // 「FAILED: の出現回数」で数えていたときは、検査が何件でも常に 1 だったので
+    // この検査が素通りしていた (= 検査していない検査)
+    let mut p = cpp_problem("b001");
+    p.hidden_tests = concat!(
+        "#include <iostream>\n",
+        "static int f=0;\n",
+        "static void check(bool c,const char*n){ if(!c){ std::cerr<<\"FAILED: \"<<n; f++; } }\n",
+        "int main(){ check(add(1,2)==3,\"add_positive\");",
+        " if(f){ std::cout<<\"test result: FAILED\"; return 1;}",
+        " std::cout<<\"test result: ok\"; return 0; }"
+    )
+    .to_string();
+    let issues = validate_static(&[p], Language::Cpp, Level::Beginner);
+    assert!(messages(&issues).contains("検査が 1 件"), "{}", messages(&issues));
+}
+
+#[test]
+fn file_with_wrong_problem_count_is_rejected() {
+    use verifier::validate_static_with_expected;
+    // 空ファイルや 50 問しかないファイルが「問題なし」で通らないこと
+    let issues = validate_static_with_expected(&[], Language::Cpp, Level::Beginner, Some(100));
+    assert!(messages(&issues).contains("問題数が 0 件"), "{}", messages(&issues));
+
+    let issues = validate_static_with_expected(
+        &[cpp_problem("b001")],
+        Language::Cpp,
+        Level::Beginner,
+        Some(100),
+    );
+    assert!(messages(&issues).contains("問題数が 1 件"), "{}", messages(&issues));
 }

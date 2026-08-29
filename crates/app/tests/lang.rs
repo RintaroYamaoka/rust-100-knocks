@@ -98,8 +98,14 @@ fn selector_falls_back_to_the_loaded_language_when_probing_failed() {
         selector_languages(&[], Language::Rust, true),
         vec![Language::Rust]
     );
-    // まだ何も読めていないなら何も出さない (空のセレクタを出すより出さない)
-    assert!(selector_languages(&[], Language::Rust, false).is_empty());
+    // 何も読めていなくても**空にはしない**。
+    // option が 0 個だと、保存された言語のデータが無くなった利用者に
+    // 「別の言語に戻す手段」が UI 上から消えてしまう (症状は「一覧が空」だけで
+    // 原因が見えない)。必ず存在が保証されている Rust を残す。
+    assert_eq!(
+        selector_languages(&[], Language::Rust, false),
+        vec![Language::Rust]
+    );
 }
 
 #[test]
@@ -136,4 +142,26 @@ fn console_wording_is_not_hardcoded_to_rust() {
 
     let rs = console_running_hint(Language::Rust);
     assert!(rs.contains("Rust Playground"), "{rs}");
+}
+
+#[test]
+fn selector_never_becomes_empty() {
+    // option が 0 個になると、保存された言語のデータが無くなった利用者に
+    // 「別の言語に戻す手段」が UI 上から消える
+    let none: Vec<Language> = vec![];
+    let r = selector_languages(&none, Language::Python, false);
+    assert!(!r.is_empty(), "セレクタが空になった");
+    assert!(r.contains(&Language::Rust), "既定の Rust が残っていない: {r:?}");
+
+    let r = selector_languages(&none, Language::Rust, false);
+    assert_eq!(r, vec![Language::Rust]);
+}
+
+#[test]
+fn selector_prefers_confirmed_languages_when_available() {
+    let avail = vec![Language::Rust, Language::Python];
+    assert_eq!(
+        selector_languages(&avail, Language::Python, true),
+        vec![Language::Rust, Language::Python]
+    );
 }

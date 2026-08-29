@@ -81,3 +81,11 @@ test("answer_code の重複を検出する", () => {
 test("バッチが空でも黙って成功しない", () => {
   assert.throws(() => mergeBatches([], "cpp", LEVEL, 100), /件数/);
 });
+
+test("mergeBatches はファイル I/O をしないので --clean の対象計算に影響しない", () => {
+  // --clean の破壊範囲は main() 側の責務。ここでは統合が純粋関数であることを固定する
+  const [a] = batches([2]);
+  const before = JSON.stringify(a);
+  mergeBatches([a], "cpp", LEVEL, 2);
+  assert.equal(JSON.stringify(a), before, "入力を書き換えている");
+});

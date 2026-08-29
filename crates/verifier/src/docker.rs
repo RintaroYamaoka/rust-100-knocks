@@ -94,10 +94,14 @@ pub fn container_script(language: Language, cases: &[RunCase]) -> String {
         Language::Java => format!("javac -nowarn {src} && java Main"),
         Language::Python => format!("python3 {src}"),
         Language::Javascript => format!("node {src}"),
-        Language::Typescript => format!("tsc --target es2020 {src} && node prog.js"),
+        // target を上流 (Wandbox) と揃える。ここだけ es2020 にすると、
+        // ES2019+ の API を使う模範解答が「ローカルは緑・本番は TS2339」になる
+        Language::Typescript => format!("tsc {} {src} && node prog.js", shared::language::tsc_flags_cli()),
         // C# はプロジェクトが要る。プロジェクト作成はループの外で 1 回だけ行う
         Language::Csharp => format!(
-            "cp {src} /proj/Program.cs && (cd /proj && dotnet build -v q --nologo -o /proj/_out >/dev/null) && dotnet /proj/_out/proj.dll"
+            // dotnet build の診断は stdout に出る。>/dev/null に流すと、answer が落ちたときに
+            // 作者へ何も見せられなくなる (「実物の診断を読む」設計が検証側だけ死ぬ)
+            "cp {src} /proj/Program.cs && (cd /proj && dotnet build -v q --nologo -o /proj/_out) && dotnet /proj/_out/proj.dll"
         ),
         Language::Rust => String::new(), // Docker では走らせない
     };

@@ -57,6 +57,9 @@ pub fn App() -> impl IntoView {
     let run_state: RwSignal<RunState> = RwSignal::new(RunState::Idle);
     let revealed: RwSignal<HashSet<String>> = RwSignal::new(HashSet::new());
     let editor_ready = RwSignal::new(false);
+    // 進捗を保存できなかったか (localStorage のクォータ超過など)。
+    // 握り潰すと、画面上は成功と区別が付かないまま進捗が消える
+    let storage_failed = RwSignal::new(false);
     let mount_started = RwSignal::new(false);
     // データが 3 レベル揃っていることを確認できた言語 (確認前は空)
     let available: RwSignal<Vec<Language>> = RwSignal::new(Vec::new());
@@ -140,7 +143,9 @@ pub fn App() -> impl IntoView {
             };
             e.updated_at_ms = storage::now_ms();
         });
-        progress.with_untracked(storage::save_progress);
+        if !progress.with_untracked(storage::save_progress) {
+            storage_failed.set(true);
+        }
     };
     let save_draft = move || {
         if editor_ready.get_untracked() {
@@ -218,7 +223,9 @@ pub fn App() -> impl IntoView {
                         e.status = next_status(cur, outcome);
                         e.updated_at_ms = storage::now_ms();
                     });
-                    progress.with_untracked(storage::save_progress);
+                    if !progress.with_untracked(storage::save_progress) {
+            storage_failed.set(true);
+        }
                     run_state.set(RunState::Done { resp, outcome });
                 }
                 Err(e) => run_state.set(RunState::Failed(e)),
@@ -304,7 +311,6 @@ pub fn App() -> impl IntoView {
                 <select
                     class="lang-select"
                     title="練習する言語"
-                    style="padding:4px 10px;border-radius:6px;border:1px solid var(--border);background:var(--bg);color:var(--text);font:inherit;cursor:pointer"
                     prop:value=move || {
                         // 一覧にも依存させる: option が後から (存在確認の完了後に) 増えたとき、
                         // ここを再評価しないと select の表示が先頭の言語にずれる
@@ -346,6 +352,17 @@ pub fn App() -> impl IntoView {
                         })
                         .collect_view()}
                 </div>
+                {move || {
+                    storage_failed
+                        .get()
+                        .then(|| {
+                            view! {
+                                <span class="storage-warning" title="ブラウザの保存領域がいっぱいの可能性があります">
+                                    "⚠ 進捗を保存できませんでした"
+                                </span>
+                            }
+                        })
+                }}
                 <div class="header-progress">
                     <span>{move || format!("{} / {} 問クリア", passed_in_level.get(), problems.with(|p| p.len()))}</span>
                     <div class="progress-track">

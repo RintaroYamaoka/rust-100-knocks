@@ -4,9 +4,10 @@
 
 use shared::language::Language;
 use shared::playground::{
-    classify, classify_line, extract_error_codes, has_compile_error, has_separate_compile_phase,
-    normalize_wandbox, strip_csharp_build_noise, validate, ExecuteRequest, ExecuteResponse,
-    LineKind, Outcome, WandboxResponse, MAX_CODE_BYTES, TEST_FAILED_MARKER, TEST_OK_MARKER,
+    classify, classify_line, extract_error_codes, harness_ran, has_compile_error, has_separate_compile_phase,
+    normalize_playground, normalize_wandbox, strip_csharp_build_noise, validate, ExecuteRequest,
+    ExecuteResponse, LineKind, Outcome, PlaygroundResponse, WandboxResponse, MAX_CODE_BYTES,
+    TEST_FAILED_MARKER, TEST_OK_MARKER,
 };
 
 fn resp(success: bool, stdout: &str, stderr: &str, compile_failed: bool) -> ExecuteResponse {
@@ -397,4 +398,113 @@ fn classify_line_handles_other_compilers() {
 fn extract_error_codes_dedups_in_order() {
     let stderr = "error[E0308]: a\nerror[E0502]: b\nerror[E0308]: c\nerror: aborting";
     assert_eq!(extract_error_codes(stderr), vec!["E0308", "E0502"]);
+}
+
+// ---- cargo test の要約行をコンパイルエラーと取り違えない ----
+
+/// 2026-08-29 に実 Playground で測定した「テストが 1 件落ちたとき」の stderr。
+/// 末尾の `error: test failed` は rustc の診断ではなく cargo 自身の要約。
+const CARGO_TEST_FAILED_STDERR: &str = "   Compiling playground v0.0.1 (/playground)\n    Finished `test` profile [unoptimized + debuginfo] target(s) in 0.52s\n     Running unittests src/lib.rs (target/debug/deps/playground-1a2b3c4d)\nerror: test failed, to rerun pass `--lib`";
+
+const CARGO_TEST_FAILED_STDOUT: &str = "\nrunning 2 tests\ntest t1 ... FAILED\ntest t2 ... ok\n\nfailures:\n\n---- t1 stdout ----\n\nthread \'t1\' panicked at src/lib.rs:4:16:\nassertion `left == right` failed\n  left: 6\n right: 4\n\n\nfailures:\n    t1\n\ntest result: FAILED. 1 passed; 1 failed; 0 ignored; 0 measured; 0 filtered out\n";
+
+#[test]
+fn rust_test_failure_is_not_reported_as_a_compile_error() {
+    // これを取り違えると、利用者がいちばん頻繁に見る画面 (テストが落ちたとき) が
+    // 全件「✗ コンパイルエラー」になり、本当の原因である assertion のパネルが
+    // stderr の下に押しやられる
+    let raw = PlaygroundResponse {
+        success: false,
+        stdout: CARGO_TEST_FAILED_STDOUT.to_string(),
+        stderr: CARGO_TEST_FAILED_STDERR.to_string(),
+    };
+    let r = normalize_playground(&raw);
+    assert!(!r.compile_failed, "cargo の要約行を診断と誤認している");
+    assert_eq!(classify(&r), Outcome::TestsFailed);
+}
+
+#[test]
+fn rust_real_compile_error_is_still_detected() {
+    // 対検証: 本物のコンパイルエラーでは判定テストが走らないので stdout に目印が無い
+    let raw = PlaygroundResponse {
+        success: false,
+        stdout: String::new(),
+        stderr: "   Compiling playground v0.0.1 (/playground)\nerror[E0308]: mismatched types\n --> src/lib.rs:2:18\nerror: aborting due to 1 previous error".to_string(),
+    };
+    let r = normalize_playground(&raw);
+    assert!(r.compile_failed);
+    assert_eq!(classify(&r), Outcome::CompileError);
+}
+
+#[test]
+fn harness_ran_detects_both_outcomes() {
+    assert!(harness_ran("test result: ok. 3 passed"));
+    assert!(harness_ran("test result: FAILED. 0 passed; 1 failed"));
+    assert!(!harness_ran(""));
+    assert!(!harness_ran("何か別の出力"));
+}
+
+#[test]
+fn a_language_whose_program_prints_error_lines_is_not_a_compile_error_once_tests_ran() {
+    // 判定テストが走った証拠があるなら、診断欄に何があってもコンパイルは通っている
+    let raw = WandboxResponse {
+        status: "1".into(),
+        compiler_error: "prog.cc:1:1: error: これは診断のように見えるがテストは走った".into(),
+        program_output: "test result: FAILED\n".into(),
+        ..Default::default()
+    };
+    let r = normalize_wandbox(shared::language::Language::Cpp, &raw);
+    assert!(!r.compile_failed);
+    assert_eq!(classify(&r), Outcome::TestsFailed);
+}
+
+// ---- TypeScript のフラグは compiler-option-raw で渡す ----
+
+#[test]
+fn typescript_flags_go_through_compiler_option_raw_not_options() {
+    // Wandbox の `options` はコンパイラごとに定義された選択肢の ID であって生フラグではない。
+    // typescript-5.6.2 には選択肢が 1 つも無いので、options に入れても黙って無視される
+    // (2026-08-29 実測: 無視された結果 Object.fromEntries が TS2550 で落ちた)。
+    let r = shared::playground::wandbox_request(Language::Typescript, "const x = 1;").unwrap();
+    assert_eq!(r.options, None);
+    assert_eq!(r.compiler_option_raw.as_deref(), Some("--target\nes2020"));
+
+    let json = serde_json::to_string(&r).unwrap();
+    assert!(json.contains("\"compiler-option-raw\""), "{json}");
+}
+
+#[test]
+fn other_languages_send_no_raw_flags() {
+    for l in Language::ALL.into_iter().filter(|l| *l != Language::Typescript) {
+        if let Some(r) = shared::playground::wandbox_request(l, "x") {
+            assert_eq!(r.compiler_option_raw, None, "{}", l.slug());
+        }
+    }
+    // gcc は選択肢 ID の方を使う
+    let cpp = shared::playground::wandbox_request(Language::Cpp, "int main(){}").unwrap();
+    assert_eq!(cpp.options.as_deref(), Some("warning,c++17"));
+}
+
+#[test]
+fn verifier_and_upstream_use_the_same_typescript_flags() {
+    // ここが食い違うと「ローカルの verifier は緑・本番は型エラー」になる。
+    // どちらも同じ TSC_FLAGS から組み立てていることを表明しておく
+    use shared::language::{tsc_flags_cli, tsc_flags_wandbox_raw, TSC_FLAGS};
+    assert_eq!(tsc_flags_cli(), TSC_FLAGS.join(" "));
+    assert_eq!(tsc_flags_wandbox_raw(), TSC_FLAGS.join("\n"));
+    assert!(TSC_FLAGS.contains(&"es2020"));
+}
+
+#[test]
+fn a_run_killed_by_a_signal_is_not_successful() {
+    // メモリ超過などで殺された実行。status が "0" でもシグナルが立っていたら成功にしない
+    let raw = WandboxResponse {
+        status: "0".into(),
+        signal: "Killed".into(),
+        program_output: "test result: ok\n".into(),
+        ..Default::default()
+    };
+    let r = normalize_wandbox(Language::Cpp, &raw);
+    assert!(!r.success, "シグナルで殺された実行を成功扱いしている");
+    assert_ne!(classify(&r), Outcome::Passed);
 }

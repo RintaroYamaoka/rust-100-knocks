@@ -15,6 +15,27 @@ pub enum Language {
     Javascript,
 }
 
+/// TypeScript のコンパイラフラグ。**上流 (Wandbox) と検証 (ローカル Docker) で必ず同じものを使う。**
+///
+/// ここが食い違うと、`Object.fromEntries` のような ES2019+ の API を使う模範解答が
+/// 「ローカルの verifier は緑なのに本番では TS2550 で落ちる」という、
+/// 最も気づきにくい形で壊れる (2026-08-29 に実測で確認)。
+pub const TSC_FLAGS: &[&str] = &["--target", "es2020"];
+
+/// ローカル Docker で `tsc` に渡す形 (空白区切り)。
+pub fn tsc_flags_cli() -> String {
+    TSC_FLAGS.join(" ")
+}
+
+/// Wandbox に渡す形。
+///
+/// Wandbox の `options` は**コンパイラごとに定義された選択肢の ID** であって生のフラグではない。
+/// typescript-5.6.2 には選択肢が 1 つも無く、生フラグは `compiler-option-raw`
+/// (改行区切り) でしか渡せない。`options` に `--target es2020` を入れても黙って無視される。
+pub fn tsc_flags_wandbox_raw() -> String {
+    TSC_FLAGS.join("\n")
+}
+
 /// 実行を委譲する上流サービス。
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Backend {

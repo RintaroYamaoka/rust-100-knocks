@@ -49,7 +49,30 @@ pub fn validate_static(
     expected_language: Language,
     expected_level: Level,
 ) -> Vec<ProblemIssue> {
+    validate_static_with_expected(problems, expected_language, expected_level, None)
+}
+
+/// 収録ファイル 1 枚は 100 問という契約 (docs/problem-authoring.md §1)。
+pub const PROBLEMS_PER_FILE: usize = 100;
+
+/// `expected_count` を渡すと件数も検査する。
+/// 件数を見ないと、空ファイルや 50 問しかないファイルが「問題なし」で通ってしまう。
+pub fn validate_static_with_expected(
+    problems: &[Problem],
+    expected_language: Language,
+    expected_level: Level,
+    expected_count: Option<usize>,
+) -> Vec<ProblemIssue> {
     let mut issues = Vec::new();
+
+    if let Some(n) = expected_count {
+        if problems.len() != n {
+            issues.push(ProblemIssue::new(
+                "-",
+                format!("問題数が {} 件です (期待 {n} 件)", problems.len()),
+            ));
+        }
+    }
     let mut seen_ids = std::collections::HashSet::new();
     let mut titles: HashMap<&str, &str> = HashMap::new();
     let mut answers: HashMap<&str, &str> = HashMap::new();
@@ -124,6 +147,29 @@ pub fn validate_static(
     issues
 }
 
+/// `hidden_tests` に現れる「検査名らしい文字列リテラル」の種類数。
+///
+/// どのテンプレートも `check(<条件>, "名前")` の形なので、判定の目印そのもの
+/// (`test result: ...` / `FAILED: `) を除いたリテラルの種類数が、おおよそ検査の件数になる。
+/// ヘルパ関数の名前に依存しないので、生成側が命名を変えても数えられる。
+pub fn distinct_check_names(hidden_tests: &str) -> usize {
+    let mut names = std::collections::HashSet::new();
+    for quote in ['"', '\''] {
+        let mut rest = hidden_tests;
+        while let Some(start) = rest.find(quote) {
+            rest = &rest[start + 1..];
+            let Some(end) = rest.find(quote) else { break };
+            let lit = &rest[..end];
+            rest = &rest[end + 1..];
+            let is_marker = lit.contains("test result") || lit.starts_with("FAILED");
+            if !is_marker && !lit.is_empty() {
+                names.insert(lit.to_string());
+            }
+        }
+    }
+    names.len()
+}
+
 /// `hidden_tests` が判定契約を満たしているか (言語別)。
 ///
 /// Rust は `#[test]` 形式を維持する (既存 300 問がこれに依存している)。
@@ -153,11 +199,17 @@ fn validate_hidden_tests(p: &Problem) -> Vec<ProblemIssue> {
                     format!("hidden_tests が失敗の目印 \"{TEST_FAILED_MARKER}\" を出力していません"),
                 ));
             }
-            let checks = p.hidden_tests.matches("FAILED: ").count();
-            if checks < 1 {
+            // 「検査は最低 2 件」を数える。
+            //
+            // `"FAILED: "` の出現回数は使えない — テンプレートではヘルパ関数の中に
+            // 1 回だけ現れる定数なので、検査を何件書いても常に 1 になる
+            // (= 検査していない検査だった)。代わりに、検査名として渡される
+            // 文字列リテラルの種類数を数える。
+            let names = distinct_check_names(&p.hidden_tests);
+            if names < 2 {
                 issues.push(ProblemIssue::new(
                     &p.id,
-                    "hidden_tests に個別検査の失敗表示 (FAILED: <名前>) がありません",
+                    format!("hidden_tests の検査が {names} 件です (最低 2 件、うち 1 件は境界値)"),
                 ));
             }
         }

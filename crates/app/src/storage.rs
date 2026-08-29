@@ -22,7 +22,7 @@ pub fn load_progress() -> ProgressMap {
 pub fn load_progress_migrated() -> ProgressMap {
     let mut map = load_progress();
     if migrate_legacy_keys(&mut map) > 0 {
-        save_progress(&map);
+        let _ = save_progress(&map);
     }
     map
 }
@@ -33,13 +33,19 @@ pub fn load_language() -> Option<String> {
 }
 
 pub fn save_language(language: Language) {
-    raw_set(LANGUAGE_STORAGE_KEY, language.slug());
+    let _ = raw_set(LANGUAGE_STORAGE_KEY, language.slug());
 }
 
-pub fn save_progress(map: &ProgressMap) {
+/// 進捗を保存する。**保存できたかを返す。**
+///
+/// 問題数が 300 → 2100 になったので、下書きを溜めた利用者が localStorage の
+/// 5MB クォータに届きうる。到達後は書き込みが例外で落ちるが、握り潰すと
+/// 画面は成功時と同じままで、リロードして初めて全部消えていたと気づくことになる。
+pub fn save_progress(map: &ProgressMap) -> bool {
     if let Ok(s) = serde_json::to_string(map) {
-        raw_set(PROGRESS_KEY, &s);
+        return raw_set(PROGRESS_KEY, &s);
     }
+    false
 }
 
 /// 現在時刻 (epoch ms)。進捗の updated_at_ms に使う。
@@ -63,10 +69,17 @@ pub fn raw_get(key: &str) -> Option<String> {
     storage.get_item(key).ok()?
 }
 
+/// localStorage への書き込み。成功したかを返す。
+///
+/// 戻り値を捨ててはいけない。問題数が 300 → 2100 に増えたことで、下書きを溜めた
+/// 利用者が 5MB のクォータに到達しうる。到達後は `QuotaExceededError` が投げられて
+/// **無言で捨てられ**、正解マークも下書きも保存されなくなるが、画面は成功時と
+/// 何も変わらないので、リロードして初めて気づくことになる。
 #[cfg(target_arch = "wasm32")]
-pub fn raw_set(key: &str, s: &str) {
-    if let Some(storage) = web_sys::window().and_then(|w| w.local_storage().ok().flatten()) {
-        let _ = storage.set_item(key, s);
+pub fn raw_set(key: &str, s: &str) -> bool {
+    match web_sys::window().and_then(|w| w.local_storage().ok().flatten()) {
+        Some(storage) => storage.set_item(key, s).is_ok(),
+        None => false,
     }
 }
 
@@ -82,8 +95,9 @@ pub fn raw_get(key: &str) -> Option<String> {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn raw_set(key: &str, s: &str) {
+pub fn raw_set(key: &str, s: &str) -> bool {
     MEMORY.with(|m| {
         m.borrow_mut().insert(key.to_string(), s.to_string());
     });
+    true
 }

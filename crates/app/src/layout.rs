@@ -97,6 +97,6 @@ pub fn load_layout() -> LayoutSizes {
 
 pub fn save_layout(sizes: &LayoutSizes) {
     if let Ok(s) = serde_json::to_string(sizes) {
-        crate::storage::raw_set(STORAGE_KEY, &s);
+        let _ = crate::storage::raw_set(STORAGE_KEY, &s);
     }
 }

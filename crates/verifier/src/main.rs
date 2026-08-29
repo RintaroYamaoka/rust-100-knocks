@@ -15,12 +15,15 @@ use std::process::ExitCode;
 use shared::language::Language;
 use shared::problem::{problems_rel_path, Level, Problem};
 use verifier::docker::CaseKind;
-use verifier::{load_problems_str, run_batch_docker, run_problem_rust, validate_static};
+use verifier::{load_problems_str, run_batch_docker, run_problem_rust};
 
 struct Job {
     path: PathBuf,
     language: Language,
     level: Level,
+    /// 収録ファイル (data/problems/<lang>/<level>.json) か。
+    /// バッチファイルの検証 (--file) では件数 100 を要求しない。
+    is_release_file: bool,
 }
 
 #[derive(Default)]
@@ -57,12 +60,18 @@ fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
         problems.len()
     );
 
-    for issue in validate_static(&problems, job.language, job.level) {
+    // 収録ファイル (バッチではなく <難易度>.json) は 100 問という契約。
+    // --file 指定 (= バッチ検証) のときは件数を問わない
+    let expected_count = job.is_release_file.then_some(verifier::PROBLEMS_PER_FILE);
+    for issue in verifier::validate_static_with_expected(&problems, job.language, job.level, expected_count) {
         eprintln!("✗ [{}] {}", issue.id, issue.message);
         totals.failed += 1;
     }
 
     if problems.is_empty() {
+        // 無言 return にすると、空ファイルが「問題なし」で通る
+        eprintln!("✗ {} に問題が 1 件も入っていません", job.path.display());
+        totals.failed += 1;
         return;
     }
 
@@ -121,8 +130,11 @@ fn verify_via_docker(job: &Job, problems: &[Problem], scratch: &PathBuf, totals:
         }
     };
     totals.container_runs += report.container_runs;
+    // コンテナ自体が壊れたのを「⚠ 表示だけ」にすると、環境障害が問題の欠陥に化ける
+    // (starter 側は「正しく落ちた」として数えられてしまう)。失敗として計上する。
     for e in &report.errors {
-        eprintln!("⚠ {e}");
+        eprintln!("✗ {e}");
+        totals.failed += 1;
     }
 
     let answers: HashSet<&str> = report
@@ -216,7 +228,7 @@ fn main() -> ExitCode {
 
     let jobs: Vec<Job> = if let Some(path) = file {
         match (language, level) {
-            (Some(language), Some(level)) => vec![Job { path, language, level }],
+            (Some(language), Some(level)) => vec![Job { path, language, level, is_release_file: false }],
             _ => {
                 eprintln!("--file を使うときは --lang と --level も指定してください");
                 return ExitCode::FAILURE;
@@ -232,6 +244,7 @@ fn main() -> ExitCode {
                     path: PathBuf::from(problems_rel_path(language, level)),
                     language,
                     level,
+                    is_release_file: true,
                 })
             })
             .collect()

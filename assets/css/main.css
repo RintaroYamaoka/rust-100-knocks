@@ -413,3 +413,13 @@ a:hover { text-decoration: underline; }
   font-size: 12px;
   line-height: 1.6;
 }
+
+/* 進捗を保存できなかったときの警告 (localStorage のクォータ超過など) */
+.storage-warning {
+  padding: 3px 10px;
+  border-radius: 6px;
+  background: rgb(210 153 34 / 0.15);
+  color: var(--yellow);
+  font-size: 12px;
+  white-space: nowrap;
+}
