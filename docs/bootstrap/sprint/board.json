@@ -1,0 +1,124 @@
+{
+  "sprint": "WO-0001-multi-language",
+  "wip_limit": 4,
+  "_wip_note": "terminal worker lane は 0 本。infra 3 lane は Workflow/subagent lane (isolation: worktree) なので ADR 0006 により wip 非対象。content 6 lane は main session の単一 Workflow が所有し、各言語が data/problems/<lang>/** だけに書き、git 操作を一切しない (commit は lead が統合時に 1 回) ため lane 競合が構造的に起きない。利用者が明示的に並列上限の解放を指示した。",
+  "tasks": [
+    {
+      "id": "S1",
+      "title": "共有契約スパイン: Language / 実行契約 / Problem スキーマ / 進捗キー / Rust データ移行",
+      "scope": [
+        "crates/shared/**",
+        "data/problems/rust/**",
+        "docs/problem-authoring.md",
+        "docs/bootstrap/handoffs/**"
+      ],
+      "branch": "feat/multi-language",
+      "depends_on": [],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead",
+      "note": "全 lane が依存する直列 spine。lead が main worktree で実装する。L2 と L3 が跨ぐ window.RustKnocksEditor.setLanguage の契約、および全コンテンツ lane が従う hidden_tests harness 契約を docs/problem-authoring.md に確定させるのもこの task の責務 (配線済みの契約だけを leaf に渡す)。"
+    },
+    {
+      "id": "S2",
+      "title": "verifier の多言語化 (Docker 固定イメージ・バッチ単位実行)",
+      "scope": ["crates/verifier/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S1"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead",
+      "note": "コンテンツ 6 lane 全部の品質ゲート。これが正しくないと 1800 問が無検証で積み上がるため lead が main worktree で実装し、ビルド済みバイナリをコンテンツ lane に渡す。"
+    },
+    {
+      "id": "L1",
+      "title": "/api/execute を多バックエンドプロキシ化 (Playground + Wandbox)",
+      "scope": ["api/execute.rs", "Cargo.toml"],
+      "branch": "feat/l1-api-proxy",
+      "depends_on": ["S1"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": null
+    },
+    {
+      "id": "L2",
+      "title": "フロントエンドの言語切替 (一覧・進捗・コンソール)",
+      "scope": ["crates/app/**"],
+      "branch": "feat/l2-frontend",
+      "depends_on": ["S1"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": null
+    },
+    {
+      "id": "L3",
+      "title": "エディタの多言語モードと開発プロキシの張り替え",
+      "scope": ["assets/**", "index.html", "Trunk.toml"],
+      "branch": "feat/l3-editor-assets",
+      "depends_on": ["S1"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": null
+    },
+    {
+      "id": "C1",
+      "title": "C++ 300問",
+      "scope": ["data/problems/cpp/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    },
+    {
+      "id": "C2",
+      "title": "C# 300問",
+      "scope": ["data/problems/csharp/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    },
+    {
+      "id": "C3",
+      "title": "Java 300問",
+      "scope": ["data/problems/java/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    },
+    {
+      "id": "C4",
+      "title": "Python 300問",
+      "scope": ["data/problems/python/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    },
+    {
+      "id": "C5",
+      "title": "TypeScript 300問",
+      "scope": ["data/problems/typescript/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    },
+    {
+      "id": "C6",
+      "title": "JavaScript 300問",
+      "scope": ["data/problems/javascript/**"],
+      "branch": "feat/multi-language",
+      "depends_on": ["S2"],
+      "status": "todo",
+      "worktree": null,
+      "claimed_by": "lead-workflow"
+    }
+  ]
+}

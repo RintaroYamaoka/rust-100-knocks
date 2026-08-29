@@ -1,6 +1,7 @@
 [
   {
     "id": "b001",
+    "language": "rust",
     "level": "beginner",
     "title": "2倍にする関数",
     "description_md": "整数 `n` を受け取り、**2倍にして返す** 関数 `double` を完成させましょう。\n\n```rust\ndouble(2)  // => 4\ndouble(-3) // => -6\n```\n\nRust では関数の最後の式が戻り値になります (`return` と `;` は不要)。",
@@ -18,6 +19,7 @@
   },
   {
     "id": "b002",
+    "language": "rust",
     "level": "beginner",
     "title": "あいさつ文を作る",
     "description_md": "名前 `name` を受け取り、`こんにちは、{name}さん!` という `String` を返す関数 `greet` を完成させましょう。\n\n```rust\ngreet(\"太郎\") // => \"こんにちは、太郎さん!\"\n```",
@@ -35,6 +37,7 @@
   },
   {
     "id": "b003",
+    "language": "rust",
     "level": "beginner",
     "title": "絶対値",
     "description_md": "整数 `n` の **絶対値** を返す関数 `abs_val` を、`if` を使って実装しましょう。\n\n```rust\nabs_val(5)  // => 5\nabs_val(-5) // => 5\n```\n\n※ 標準ライブラリの `abs()` を使わずに書いてみてください。",
@@ -52,6 +55,7 @@
   },
   {
     "id": "b004",
+    "language": "rust",
     "level": "beginner",
     "title": "借用で文字数を数える",
     "description_md": "文字列スライス `s` の **文字数** (バイト数ではなく `char` の数) を返す関数 `count_chars` を完成させましょう。\n\n```rust\ncount_chars(\"hello\") // => 5\ncount_chars(\"こんにちは\") // => 5\n```\n\n日本語のようなマルチバイト文字では `s.len()` (バイト数) と文字数が一致しないことに注意してください。",
@@ -71,6 +75,7 @@
   },
   {
     "id": "b005",
+    "language": "rust",
     "level": "beginner",
     "title": "スライスの合計",
     "description_md": "整数スライス `v` の **合計** を返す関数 `sum` を完成させましょう。\n\n```rust\nsum(&[1, 2, 3]) // => 6\nsum(&[])        // => 0\n```\n\n`for` ループでも書けますが、イテレータの `sum()` メソッドを使うとより簡潔です。",
@@ -88,6 +93,7 @@
   },
   {
     "id": "b006",
+    "language": "rust",
     "level": "beginner",
     "title": "ミュータブルな合計カウンタ",
     "description_md": "3 つの整数 `a`、`b`、`c` を受け取り、その合計を返す関数 `tally` を実装してください。\n\nただしこの問題では、`0` で初期化したローカル変数 `total` を用意し、`a`、`b`、`c` を **1 つずつ順番に加算して** 最終的な値を返す、という書き方で実装してみましょう。変数を後から更新するには `let mut` で宣言する必要があります。\n\n```rust\n// 入出力例\nassert_eq!(tally(1, 2, 3), 6);\nassert_eq!(tally(-5, 5, 10), 10);\n```\n\n注意: Rust の変数は既定で不変 (イミュータブル) です。`mut` を付けずに再代入しようとするとコンパイルエラーになります。",
@@ -106,6 +112,7 @@
   },
   {
     "id": "b007",
+    "language": "rust",
     "level": "beginner",
     "title": "シャドーイングで値を作り直す",
     "description_md": "文字列スライス `input` を受け取り、**前後の空白を取り除いた後の文字数 (バイト長)** を返す関数 `trimmed_len` を実装してください。空白の除去には `str` の `trim` メソッド、長さの取得には `len` メソッドが使えます。\n\nこの問題では `mut` を使わずに、**同じ名前 `input` を `let` で宣言し直す「シャドーイング」** を使って実装してみましょう。シャドーイングでは、途中で型が変わっても構いません (`&str` → `usize`)。\n\n```rust\n// 入出力例\nassert_eq!(trimmed_len(\"hello\"), 5);\nassert_eq!(trimmed_len(\"  hi  \"), 2);\nassert_eq!(trimmed_len(\"   \"), 0);\n```\n\n注意: 入力は ASCII 文字のみとします。",
@@ -124,6 +131,7 @@
   },
   {
     "id": "b008",
+    "language": "rust",
     "level": "beginner",
     "title": "定数で秒を分に変換する",
     "description_md": "秒数 `seconds` を受け取り、それが何分に相当するかを **切り捨て** で返す関数 `to_minutes` を実装してください。\n\nこのとき、1 分あたりの秒数 `60` をコードに直接書く (マジックナンバーにする) のではなく、**`pub const SECONDS_PER_MINUTE: u32 = 60;` という定数を関数の外に定義し**、それを使って計算してください。テストでは定数 `SECONDS_PER_MINUTE` 自体も参照します。\n\n```rust\n// 入出力例\nassert_eq!(SECONDS_PER_MINUTE, 60);\nassert_eq!(to_minutes(120), 2); // 120 秒 = 2 分\nassert_eq!(to_minutes(59), 0);  // 1 分未満は 0 分\n```\n\n注意: `const` には型注釈が必須です。また、定数名は大文字のスネークケース (SCREAMING_SNAKE_CASE) で書くのが Rust の慣習です。",
@@ -142,6 +150,7 @@
   },
   {
     "id": "b009",
+    "language": "rust",
     "level": "beginner",
     "title": "立方体の体積",
     "description_md": "一辺の長さ `edge` (整数、負の値もあり得ます) を受け取り、立方体の体積 `edge の 3 乗` を返す関数 `cube_volume` を実装してください。\n\n掛け算を 2 回書いても求められますが、この問題では `i32` 型が持つ **`pow` メソッド** を使ってみましょう。整数型にもメソッドが生えている、という感覚をつかむのが目的です。\n\n```rust\n// 入出力例\nassert_eq!(cube_volume(3), 27);\nassert_eq!(cube_volume(-2), -8);\nassert_eq!(cube_volume(0), 0);\n```\n\n注意: 結果が `i32` の範囲に収まる入力のみが与えられます。",
@@ -160,6 +169,7 @@
   },
   {
     "id": "b010",
+    "language": "rust",
     "level": "beginner",
     "title": "円の面積を求める",
     "description_md": "半径 `radius` (`f64` 型、0 以上) を受け取り、円の面積 `π × radius × radius` を返す関数 `circle_area` を実装してください。\n\n円周率は自分で `3.14` などと書かず、標準ライブラリに用意されている定数 **`std::f64::consts::PI`** を使ってください。\n\n```rust\n// 入出力例 (浮動小数点数なので誤差を許容して比較します)\nlet area = circle_area(1.0);\nassert!((area - std::f64::consts::PI).abs() < 1e-9); // 半径 1 の面積は π\n\nlet area = circle_area(0.0);\nassert!(area.abs() < 1e-9); // 半径 0 の面積は 0\n```",
@@ -178,6 +188,7 @@
   },
   {
     "id": "b011",
+    "language": "rust",
     "level": "beginner",
     "title": "成人未満の判定",
     "description_md": "年齢 `age` (`u32` 型) を受け取り、**18 歳未満なら `true`、18 歳以上なら `false`** を返す関数 `is_minor` を実装してください。\n\nポイントは、`if` 文を使わずに **比較式をそのまま返す** ことです。`age < 18` のような比較式は、それ自体が `bool` 型の値になります。\n\n```rust\n// 入出力例\nassert_eq!(is_minor(17), true);\nassert_eq!(is_minor(18), false);\nassert_eq!(is_minor(0), true);\n```",
@@ -196,6 +207,7 @@
   },
   {
     "id": "b012",
+    "language": "rust",
     "level": "beginner",
     "title": "charを大文字にする",
     "description_md": "1 文字を表す `char` 型の値 `c` を受け取り、それが ASCII の英小文字なら大文字に変換して返す関数 `to_upper_char` を実装してください。英小文字以外 (大文字・数字・日本語の文字など) は **そのまま返します**。\n\n`char` 型には `to_ascii_uppercase` というメソッドが用意されており、この仕様をそのまま実現できます。\n\n```rust\n// 入出力例\nassert_eq!(to_upper_char('a'), 'A');\nassert_eq!(to_upper_char('Z'), 'Z'); // もともと大文字ならそのまま\nassert_eq!(to_upper_char('7'), '7'); // 英字以外もそのまま\n```\n\n注意: `char` のリテラルはシングルクォート (`'a'`)、文字列 (`&str`) はダブルクォート (`\"a\"`) です。別の型なので混同しないようにしましょう。",
@@ -213,6 +225,7 @@
   },
   {
     "id": "b013",
+    "language": "rust",
     "level": "beginner",
     "title": "タプルで2値を入れ替える",
     "description_md": "整数と浮動小数点数のペア `pair: (i32, f64)` を受け取り、**要素の順番を入れ替えたタプル `(f64, i32)`** を返す関数 `swap_pair` を実装してください。\n\nタプルは「型の異なる複数の値をひとまとめにする」ための型です。`let (a, b) = pair;` のように **パターンで分解** すると、各要素を別々の変数に取り出せます。\n\n```rust\n// 入出力例\nassert_eq!(swap_pair((1, 2.5)), (2.5, 1));\nassert_eq!(swap_pair((-3, -1.5)), (-1.5, -3));\n```",
@@ -230,6 +243,7 @@
   },
   {
     "id": "b014",
+    "language": "rust",
     "level": "beginner",
     "title": "2点の中点を求める",
     "description_md": "平面上の 2 点 `p1`、`p2` をそれぞれ `(f64, f64)` のタプル (x 座標, y 座標) として受け取り、その **中点** の座標をタプルで返す関数 `midpoint` を実装してください。\n\n中点の x 座標は 2 点の x 座標の平均、y 座標は 2 点の y 座標の平均です。タプルの要素には `p1.0` (1 番目)、`p1.1` (2 番目) のように **`.0` / `.1`** でアクセスできます。\n\n```rust\n// 入出力例\nlet m = midpoint((0.0, 0.0), (2.0, 4.0));\nassert!((m.0 - 1.0).abs() < 1e-9); // x = 1.0\nassert!((m.1 - 2.0).abs() < 1e-9); // y = 2.0\n```",
@@ -248,6 +262,7 @@
   },
   {
     "id": "b015",
+    "language": "rust",
     "level": "beginner",
     "title": "月名の配列参照",
     "description_md": "月の番号 `month` (`usize` 型、**1 から 12 までの値のみが渡されると仮定してよい**) を受け取り、対応する英語の月名を返す関数 `month_name` を実装してください。\n\n実装では、12 個の月名を並べた **固定長配列 `[&str; 12]`** を関数内に定義し、添字 (インデックス) でルックアップしてください。月名は次のとおりです。\n\n`January, February, March, April, May, June, July, August, September, October, November, December`\n\n```rust\n// 入出力例\nassert_eq!(month_name(1), \"January\");\nassert_eq!(month_name(6), \"June\");\nassert_eq!(month_name(12), \"December\");\n```\n\n注意: 配列の添字は 0 始まりなので、`month` との対応にずれがあります。",
@@ -266,6 +281,7 @@
   },
   {
     "id": "b016",
+    "language": "rust",
     "level": "beginner",
     "title": "割り算の商と余り",
     "description_md": "整数 `a` を整数 `b` で割ったときの「商」と「余り」をタプル `(商, 余り)` として返す関数 `div_mod` を実装してください。\n\nRust の整数除算 `/` は小数点以下を **0 方向に切り捨て** ます。また `%` は「`a - (a / b) * b`」で定義される余りを返します。負の数の場合もこの規則に従ってください (つまり `-7 / 3` は `-2`、`-7 % 3` は `-1` になります)。\n\n`b` は 0 ではないものとします。\n\n```rust\nassert_eq!(div_mod(7, 3), (2, 1));\nassert_eq!(div_mod(10, 5), (2, 0));\nassert_eq!(div_mod(-7, 3), (-2, -1));\n```",
@@ -284,6 +300,7 @@
   },
   {
     "id": "b017",
+    "language": "rust",
     "level": "beginner",
     "title": "四捨五入して整数へ",
     "description_md": "`f64` の値を四捨五入して `i64` として返す関数 `round_to_int` を実装してください。\n\n丸め方は `f64::round` と同じ、「ちょうど 0.5 のときは 0 から遠い方へ丸める」方式とします (`2.5` は `3`、`-2.5` は `-3`)。\n\n入力は `i64` で表せる範囲の値だけが渡されるものとします。\n\n```rust\nassert_eq!(round_to_int(2.4), 2);\nassert_eq!(round_to_int(2.5), 3);\nassert_eq!(round_to_int(-2.5), -3);\n```",
@@ -302,6 +319,7 @@
   },
   {
     "id": "b018",
+    "language": "rust",
     "level": "beginner",
     "title": "摂氏から華氏へ",
     "description_md": "摂氏温度 `c` (°C) を華氏温度 (°F) に変換して返す関数 `celsius_to_fahrenheit` を実装してください。\n\n変換式は次のとおりです。\n\n> 華氏 = 摂氏 × 9 ÷ 5 + 32\n\n引数も戻り値も `f64` です。Rust では `f64` と整数リテラルを直接掛け算できないため、`9.0` や `32.0` のように **浮動小数リテラル** で書く必要があります。\n\n```rust\nassert_eq!(celsius_to_fahrenheit(0.0), 32.0);\nassert_eq!(celsius_to_fahrenheit(100.0), 212.0);\nassert_eq!(celsius_to_fahrenheit(-40.0), -40.0);\n```",
@@ -320,6 +338,7 @@
   },
   {
     "id": "b019",
+    "language": "rust",
     "level": "beginner",
     "title": "文字列を数値にパースする",
     "description_md": "文字列 `s` を `i32` に変換して返す関数 `parse_or_zero` を実装してください。変換できない文字列 (数字以外を含む、空文字列、前後に空白がある、など) の場合は `0` を返します。\n\n`str::parse` メソッドと、変換先の型を指定する **ターボフィッシュ** (`parse::<i32>()`) を使ってみましょう。\n\n```rust\nassert_eq!(parse_or_zero(\"42\"), 42);\nassert_eq!(parse_or_zero(\"-7\"), -7);\nassert_eq!(parse_or_zero(\"abc\"), 0);\nassert_eq!(parse_or_zero(\"\"), 0);\n```",
@@ -338,6 +357,7 @@
   },
   {
     "id": "b020",
+    "language": "rust",
     "level": "beginner",
     "title": "数値の桁数を数える",
     "description_md": "0 以上の整数 `n` (`u32`) の **10 進数での桁数** を返す関数 `count_digits` を実装してください。\n\n数値を `to_string` で文字列に変換すると、その文字数 (= 桁数) を `len` で数えられます。\n\n- `0` は 1 桁と数えます。\n\n```rust\nassert_eq!(count_digits(0), 1);\nassert_eq!(count_digits(7), 1);\nassert_eq!(count_digits(12345), 5);\n```",
@@ -356,6 +376,7 @@
   },
   {
     "id": "b021",
+    "language": "rust",
     "level": "beginner",
     "title": "push_strで文を組み立てる",
     "description_md": "名前 `name` を受け取り、`\"Hello, {name}!\"` という形式のあいさつ文を `String` で返す関数 `build_greeting` を実装してください。\n\nこの問題では `String::new()` で空の `String` を作り、`push_str` (文字列の追記) と `push` (1 文字の追記) を使って少しずつ組み立ててみましょう。\n\n```rust\nassert_eq!(build_greeting(\"Rust\"), \"Hello, Rust!\");\nassert_eq!(build_greeting(\"world\"), \"Hello, world!\");\n```",
@@ -374,6 +395,7 @@
   },
   {
     "id": "b022",
+    "language": "rust",
     "level": "beginner",
     "title": "余白を取り除く",
     "description_md": "文字列 `s` の **先頭と末尾** の空白 (スペース、タブ、改行など) を取り除いた結果を、所有権付きの `String` として返す関数 `trimmed` を実装してください。\n\n文字列の途中にある空白はそのまま残します。\n\n```rust\nassert_eq!(trimmed(\"  hello  \"), \"hello\");\nassert_eq!(trimmed(\"\\t Rust 100 knocks \\n\"), \"Rust 100 knocks\");\nassert_eq!(trimmed(\"   \"), \"\");\n```",
@@ -392,6 +414,7 @@
   },
   {
     "id": "b023",
+    "language": "rust",
     "level": "beginner",
     "title": "全部大文字に変換する",
     "description_md": "文字列 `s` のアルファベットをすべて大文字に変換した `String` を返す関数 `shout` を実装してください。\n\n数字や記号など、大文字が存在しない文字はそのまま残します。元の文字列 `s` は変更しません (そもそも `&str` は変更できません)。\n\n```rust\nassert_eq!(shout(\"hello\"), \"HELLO\");\nassert_eq!(shout(\"Rust 1.0!\"), \"RUST 1.0!\");\nassert_eq!(shout(\"\"), \"\");\n```",
@@ -410,6 +433,7 @@
   },
   {
     "id": "b024",
+    "language": "rust",
     "level": "beginner",
     "title": "単語を置き換える",
     "description_md": "文字列 `s` の中に現れる `from` を **すべて** `to` に置き換えた `String` を返す関数 `replace_word` を実装してください。\n\n- 出現箇所が複数あれば、すべて置き換えます。\n- `from` が 1 度も現れない場合は、元と同じ内容の `String` を返します。\n- `from` は空文字列ではないものとします。\n\n```rust\nassert_eq!(replace_word(\"I like cats\", \"cats\", \"dogs\"), \"I like dogs\");\nassert_eq!(replace_word(\"aaa\", \"a\", \"b\"), \"bbb\");\nassert_eq!(replace_word(\"hello\", \"xyz\", \"!\"), \"hello\");\n```",
@@ -428,6 +452,7 @@
   },
   {
     "id": "b025",
+    "language": "rust",
     "level": "beginner",
     "title": "カンマで分割してVecにする",
     "description_md": "文字列 `s` をカンマ `,` で分割し、各要素を `String` にした `Vec<String>` を返す関数 `split_csv` を実装してください。\n\n- 各要素の前後の空白はそのまま残します (加工しません)。\n- 連続するカンマの間は空文字列 `\"\"` として数えます。\n- `s` が空文字列の場合は、空文字列 1 個だけを含む `Vec` を返します (これは `split` の標準の挙動です)。\n\n```rust\nassert_eq!(split_csv(\"a,b,c\"), vec![\"a\", \"b\", \"c\"]);\nassert_eq!(split_csv(\"one\"), vec![\"one\"]);\nassert_eq!(split_csv(\"a,,b\"), vec![\"a\", \"\", \"b\"]);\nassert_eq!(split_csv(\"\"), vec![\"\"]);\n```",
@@ -446,6 +471,7 @@
   },
   {
     "id": "b026",
+    "language": "rust",
     "level": "beginner",
     "title": "接頭辞と接尾辞の判定",
     "description_md": "文字列が特定の文字列で「始まるか」「終わるか」を判定する 2 つの関数を実装してください。\n\n- `has_prefix(s, prefix)` : 文字列 `s` が `prefix` で始まるなら `true`、そうでなければ `false` を返します。\n- `has_suffix(s, suffix)` : 文字列 `s` が `suffix` で終わるなら `true`、そうでなければ `false` を返します。\n\nなお、空文字列 `\"\"` は「どんな文字列の先頭・末尾にもある」とみなし、常に `true` を返すものとします (Rust 標準ライブラリの挙動と同じです)。\n\n```rust\nassert_eq!(has_prefix(\"hello.rs\", \"hello\"), true);\nassert_eq!(has_prefix(\"hello.rs\", \"world\"), false);\nassert_eq!(has_suffix(\"main.rs\", \".rs\"), true);\nassert_eq!(has_suffix(\"main.rs\", \".txt\"), false);\nassert_eq!(has_prefix(\"abc\", \"\"), true); // 空文字列は常に true\n```\n\n自分で 1 文字ずつ比較する必要はありません。標準ライブラリのメソッドを探して使ってみましょう。",
@@ -464,6 +490,7 @@
   },
   {
     "id": "b027",
+    "language": "rust",
     "level": "beginner",
     "title": "文字列をn回繰り返す",
     "description_md": "文字列 `s` を `n` 回繰り返してつなげた新しい `String` を返す関数 `repeat_text` を実装してください。\n\n- `n` が `0` のときは空文字列 `\"\"` を返します。\n- `s` が空文字列のときは、何回繰り返しても空文字列です。\n\n```rust\nassert_eq!(repeat_text(\"ab\", 3), \"ababab\");\nassert_eq!(repeat_text(\"な\", 2), \"なな\");\nassert_eq!(repeat_text(\"ab\", 0), \"\"); // 0 回なら空文字列\n```\n\nループで 1 回ずつ連結しなくても、標準ライブラリのメソッド 1 つで書けます。",
@@ -482,6 +509,7 @@
   },
   {
     "id": "b028",
+    "language": "rust",
     "level": "beginner",
     "title": "部分文字列を含むか",
     "description_md": "文字列 `s` の中に部分文字列 `pat` が含まれているかどうかを返す関数 `contains_sub` を実装してください。含まれていれば `true`、含まれていなければ `false` です。\n\nなお、空文字列 `\"\"` は「どんな文字列にも含まれる」とみなし、常に `true` を返すものとします (Rust 標準ライブラリの挙動と同じです)。\n\n```rust\nassert_eq!(contains_sub(\"hello world\", \"lo w\"), true);\nassert_eq!(contains_sub(\"hello world\", \"xyz\"), false);\nassert_eq!(contains_sub(\"こんにちは\", \"にち\"), true);\nassert_eq!(contains_sub(\"abc\", \"\"), true); // 空文字列は常に true\n```",
@@ -500,6 +528,7 @@
   },
   {
     "id": "b029",
+    "language": "rust",
     "level": "beginner",
     "title": "3つの値の最大",
     "description_md": "3 つの整数 `a`, `b`, `c` のうち最も大きい値を返す関数 `max_of_three` を実装してください。\n\nこの問題では `if` / `else if` / `else` を**式として**使い、その結果をそのまま関数の戻り値にしてください。同じ最大値が複数あってもかまいません (その値を返せばよいだけです)。\n\n```rust\nassert_eq!(max_of_three(1, 2, 3), 3);\nassert_eq!(max_of_three(5, -2, 4), 5);\nassert_eq!(max_of_three(-3, -1, -2), -1); // 負の数でも動くこと\nassert_eq!(max_of_three(7, 7, 7), 7);     // 全部同じでも OK\n```",
@@ -518,6 +547,7 @@
   },
   {
     "id": "b030",
+    "language": "rust",
     "level": "beginner",
     "title": "loopで2倍し続ける",
     "description_md": "`start` から始めて、値が `limit` を**超える** (`limit` より大きくなる) まで 2 倍し続け、初めて `limit` を超えた値を返す関数 `double_until` を実装してください。\n\n- `start` が最初から `limit` を超えている場合は、2 倍せずに `start` をそのまま返します。\n- 値がちょうど `limit` と等しい間は「超えた」とはみなさず、2 倍を続けます。\n- `start` は 1 以上であることが保証されています。\n\nこの問題では `loop` と `break` を使い、`break 値` で loop 式から値を返す書き方を練習してください。\n\n```rust\nassert_eq!(double_until(1, 100), 128); // 1→2→4→…→64→128 で初めて 100 を超える\nassert_eq!(double_until(3, 10), 12);   // 3→6→12\nassert_eq!(double_until(200, 100), 200); // 最初から超えているのでそのまま\nassert_eq!(double_until(5, 5), 10);    // 5 は 5 を超えていないので 2 倍する\n```",
@@ -536,6 +566,7 @@
   },
   {
     "id": "b031",
+    "language": "rust",
     "level": "beginner",
     "title": "whileで階乗を計算",
     "description_md": "`n` の階乗 (`n!` = 1 × 2 × … × n) を `while` ループで計算して返す関数 `factorial` を実装してください。\n\n- `0!` は `1` と定義されています。`factorial(0)` は `1` を返してください。\n- `n` は `20` 以下であることが保証されています (`20!` までは `u64` に収まります)。\n\n```rust\nassert_eq!(factorial(0), 1);\nassert_eq!(factorial(1), 1);\nassert_eq!(factorial(5), 120); // 1*2*3*4*5\n```\n\n`for` や再帰でも計算できますが、この問題では「条件付きループ + 累積用の `mut` 変数」という定番パターンを `while` で練習してください。",
@@ -554,6 +585,7 @@
   },
   {
     "id": "b032",
+    "language": "rust",
     "level": "beginner",
     "title": "1からnまでの総和",
     "description_md": "`1` から `n` までのすべての整数の合計を `for` ループで計算して返す関数 `sum_up_to` を実装してください。\n\n- `n` が `0` のときは足すものがないので `0` を返します。\n- `n` 自身も合計に**含めます**。範囲の書き方に注意してください。\n\n```rust\nassert_eq!(sum_up_to(0), 0);\nassert_eq!(sum_up_to(1), 1);\nassert_eq!(sum_up_to(10), 55); // 1+2+…+10\n```",
@@ -572,6 +604,7 @@
   },
   {
     "id": "b033",
+    "language": "rust",
     "level": "beginner",
     "title": "範囲の偶数だけを足す",
     "description_md": "`start` から `end` まで (両端を含む) の整数のうち、**偶数だけ**を合計して返す関数 `sum_even_in_range` を実装してください。\n\n- `0` は偶数として扱います。\n- `start > end` のときは範囲が空なので `0` を返します。\n\n```rust\nassert_eq!(sum_even_in_range(1, 10), 30); // 2+4+6+8+10\nassert_eq!(sum_even_in_range(2, 2), 2);   // 2 だけ\nassert_eq!(sum_even_in_range(3, 3), 0);   // 奇数しかない\nassert_eq!(sum_even_in_range(10, 1), 0);  // 空の範囲\n```\n\n`for` ループの本体に `if` を入れて、条件を満たす値だけを足し込む形で書いてみましょう。",
@@ -590,6 +623,7 @@
   },
   {
     "id": "b034",
+    "language": "rust",
     "level": "beginner",
     "title": "数値を曜日名に変える",
     "description_md": "`1` から `7` の数値を日本語の曜日名に変換する関数 `weekday_name` を `match` 式で実装してください。\n\n対応は次の通りです。\n\n| 数値 | 戻り値 |\n|---|---|\n| 1 | `\"月曜日\"` |\n| 2 | `\"火曜日\"` |\n| 3 | `\"水曜日\"` |\n| 4 | `\"木曜日\"` |\n| 5 | `\"金曜日\"` |\n| 6 | `\"土曜日\"` |\n| 7 | `\"日曜日\"` |\n| それ以外 (0 や 8 など) | `\"不明\"` |\n\n```rust\nassert_eq!(weekday_name(1), \"月曜日\");\nassert_eq!(weekday_name(7), \"日曜日\");\nassert_eq!(weekday_name(0), \"不明\");\nassert_eq!(weekday_name(8), \"不明\");\n```",
@@ -607,6 +641,7 @@
   },
   {
     "id": "b035",
+    "language": "rust",
     "level": "beginner",
     "title": "年齢を区分に分ける",
     "description_md": "年齢 `age` を次の 4 つの区分に分類する関数 `age_category` を、`match` の**範囲パターン**を使って実装してください。\n\n| 年齢 | 戻り値 |\n|---|---|\n| 0〜12 | `\"子ども\"` |\n| 13〜19 | `\"ティーン\"` |\n| 20〜64 | `\"大人\"` |\n| 65 以上 | `\"シニア\"` |\n\n境界の値 (12 と 13、19 と 20、64 と 65) がどちらの区分に入るかに注意してください。\n\n```rust\nassert_eq!(age_category(0), \"子ども\");\nassert_eq!(age_category(13), \"ティーン\");\nassert_eq!(age_category(20), \"大人\");\nassert_eq!(age_category(65), \"シニア\");\n```\n\n`if` / `else if` の連鎖でも書けますが、この問題では `0..=12` のような範囲パターンを使ってください。",
@@ -625,6 +660,7 @@
   },
   {
     "id": "b036",
+    "language": "rust",
     "level": "beginner",
     "title": "月から季節を求める",
     "description_md": "月の数値 (`u32`) を受け取り、対応する季節名を `String` で返す関数 `season` を実装してください。\n\n対応は次のとおりです。\n\n- 12月・1月・2月 → `\"冬\"`\n- 3月・4月・5月 → `\"春\"`\n- 6月・7月・8月 → `\"夏\"`\n- 9月・10月・11月 → `\"秋\"`\n- それ以外 (0 や 13 など) → `\"不明\"`\n\n`match` 式では `|` を使って複数の値を 1 つのアームにまとめられます。この問題では必ず `match` と `|` を使って書いてみましょう。\n\n```rust\nassert_eq!(season(1), \"冬\");\nassert_eq!(season(4), \"春\");\nassert_eq!(season(8), \"夏\");\nassert_eq!(season(10), \"秋\");\nassert_eq!(season(13), \"不明\");\n```\n",
@@ -643,6 +679,7 @@
   },
   {
     "id": "b037",
+    "language": "rust",
     "level": "beginner",
     "title": "早期リターンで下限を保証",
     "description_md": "整数 (`i32`) を受け取り、負数なら `0` を、それ以外はそのままの値を返す関数 `at_least_zero` を実装してください。つまり戻り値の下限を 0 に保証する関数です。\n\nこの問題では、負数のケースを `return` キーワードで早期リターンし、通常のケースは関数の最後の式 (セミコロンなし) として返す、という 2 つの返し方を両方使って書いてみましょう。\n\n```rust\nassert_eq!(at_least_zero(5), 5);\nassert_eq!(at_least_zero(0), 0);\nassert_eq!(at_least_zero(-3), 0);\n```\n",
@@ -661,6 +698,7 @@
   },
   {
     "id": "b038",
+    "language": "rust",
     "level": "beginner",
     "title": "税込価格を関数分割で求める",
     "description_md": "商品の単価 `price` と個数 `quantity` (どちらも `u32`) を受け取り、税込の合計金額を返す関数 `total_with_tax` を実装してください。\n\n計算のルールは次のとおりです。\n\n1. 小計 = `price * quantity`\n2. 税込金額 = 小計に消費税 10% を加えた額。整数演算 `小計 * 110 / 100` で計算し、小数点以下は切り捨てます\n\nこのとき「税込にする」部分は、`pub` を付けない補助関数 `with_tax` (引数は小計、戻り値は税込金額) に切り出し、`total_with_tax` から呼び出す構成にしてください。処理を小さな関数に分けると、それぞれが単純になり、部品として組み合わせられるようになります。\n\n```rust\nassert_eq!(total_with_tax(100, 3), 330); // 小計 300 → 税込 330\nassert_eq!(total_with_tax(99, 1), 108);  // 小計 99 → 108.9 の切り捨てで 108\nassert_eq!(total_with_tax(123, 0), 0);   // 個数 0 なら 0 円\n```\n",
@@ -679,6 +717,7 @@
   },
   {
     "id": "b039",
+    "language": "rust",
     "level": "beginner",
     "title": "所有権を受け取って返す",
     "description_md": "`String` を値で (参照ではなく) 受け取り、末尾に `!` を 1 文字追加して返す関数 `exclaim` を実装してください。\n\n`String` を値で受け取ると、所有権が呼び出し元から関数へ移動 (move) します。加工した `String` を戻り値として返すことで、所有権を呼び出し側に戻すことができます。\n\n```rust\nlet s = String::from(\"こんにちは\");\nlet result = exclaim(s);\nassert_eq!(result, \"こんにちは!\");\n// この時点で s はもう使えません (所有権が move したため)\n```\n",
@@ -697,6 +736,7 @@
   },
   {
     "id": "b040",
+    "language": "rust",
     "level": "beginner",
     "title": "cloneで元を残して加工する",
     "description_md": "`String` を受け取り、「元の文字列そのまま」と「末尾に `!` を追加した加工版」の 2 つをタプル `(元, 加工版)` で返す関数 `keep_and_modify` を実装してください。\n\n`String` は move されると元の変数から使えなくなりますが、`clone` で複製を作れば、元の値を保ったまま複製の方だけを加工できます。\n\n```rust\nlet (original, modified) = keep_and_modify(String::from(\"abc\"));\nassert_eq!(original, \"abc\");\nassert_eq!(modified, \"abc!\");\n```\n",
@@ -715,6 +755,7 @@
   },
   {
     "id": "b041",
+    "language": "rust",
     "level": "beginner",
     "title": "借用で長い方を判定する",
     "description_md": "2 つの文字列スライス `&str` を受け取り、長い方を `String` にして返す関数 `longer` を実装してください。\n\n- 長さは `len()` (バイト数) で比較します\n- 長さが同じ場合は 1 つ目の引数の方を返します\n\n引数を参照 (`&str`) で受け取っているので、この関数は所有権を奪いません。呼び出した後も、渡した文字列は元のまま使えます。\n\n```rust\nlet a = String::from(\"hello\");\nlet b = String::from(\"hi\");\nlet result = longer(&a, &b);\nassert_eq!(result, \"hello\");\n// a も b も借用しただけなので、この後も使える\nassert_eq!(a, \"hello\");\nassert_eq!(b, \"hi\");\n```\n",
@@ -733,6 +774,7 @@
   },
   {
     "id": "b042",
+    "language": "rust",
     "level": "beginner",
     "title": "可変借用で追記する",
     "description_md": "`&mut String` を受け取り、その末尾に `\", world\"` を追記する関数 `append_world` を実装してください。戻り値はありません。\n\n可変参照 `&mut` 経由で操作すると、呼び出し元が持っている `String` そのものが書き換わります。値を返さなくても、呼び出し側から変化が観測できるのがポイントです。\n\n```rust\nlet mut s = String::from(\"hello\");\nappend_world(&mut s);\nassert_eq!(s, \"hello, world\"); // 呼び出し元の s が直接書き換わっている\n```\n",
@@ -751,6 +793,7 @@
   },
   {
     "id": "b043",
+    "language": "rust",
     "level": "beginner",
     "title": "全要素に1を足す",
     "description_md": "`&mut Vec<i32>` を受け取り、すべての要素に 1 を足す関数 `add_one_all` を実装してください。戻り値はなく、受け取った Vec を in-place (その場) で書き換えます。\n\n`iter_mut()` を使うと、各要素への可変参照を順に取り出して書き換えられます。\n\n```rust\nlet mut v = vec![1, 2, 3];\nadd_one_all(&mut v);\nassert_eq!(v, vec![2, 3, 4]); // 元の Vec が直接書き換わっている\n```\n\n空の Vec を渡した場合は何も起こらず、空のままです。\n",
@@ -769,6 +812,7 @@
   },
   {
     "id": "b044",
+    "language": "rust",
     "level": "beginner",
     "title": "pushで1からnを集める",
     "description_md": "`u32` の値 `n` を受け取り、1 から `n` までの整数を小さい順に収めた `Vec<u32>` を返す関数 `collect_up_to` を実装してください。\n\n`Vec::new()` で空の Vec を作り、`for` ループと `push` で 1 つずつ要素を追加していく、Vec 構築の最も基本的なパターンで書いてみましょう。\n\n```rust\nassert_eq!(collect_up_to(5), vec![1, 2, 3, 4, 5]);\nassert_eq!(collect_up_to(1), vec![1]);\nassert_eq!(collect_up_to(0), Vec::<u32>::new()); // n = 0 なら空の Vec\n```\n",
@@ -787,6 +831,7 @@
   },
   {
     "id": "b045",
+    "language": "rust",
     "level": "beginner",
     "title": "popで末尾を取り除く",
     "description_md": "`&mut Vec<i32>` を受け取り、末尾の要素を取り除いてその値を返す関数 `remove_last` を実装してください。\n\n- Vec が空でなければ、末尾の要素を Vec から取り除き、`Some(値)` を返します\n- Vec が空なら、何もせず `None` を返します\n\n`Vec::pop` はまさにこの動きをするメソッドです。空の Vec に対してもパニックせず安全に扱えることを確認しましょう。\n\n```rust\nlet mut v = vec![1, 2, 3];\nassert_eq!(remove_last(&mut v), Some(3)); // 末尾の 3 が取り除かれる\nassert_eq!(v, vec![1, 2]);                // Vec は 2 要素になっている\n\nlet mut empty: Vec<i32> = Vec::new();\nassert_eq!(remove_last(&mut empty), None); // 空なら None\n```\n",
@@ -805,6 +850,7 @@
   },
   {
     "id": "b046",
+    "language": "rust",
     "level": "beginner",
     "title": "getで安全に読む",
     "description_md": "`Vec<i32>` の `i` 番目の要素を安全に読み取る関数 `safe_get` を実装してください。\n\n- 添字 `i` が範囲内なら、その位置の値を `Some(値)` で返します\n- 添字 `i` が範囲外なら、panic せずに `None` を返します\n\n```rust\nlet v = vec![10, 20, 30];\nassert_eq!(safe_get(&v, 1), Some(20));\nassert_eq!(safe_get(&v, 5), None); // 範囲外でも panic しない\n```\n\n`v[i]` のような添字アクセスは範囲外で panic してしまいます。panic しない方法を使いましょう。\n",
@@ -824,6 +870,7 @@
   },
   {
     "id": "b047",
+    "language": "rust",
     "level": "beginner",
     "title": "要素数で状態を分類",
     "description_md": "`Vec<i32>` の要素数を調べて、状態を表す文字列を返す関数 `classify` を実装してください。\n\n- 要素が 0 個 (空) のとき: `\"empty\"` を返す\n- 要素がちょうど 1 個のとき: `\"one\"` を返す\n- 要素が 2 個以上のとき: `\"many\"` を返す\n\n戻り値の型は `String` です。\n\n```rust\nlet v: Vec<i32> = vec![];\nassert_eq!(classify(&v), \"empty\");\nassert_eq!(classify(&vec![7]), \"one\");\nassert_eq!(classify(&vec![1, 2, 3]), \"many\");\n```\n",
@@ -842,6 +889,7 @@
   },
   {
     "id": "b048",
+    "language": "rust",
     "level": "beginner",
     "title": "含まれているか調べる",
     "description_md": "`Vec<i32>` の中に指定した値 `target` が含まれているかどうかを返す関数 `has_value` を実装してください。含まれていれば `true`、含まれていなければ `false` を返します。\n\n```rust\nlet v = vec![3, 1, 4, 1, 5];\nassert_eq!(has_value(&v, 4), true);\nassert_eq!(has_value(&v, 9), false);\n```\n\n自分でループを書いても解けますが、Vec (スライス) に用意されている存在判定メソッドを使ってみましょう。\n",
@@ -860,6 +908,7 @@
   },
   {
     "id": "b049",
+    "language": "rust",
     "level": "beginner",
     "title": "2つのVecをつなげる",
     "description_md": "2 つの `Vec<i32>` を受け取り、`a` の要素の後ろに `b` の要素を並べた 1 つの `Vec<i32>` を返す関数 `concat_vecs` を実装してください。要素の順序は元のまま保ちます。\n\n```rust\nlet a = vec![1, 2, 3];\nlet b = vec![4, 5];\nassert_eq!(concat_vecs(a, b), vec![1, 2, 3, 4, 5]);\n```\n\nどちらか (または両方) が空でも正しく動くようにしてください。\n",
@@ -878,6 +927,7 @@
   },
   {
     "id": "b050",
+    "language": "rust",
     "level": "beginner",
     "title": "指定位置を書き換える",
     "description_md": "可変参照で受け取った `Vec<i32>` の `i` 番目の要素を、新しい値 `x` で上書きする関数 `replace_at` を実装してください。\n\n- 添字 `i` は必ず範囲内 (`i < v.len()`) で呼ばれるものとします\n- `i` 番目以外の要素は変更しません\n- 戻り値はありません (Vec を直接書き換えます)\n\n```rust\nlet mut v = vec![10, 20, 30];\nreplace_at(&mut v, 1, 99);\nassert_eq!(v, vec![10, 99, 30]);\n```\n",
@@ -896,6 +946,7 @@
   },
   {
     "id": "b051",
+    "language": "rust",
     "level": "beginner",
     "title": "先頭n個を切り出す",
     "description_md": "`Vec<i32>` の先頭 `n` 個の要素を、新しい `Vec<i32>` として返す関数 `take_first` を実装してください。\n\n- `n` は必ず `n <= v.len()` の範囲で呼ばれるものとします\n- 元の Vec は変更しません\n- `n` が 0 のときは空の Vec を返します\n\n```rust\nlet v = vec![1, 2, 3, 4, 5];\nassert_eq!(take_first(&v, 3), vec![1, 2, 3]);\nassert_eq!(take_first(&v, 0), vec![]);\n```\n\n範囲スライス `&v[..n]` と、スライスを所有権付きの Vec に変換するメソッドを組み合わせてみましょう。\n",
@@ -914,6 +965,7 @@
   },
   {
     "id": "b052",
+    "language": "rust",
     "level": "beginner",
     "title": "スライスの端の要素",
     "description_md": "スライス `&[i32]` の先頭の要素・末尾の要素を返す 2 つの関数を実装してください。どちらも、スライスが空のときは panic せずに `default` で指定された値を返します。\n\n- `first_or(s, default)`: 先頭の要素。空なら `default`\n- `last_or(s, default)`: 末尾の要素。空なら `default`\n\n```rust\nlet s = [10, 20, 30];\nassert_eq!(first_or(&s, -1), 10);\nassert_eq!(last_or(&s, -1), 30);\n\nlet empty: [i32; 0] = [];\nassert_eq!(first_or(&empty, -1), -1); // 空でも panic しない\n```\n\nスライスの `first` / `last` メソッドは `Option` を返します。`unwrap_or` と組み合わせてみましょう。\n",
@@ -932,6 +984,7 @@
   },
   {
     "id": "b053",
+    "language": "rust",
     "level": "beginner",
     "title": "真ん中を切り出す",
     "description_md": "スライス `&[i32]` から、添字 `a` 以上 `b` 未満 (`a` は含み、`b` は含まない) の範囲を新しい `Vec<i32>` として返す関数 `middle` を実装してください。\n\n- `a <= b` かつ `b <= v.len()` の範囲で呼ばれるものとします\n- `a == b` のときは空の Vec を返します\n\n```rust\nlet v = [10, 20, 30, 40, 50];\nassert_eq!(middle(&v, 1, 4), vec![20, 30, 40]); // 添字1〜3 (4は含まない)\nassert_eq!(middle(&v, 2, 2), vec![]);\n```\n",
@@ -949,6 +1002,7 @@
   },
   {
     "id": "b054",
+    "language": "rust",
     "level": "beginner",
     "title": "スライスで正の数を数える",
     "description_md": "スライス `&[i32]` を受け取り、**正の数** (0 より大きい数) の個数を返す関数 `count_positive` を実装してください。0 は正の数に含めません。\n\n```rust\nlet v = vec![3, -1, 0, 7, -5];\nassert_eq!(count_positive(&v), 2); // 3 と 7\n\nlet arr = [1, 2, 3];\nassert_eq!(count_positive(&arr), 3); // 配列からも呼べる\n```\n\n引数を `&Vec<i32>` ではなく `&[i32]` にしてあるのがポイントです。こうすると `Vec` からも配列からも同じ関数を呼べます。\n",
@@ -967,6 +1021,7 @@
   },
   {
     "id": "b055",
+    "language": "rust",
     "level": "beginner",
     "title": "座標structを定義する",
     "description_md": "2 次元の座標を表す struct `Point` と、それを扱う 2 つの関数を実装してください。\n\n1. `Point`: `x` と `y` という名前の `i32` 型フィールドを持つ struct。フィールドは外部 (テスト) から直接読めるように `pub` にします\n2. `new_point(x, y)`: 受け取った値で `Point` を作って返す関数\n3. `coord_sum(p)`: 座標の `x + y` を返す関数\n\n```rust\nlet p = new_point(3, 4);\nassert_eq!(p.x, 3);\nassert_eq!(p.y, 4);\nassert_eq!(coord_sum(&p), 7);\n\n// フィールドを直接指定して作ることもできる\nlet q = Point { x: -1, y: 1 };\nassert_eq!(coord_sum(&q), 0);\n```\n",
@@ -984,6 +1039,7 @@
   },
   {
     "id": "b056",
+    "language": "rust",
     "level": "beginner",
     "title": "newで長方形を作る",
     "description_md": "幅 `width` と高さ `height`(どちらも `u32`)を持つ構造体 `Rectangle` があります。\nコンストラクタとして使える関連関数 `Rectangle::new` を実装してください。\n\n- `new(width, height)` は、引数の値をそのままフィールドに設定した `Rectangle` を返します。\n\n```rust\nlet r = Rectangle::new(3, 4);\nassert_eq!(r.width, 3);\nassert_eq!(r.height, 4);\n\nlet zero = Rectangle::new(0, 0);\nassert_eq!(zero.width, 0);\n```\n\n注意: `new` は `self` を引数に取らない「関連関数」です。`r.new(...)` のようにインスタンスから呼ぶのではなく、`Rectangle::new(...)` と型名に `::` を付けて呼び出します。Rust には言語組み込みのコンストラクタはなく、`new` という名前の関連関数を用意するのが慣習です。",
@@ -1002,6 +1058,7 @@
   },
   {
     "id": "b057",
+    "language": "rust",
     "level": "beginner",
     "title": "メソッドで面積を出す",
     "description_md": "幅 `width` と高さ `height`(どちらも `u32`)を持つ構造体 `Rectangle` に、面積を返すメソッド `area` を実装してください。\n\n- `area` は `&self` を受け取り、`width * height` を `u32` で返します。\n- 構造体本体と `new` はすでに用意されています。\n\n```rust\nlet r = Rectangle::new(3, 4);\nassert_eq!(r.area(), 12);\n\nlet flat = Rectangle::new(0, 5);\nassert_eq!(flat.area(), 0);\n```\n\n注意: `area` は自身のフィールドを読むだけなので、所有権を奪う `self` ではなく参照の `&self` を取ります。呼び出しは `r.area()` というメソッド記法で行います。",
@@ -1020,6 +1077,7 @@
   },
   {
     "id": "b058",
+    "language": "rust",
     "level": "beginner",
     "title": "カウンタstructを進める",
     "description_md": "カウンタを表す構造体 `Counter` に、内部状態を変更する 2 つのメソッドを実装してください。\n\n- `increment(&mut self)`: `count` を 1 増やします。\n- `reset(&mut self)`: `count` を 0 に戻します。\n- `Counter::new()` は `count` が 0 の `Counter` を返します(実装済み)。\n\n```rust\nlet mut c = Counter::new();\nc.increment();\nc.increment();\nassert_eq!(c.count, 2);\n\nc.reset();\nassert_eq!(c.count, 0);\n```\n\n注意: 自身のフィールドを書き換えるメソッドは `&mut self` を取ります。また、呼び出す側も `let mut c = ...` のように `mut` 付きで束縛しておく必要があります。",
@@ -1038,6 +1096,7 @@
   },
   {
     "id": "b059",
+    "language": "rust",
     "level": "beginner",
     "title": "設定の一部だけ変える",
     "description_md": "アプリの設定を表す構造体 `Config` があります(音量 `volume: u32`、明るさ `brightness: u32`、全画面 `fullscreen: bool`)。\n既存の設定を元に、一部のフィールドだけを差し替えた新しい `Config` を返す 2 つの関数を実装してください。\n\n- `with_volume(base, volume)`: `volume` だけを引数の値に差し替え、他のフィールドは `base` のまま。\n- `into_fullscreen(base)`: `fullscreen` だけを `true` にし、他のフィールドは `base` のまま。\n\n```rust\nlet base = Config { volume: 50, brightness: 70, fullscreen: false };\nlet quiet = with_volume(base, 10);\nassert_eq!(quiet.volume, 10);\nassert_eq!(quiet.brightness, 70); // 他はそのまま\n\nlet full = into_fullscreen(quiet);\nassert!(full.fullscreen);\nassert_eq!(full.volume, 10);\n```\n\nヒント: 構造体更新記法 `Config { volume, ..base }` を使うと、「残りのフィールドは `base` から持ってくる」と書けます。",
@@ -1056,6 +1115,7 @@
   },
   {
     "id": "b060",
+    "language": "rust",
     "level": "beginner",
     "title": "deriveで比較できる型",
     "description_md": "2 次元の点を表す構造体 `Point`(`x: i32`, `y: i32`)を、テストで `assert_eq!` できる型にしてください。\n\nやることは 2 つです。\n\n1. `Point` に `#[derive(Debug, PartialEq)]` を付けて、`==` 比較と `{:?}` 表示を自動実装させる。\n2. 引数の値を持つ `Point` を返す関数 `make_point(x, y)` を実装する。\n\n```rust\nlet p = make_point(1, 2);\nassert_eq!(p, Point { x: 1, y: 2 });      // PartialEq のおかげで比較できる\nprintln!(\"{:?}\", p);                       // Debug のおかげで表示できる\n// => Point { x: 1, y: 2 }\n```\n\n注意: `{:?}` の表示形式は derive された `Debug` の標準形式(`Point { x: 1, y: 2 }`)になります。手書きの `impl` ではなく、必ず derive 属性を使ってください。",
@@ -1074,6 +1134,7 @@
   },
   {
     "id": "b061",
+    "language": "rust",
     "level": "beginner",
     "title": "方向enumで移動量を返す",
     "description_md": "上下左右の方向を表す enum `Direction` があります。各方向に 1 歩進んだときの移動量 `(x, y)` を返す関数 `delta` を実装してください。\n\n対応は次のとおりです(x は右がプラス、y は上がプラス)。\n\n| 方向 | 戻り値 |\n| --- | --- |\n| `Up` | `(0, 1)` |\n| `Down` | `(0, -1)` |\n| `Left` | `(-1, 0)` |\n| `Right` | `(1, 0)` |\n\n```rust\nassert_eq!(delta(Direction::Up), (0, 1));\nassert_eq!(delta(Direction::Left), (-1, 0));\n```\n\n注意: `match` 式を使い、4 つのバリアントすべてを漏れなく扱ってください。",
@@ -1092,6 +1153,7 @@
   },
   {
     "id": "b062",
+    "language": "rust",
     "level": "beginner",
     "title": "図形enumの面積",
     "description_md": "図形を表す enum `Shape` があります。バリアントはデータを持ちます。\n\n- `Circle(f64)`: 半径を持つ円\n- `Rectangle(f64, f64)`: 幅と高さを持つ長方形\n\n図形の面積を返す関数 `area` を実装してください。\n\n- 円の面積: `std::f64::consts::PI` × 半径 × 半径\n- 長方形の面積: 幅 × 高さ\n\n```rust\nlet c = Shape::Circle(2.0);\n// PI * 2.0 * 2.0 = 約 12.566\nassert!((area(&c) - 12.566370614359172).abs() < 1e-9);\n\nlet r = Shape::Rectangle(2.5, 4.0);\nassert!((area(&r) - 10.0).abs() < 1e-9);\n```\n\n注意: 円周率には必ず `std::f64::consts::PI` を使ってください(`3.14` などの手書きは不可)。",
@@ -1110,6 +1172,7 @@
   },
   {
     "id": "b063",
+    "language": "rust",
     "level": "beginner",
     "title": "信号機の次の状態",
     "description_md": "信号機の状態を表す enum `TrafficLight` があります(`Green`, `Yellow`, `Red`)。\n現在の状態を受け取り、**次の状態** を返す関数 `next_light` を実装してください。\n\n信号は次の順で循環します。\n\n```text\nGreen → Yellow → Red → Green → ...\n```\n\n```rust\nassert_eq!(next_light(TrafficLight::Green), TrafficLight::Yellow);\nassert_eq!(next_light(TrafficLight::Yellow), TrafficLight::Red);\nassert_eq!(next_light(TrafficLight::Red), TrafficLight::Green);\n```\n\n注意: `match` で現在のバリアントごとに次のバリアントを返してください。これは enum で「状態機械」を表現する第一歩です。",
@@ -1128,6 +1191,7 @@
   },
   {
     "id": "b064",
+    "language": "rust",
     "level": "beginner",
     "title": "硬貨enumにメソッドを生やす",
     "description_md": "日本の硬貨を表す enum `Coin` があります(`One`, `Five`, `Ten`, `Fifty`, `Hundred`, `FiveHundred`)。\n`impl Coin` ブロックの中に、額面(円)を返すメソッド `value` を実装してください。\n\n| バリアント | 戻り値 |\n| --- | --- |\n| `One` | `1` |\n| `Five` | `5` |\n| `Ten` | `10` |\n| `Fifty` | `50` |\n| `Hundred` | `100` |\n| `FiveHundred` | `500` |\n\n```rust\nlet c = Coin::Fifty;\nassert_eq!(c.value(), 50);\nassert_eq!(Coin::FiveHundred.value(), 500);\n```\n\n注意: struct と同じように、enum にも `impl` ブロックでメソッドを定義できます。`value` は `&self` を取り、`u32` を返します。",
@@ -1146,6 +1210,7 @@
   },
   {
     "id": "b065",
+    "language": "rust",
     "level": "beginner",
     "title": "ミニ計算機を評価する",
     "description_md": "簡単な計算式を表す enum `Expr` があります。\n\n- `Num(i32)`: ただの数値\n- `Add(i32, i32)`: 2 数の足し算\n- `Sub(i32, i32)`: 2 数の引き算(1 番目 − 2 番目)\n- `Mul(i32, i32)`: 2 数の掛け算\n\n式を評価して結果を返す関数 `eval` を実装してください。\n\n```rust\nassert_eq!(eval(Expr::Num(42)), 42);\nassert_eq!(eval(Expr::Add(2, 3)), 5);\nassert_eq!(eval(Expr::Sub(3, 10)), -7);\nassert_eq!(eval(Expr::Mul(-4, 6)), -24);\n```\n\n注意: `match` のパターンで `Expr::Add(a, b)` のように 2 つの値を変数に束縛し、束縛した変数で計算します。結果が `i32` の範囲を超える入力は与えられません。",
@@ -1164,6 +1229,7 @@
   },
   {
     "id": "b066",
+    "language": "rust",
     "level": "beginner",
     "title": "失敗する割り算",
     "description_md": "整数の割り算を行う関数 `safe_div` を実装してください。\n\n- `safe_div(a, b)` は `a / b` の結果を `Some` に包んで返します。\n- ただし `b` が `0` のときは割り算ができないので、`None` を返します。\n- 割り算は整数除算です (小数点以下は切り捨て)。\n\nRust では「失敗するかもしれない計算」の戻り値に `Option<T>` を使います。値があるときは `Some(値)`、ないときは `None` です。\n\n```rust\nassert_eq!(safe_div(10, 3), Some(3));\nassert_eq!(safe_div(10, 0), None);\nassert_eq!(safe_div(-9, 3), Some(-3));\n```",
@@ -1182,6 +1248,7 @@
   },
   {
     "id": "b067",
+    "language": "rust",
     "level": "beginner",
     "title": "Noneなら既定値",
     "description_md": "`Option<i32>` から値を取り出す関数 `value_or` を実装してください。\n\n- `opt` が `Some(x)` なら中身の `x` を返します。\n- `opt` が `None` なら引数 `default` の値を返します。\n- **panic してはいけません**。`Option::unwrap_or` メソッドを使うと 1 行で書けます。\n\n```rust\nassert_eq!(value_or(Some(42), 0), 42);\nassert_eq!(value_or(None, 0), 0);\nassert_eq!(value_or(None, -1), -1);\n```",
@@ -1200,6 +1267,7 @@
   },
   {
     "id": "b068",
+    "language": "rust",
     "level": "beginner",
     "title": "値の有無を調べる",
     "description_md": "`Option<i32>` の中身を取り出さずに、値が入っているかどうかだけを調べる 2 つの関数を実装してください。\n\n- `has_value(opt)`: `opt` が `Some(...)` なら `true`、`None` なら `false` を返します。\n- `is_missing(opt)`: `opt` が `None` なら `true`、`Some(...)` なら `false` を返します。\n\nそれぞれ `Option` の `is_some` / `is_none` メソッドを使うと 1 行で書けます。\n\n```rust\nassert_eq!(has_value(Some(1)), true);\nassert_eq!(has_value(None), false);\nassert_eq!(is_missing(None), true);\nassert_eq!(is_missing(Some(0)), false);\n```",
@@ -1218,6 +1286,7 @@
   },
   {
     "id": "b069",
+    "language": "rust",
     "level": "beginner",
     "title": "matchでOptionを開く",
     "description_md": "`match` 式を使って `Option<i32>` を分解する関数 `add_ten` を実装してください。\n\n- `opt` が `Some(x)` なら `x + 10` を返します。\n- `opt` が `None` なら `0` を返します。\n- `match` 式で `Some(x)` と `None` の 2 つの腕 (アーム) を書いて分岐してください。\n\n```rust\nassert_eq!(add_ten(Some(5)), 15);\nassert_eq!(add_ten(Some(-10)), 0);\nassert_eq!(add_ten(None), 0);\n```",
@@ -1236,6 +1305,7 @@
   },
   {
     "id": "b070",
+    "language": "rust",
     "level": "beginner",
     "title": "中身だけを2乗する",
     "description_md": "`Option<i32>` の中身だけを 2 乗する関数 `square_opt` を実装してください。\n\n- `opt` が `Some(x)` なら `Some(x * x)` を返します。\n- `opt` が `None` なら `None` のまま返します。\n- `Option::map` メソッドを使うと、この「Some のときだけ変換し、None はそのまま」という処理が 1 行で書けます。\n\n```rust\nassert_eq!(square_opt(Some(3)), Some(9));\nassert_eq!(square_opt(Some(-4)), Some(16));\nassert_eq!(square_opt(None), None);\n```",
@@ -1254,6 +1324,7 @@
   },
   {
     "id": "b071",
+    "language": "rust",
     "level": "beginner",
     "title": "パース失敗をNoneにする",
     "description_md": "文字列を `i32` に変換する関数 `parse_i32` を実装してください。\n\n- `s` が整数として解釈できる文字列なら、その値を `Some` に包んで返します。\n- 解釈できない文字列 (`\"abc\"` や `\"\"` など) なら `None` を返します。\n- **panic してはいけません**。文字列の `parse` メソッドは `Result` を返しますが、`ok()` メソッドで `Option` に変換できます。\n\n```rust\nassert_eq!(parse_i32(\"42\"), Some(42));\nassert_eq!(parse_i32(\"-7\"), Some(-7));\nassert_eq!(parse_i32(\"abc\"), None);\nassert_eq!(parse_i32(\"\"), None);\n```",
@@ -1272,6 +1343,7 @@
   },
   {
     "id": "b072",
+    "language": "rust",
     "level": "beginner",
     "title": "mapで全要素を2乗",
     "description_md": "整数スライスの全要素を 2 乗した新しい `Vec<i32>` を返す関数 `square_all` を実装してください。\n\n- 各要素 `x` を `x * x` に変換します。\n- 元の順序を保ちます。\n- 空のスライスなら空の `Vec` を返します。\n- `for` ループではなく、イテレータの `iter().map(...).collect()` チェーンで書いてください。\n\n```rust\nassert_eq!(square_all(&[1, 2, 3]), vec![1, 4, 9]);\nassert_eq!(square_all(&[-2, 0]), vec![4, 0]);\nassert_eq!(square_all(&[]), vec![]);\n```",
@@ -1290,6 +1362,7 @@
   },
   {
     "id": "b073",
+    "language": "rust",
     "level": "beginner",
     "title": "filterで正の数だけ残す",
     "description_md": "整数スライスから **正の数 (0 より大きい数)** だけを残した新しい `Vec<i32>` を返す関数 `keep_positive` を実装してください。\n\n- `0` と負の数は取り除きます。\n- 元の順序を保ちます。\n- 該当する要素がなければ空の `Vec` を返します。\n- `iter().filter(...)` を使ってください。filter のクロージャに渡ってくるのは要素への参照である点に注意しましょう。\n\n```rust\nassert_eq!(keep_positive(&[1, -2, 3, 0, -5]), vec![1, 3]);\nassert_eq!(keep_positive(&[-1, -2]), vec![]);\nassert_eq!(keep_positive(&[]), vec![]);\n```",
@@ -1308,6 +1381,7 @@
   },
   {
     "id": "b074",
+    "language": "rust",
     "level": "beginner",
     "title": "負の数を数える",
     "description_md": "整数スライスに含まれる **負の数 (0 より小さい数)** の個数を返す関数 `count_negative` を実装してください。\n\n- `0` は負の数ではありません。\n- 戻り値の型は `usize` です (個数を表す Rust の標準的な型)。\n- `for` ループではなく、`iter().filter(...).count()` の組み合わせで書いてください。\n\n```rust\nassert_eq!(count_negative(&[1, -2, 3, -4, -5]), 3);\nassert_eq!(count_negative(&[0, 1, 2]), 0);\nassert_eq!(count_negative(&[]), 0);\n```",
@@ -1326,6 +1400,7 @@
   },
   {
     "id": "b075",
+    "language": "rust",
     "level": "beginner",
     "title": "最大と最小をOptionで",
     "description_md": "整数スライスの最大値と最小値を `(最大, 最小)` のタプルで返す関数 `max_min` を実装してください。\n\n- 戻り値の型は `(Option<i32>, Option<i32>)` です。\n- スライスが空のときは最大も最小も存在しないので `(None, None)` を返します。\n- イテレータの `max()` / `min()` メソッドを使ってください。これらは要素への参照 (`Option<&i32>`) を返すので、`copied()` などで `Option<i32>` に変換する必要があります。\n\n```rust\nassert_eq!(max_min(&[3, 1, 4, 1, 5]), (Some(5), Some(1)));\nassert_eq!(max_min(&[-7]), (Some(-7), Some(-7)));\nassert_eq!(max_min(&[]), (None, None));\n```",
@@ -1344,6 +1419,7 @@
   },
   {
     "id": "b076",
+    "language": "rust",
     "level": "beginner",
     "title": "revで逆順のVecを作る",
     "description_md": "整数のスライス `v` を受け取り、要素を逆順に並べた新しい `Vec<i32>` を返す関数 `reversed` を実装してください。\n\n- 元のスライスは変更しません (そもそも `&[i32]` は変更できません)。\n- 空のスライスを渡した場合は空の `Vec` を返します。\n\n```rust\nassert_eq!(reversed(&[1, 2, 3]), vec![3, 2, 1]);\nassert_eq!(reversed(&[42]), vec![42]);\nassert_eq!(reversed(&[]), Vec::<i32>::new());\n```\n",
@@ -1362,6 +1438,7 @@
   },
   {
     "id": "b077",
+    "language": "rust",
     "level": "beginner",
     "title": "文字列を反転する",
     "description_md": "文字列スライス `s` を受け取り、文字の並びを逆順にした新しい `String` を返す関数 `reverse_string` を実装してください。\n\n- 「文字」は `char` (Unicode スカラー値) 単位で扱います。日本語のようなマルチバイト文字も 1 文字として反転されます。\n- 空文字列を渡した場合は空文字列を返します。\n\n```rust\nassert_eq!(reverse_string(\"abc\"), \"cba\");\nassert_eq!(reverse_string(\"こんにちは\"), \"はちにんこ\");\nassert_eq!(reverse_string(\"\"), \"\");\n```\n",
@@ -1380,6 +1457,7 @@
   },
   {
     "id": "b078",
+    "language": "rust",
     "level": "beginner",
     "title": "偶数番目の要素だけ",
     "description_md": "整数のスライス `v` を受け取り、インデックスが偶数 (0, 2, 4, ...) の要素だけを順番どおりに集めた `Vec<i32>` を返す関数 `even_indexed` を実装してください。\n\n- インデックスは 0 始まりです。先頭要素はインデックス 0 なので必ず含まれます。\n- 空のスライスなら空の `Vec` を返します。\n\n```rust\nassert_eq!(even_indexed(&[10, 20, 30, 40, 50]), vec![10, 30, 50]);\nassert_eq!(even_indexed(&[7]), vec![7]);\nassert_eq!(even_indexed(&[]), Vec::<i32>::new());\n```\n",
@@ -1398,6 +1476,7 @@
   },
   {
     "id": "b079",
+    "language": "rust",
     "level": "beginner",
     "title": "zipで2列を足し合わせる",
     "description_md": "2 つの整数スライス `a` と `b` を受け取り、同じ位置の要素どうしを足した `Vec<i32>` を返す関数 `add_pairs` を実装してください。\n\n- 長さが違う場合は、短い方の長さに揃えます (余った要素は無視します)。これは `zip` の標準の挙動です。\n- どちらかが空なら空の `Vec` を返します。\n\n```rust\nassert_eq!(add_pairs(&[1, 2, 3], &[10, 20, 30]), vec![11, 22, 33]);\n// 長さが違うときは短い方に揃う\nassert_eq!(add_pairs(&[1, 2, 3], &[10, 20]), vec![11, 22]);\nassert_eq!(add_pairs(&[], &[1, 2]), Vec::<i32>::new());\n```\n",
@@ -1416,6 +1495,7 @@
   },
   {
     "id": "b080",
+    "language": "rust",
     "level": "beginner",
     "title": "偶数だけ2乗して合計",
     "description_md": "整数のスライス `v` を受け取り、**偶数の要素だけ**をそれぞれ 2 乗して合計した値を `i32` で返す関数 `sum_even_squares` を実装してください。\n\n- 0 は偶数として扱います。負の偶数 (例: -2) も対象です。2 乗するのでその項は正になります。\n- 偶数が 1 つもない場合や空のスライスの場合は 0 を返します。\n\n```rust\n// 2*2 + 4*4 = 20\nassert_eq!(sum_even_squares(&[1, 2, 3, 4]), 20);\n// (-2)*(-2) = 4\nassert_eq!(sum_even_squares(&[-2, 3]), 4);\nassert_eq!(sum_even_squares(&[]), 0);\n```\n",
@@ -1434,6 +1514,7 @@
   },
   {
     "id": "b081",
+    "language": "rust",
     "level": "beginner",
     "title": "名前から点数を引く",
     "description_md": "`(名前, 点数)` のペアのスライス `pairs` と名前 `name` を受け取り、その名前の点数を `Option<i32>` で返す関数 `lookup_score` を実装してください。\n\n実装は次の手順で行います。\n\n1. `HashMap` を作り、`pairs` の全ペアを `insert` で登録する\n2. `get` で `name` を検索し、見つかれば `Some(点数)`、なければ `None` を返す\n\n- 同じ名前が複数回現れた場合は、**後に出てきた点数で上書き**されます (`insert` の標準の挙動)。\n\n```rust\nlet pairs = [(\"alice\", 80), (\"bob\", 65)];\nassert_eq!(lookup_score(&pairs, \"alice\"), Some(80));\nassert_eq!(lookup_score(&pairs, \"carol\"), None);\n// 同じ名前は後の値で上書き\nassert_eq!(lookup_score(&[(\"alice\", 80), (\"alice\", 95)], \"alice\"), Some(95));\n```\n",
@@ -1452,6 +1533,7 @@
   },
   {
     "id": "b082",
+    "language": "rust",
     "level": "beginner",
     "title": "キーの存在を確かめる",
     "description_md": "`HashMap<String, i32>` への参照 `map` とキー `key` を受け取り、そのキーがマップに存在するかどうかを `bool` で返す関数 `has_key` を実装してください。\n\n- 値は取り出しません。存在の有無だけを判定します。\n- 値が 0 や負数でも、キーが存在すれば `true` です。\n\n```rust\nuse std::collections::HashMap;\n\nlet mut map = HashMap::new();\nmap.insert(\"alice\".to_string(), 80);\nmap.insert(\"zero\".to_string(), 0);\n\nassert_eq!(has_key(&map, \"alice\"), true);\nassert_eq!(has_key(&map, \"zero\"), true);\nassert_eq!(has_key(&map, \"bob\"), false);\n```\n",
@@ -1470,6 +1552,7 @@
   },
   {
     "id": "b083",
+    "language": "rust",
     "level": "beginner",
     "title": "単語の出現回数を数える",
     "description_md": "文字列 `text` を受け取り、空白区切りの各単語が何回現れるかを数えて `HashMap<String, usize>` で返す関数 `word_count` を実装してください。\n\n- 単語の区切りは `split_whitespace()` を使います (連続する空白や前後の空白も正しく扱えます)。\n- 大文字・小文字は区別します (`\"Apple\"` と `\"apple\"` は別の単語)。\n- 空文字列や空白だけの文字列なら空のマップを返します。\n\n```rust\nlet counts = word_count(\"apple banana apple\");\nassert_eq!(counts.get(\"apple\"), Some(&2));\nassert_eq!(counts.get(\"banana\"), Some(&1));\nassert_eq!(counts.len(), 2);\n\nassert!(word_count(\"\").is_empty());\n```\n",
@@ -1488,6 +1571,7 @@
   },
   {
     "id": "b084",
+    "language": "rust",
     "level": "beginner",
     "title": "キーごとに得点を合算",
     "description_md": "`(名前, 点数)` のペアのスライス `records` を受け取り、名前ごとに点数を合計した `HashMap<String, i32>` を返す関数 `total_scores` を実装してください。\n\n- 同じ名前が複数回現れたら、その点数をすべて足し合わせます。\n- 点数は負の値のこともあります (ペナルティなど)。そのまま加算してください。\n- 空のスライスなら空のマップを返します。\n\n```rust\nlet records = [(\"alice\", 10), (\"bob\", 5), (\"alice\", 20)];\nlet totals = total_scores(&records);\nassert_eq!(totals.get(\"alice\"), Some(&30));\nassert_eq!(totals.get(\"bob\"), Some(&5));\nassert_eq!(totals.len(), 2);\n```\n",
@@ -1506,6 +1590,7 @@
   },
   {
     "id": "b085",
+    "language": "rust",
     "level": "beginner",
     "title": "全部の値を合計する",
     "description_md": "`HashMap<String, i32>` への参照 `map` を受け取り、**すべての値の合計**を `i32` で返す関数 `sum_values` を実装してください。\n\n- キーは合計に関係ありません。値だけを足します。\n- 空のマップなら 0 を返します。\n- 負の値もそのまま加算します。\n\n```rust\nuse std::collections::HashMap;\n\nlet mut map = HashMap::new();\nmap.insert(\"alice\".to_string(), 80);\nmap.insert(\"bob\".to_string(), 65);\nassert_eq!(sum_values(&map), 145);\n\nlet empty: HashMap<String, i32> = HashMap::new();\nassert_eq!(sum_values(&empty), 0);\n```\n",
@@ -1524,6 +1609,7 @@
   },
   {
     "id": "b086",
+    "language": "rust",
     "level": "beginner",
     "title": "キー一覧をソートして返す",
     "description_md": "`HashMap<String, i32>` への参照を受け取り、すべてのキーを辞書順 (昇順) に並べた `Vec<String>` を返す関数 `sorted_keys` を実装してください。\n\n`HashMap` の反復順序は実行のたびに変わる可能性があります。そのため、`keys()` で取り出した順序をそのまま返すとテストできる結果になりません。`sort` で順序を決定化しましょう。\n\n```rust\nuse std::collections::HashMap;\n\nlet mut m = HashMap::new();\nm.insert(\"banana\".to_string(), 2);\nm.insert(\"apple\".to_string(), 1);\nm.insert(\"cherry\".to_string(), 3);\n\nassert_eq!(\n    sorted_keys(&m),\n    vec![\"apple\".to_string(), \"banana\".to_string(), \"cherry\".to_string()]\n);\n```\n\n- 空の `HashMap` を渡された場合は空の `Vec` を返してください。\n- 値 (i32) は使いません。キーだけを返します。",
@@ -1542,6 +1628,7 @@
   },
   {
     "id": "b087",
+    "language": "rust",
     "level": "beginner",
     "title": "範囲内かどうかの判定",
     "description_md": "整数 `x` と下限 `low`・上限 `high` を受け取り、`x` が `low` 以上 `high` 以下 (両端を含む) であれば `true` を返す関数 `in_range` を実装してください。\n\n```rust\nassert_eq!(in_range(5, 1, 10), true);\nassert_eq!(in_range(0, 1, 10), false);\nassert_eq!(in_range(10, 1, 10), true); // 上限ちょうども範囲内\n```\n\n- 下限・上限の 2 つの条件を `&&` で組み合わせて 1 つの `bool` にします。\n- `low > high` となる呼び出しは考慮しなくて構いません (その場合は自然に `false` になります)。",
@@ -1560,6 +1647,7 @@
   },
   {
     "id": "b088",
+    "language": "rust",
     "level": "beginner",
     "title": "うるう年の判定",
     "description_md": "西暦年 `year` を受け取り、うるう年なら `true` を返す関数 `is_leap_year` を実装してください。\n\nうるう年の規則は次のとおりです。\n\n1. 4 で割り切れる年はうるう年。\n2. ただし 100 で割り切れる年はうるう年ではない。\n3. ただし 400 で割り切れる年はうるう年。\n\n```rust\nassert_eq!(is_leap_year(2024), true);  // 4の倍数\nassert_eq!(is_leap_year(1900), false); // 100の倍数 (400の倍数ではない)\nassert_eq!(is_leap_year(2000), true);  // 400の倍数\nassert_eq!(is_leap_year(2023), false); // 4の倍数ではない\n```\n\n剰余演算子 `%` と `&&` / `||` を組み合わせ、条件を正しく括弧で構成しましょう。",
@@ -1578,6 +1666,7 @@
   },
   {
     "id": "b089",
+    "language": "rust",
     "level": "beginner",
     "title": "どちらか一方だけtrue",
     "description_md": "2 つの `bool` 値 `a` と `b` を受け取り、**どちらか一方だけ**が `true` のときに `true` を返す関数 `exactly_one` を実装してください。両方 `true` や両方 `false` のときは `false` です。\n\nこれは排他的論理和 (XOR) と呼ばれる演算で、真理値表は次のとおりです。\n\n| a | b | 結果 |\n|-------|-------|-------|\n| true | true | false |\n| true | false | true |\n| false | true | true |\n| false | false | false |\n\n```rust\nassert_eq!(exactly_one(true, false), true);\nassert_eq!(exactly_one(true, true), false);\n```\n\nRust では `^` 演算子または `!=` 演算子で簡潔に書けます。",
@@ -1596,6 +1685,7 @@
   },
   {
     "id": "b090",
+    "language": "rust",
     "level": "beginner",
     "title": "any/allで全体を判定",
     "description_md": "整数スライス `&[i32]` を受け取る次の 2 つの関数を、イテレータの `any` / `all` を使って実装してください。\n\n1. `has_negative`: 負の数が **1 つでも** 含まれていれば `true`\n2. `all_even`: **すべて** の要素が偶数なら `true`\n\n```rust\nassert_eq!(has_negative(&[1, -2, 3]), true);\nassert_eq!(has_negative(&[1, 2, 3]), false);\nassert_eq!(all_even(&[2, 4, 6]), true);\nassert_eq!(all_even(&[2, 3, 6]), false);\n```\n\n空のスライスに対する結果にも注意してください。\n\n- `has_negative(&[])` は「1 つも要素がない = 負の数もない」ので `false`\n- `all_even(&[])` は「反例が 1 つもない」ので `true` (数学の「空虚な真」)\n\nこの規約は `any` / `all` をそのまま使えば自然に満たされます。",
@@ -1614,6 +1704,7 @@
   },
   {
     "id": "b091",
+    "language": "rust",
     "level": "beginner",
     "title": "FizzBuzzの列を作る",
     "description_md": "正の整数 `n` を受け取り、1 から `n` までの各整数 `i` について次の規則で文字列を作り、`Vec<String>` として返す関数 `fizzbuzz` を実装してください。\n\n- `i` が 3 と 5 の両方の倍数 (= 15 の倍数) なら `\"FizzBuzz\"`\n- `i` が 3 の倍数なら `\"Fizz\"`\n- `i` が 5 の倍数なら `\"Buzz\"`\n- それ以外は `i` を 10 進数の文字列にしたもの (例: `\"7\"`)\n\n```rust\nassert_eq!(\n    fizzbuzz(5),\n    vec![\"1\", \"2\", \"Fizz\", \"4\", \"Buzz\"]\n        .into_iter()\n        .map(String::from)\n        .collect::<Vec<String>>()\n);\n```\n\n- `n` が `0` のときは空の `Vec` を返してください。\n- 判定の順序に注意してください。3 の倍数かどうかを先に調べると 15 の倍数が `\"Fizz\"` になってしまいます。",
@@ -1632,6 +1723,7 @@
   },
   {
     "id": "b092",
+    "language": "rust",
     "level": "beginner",
     "title": "各桁の合計",
     "description_md": "非負整数 `n` を受け取り、10 進数で表したときの各桁の合計を返す関数 `digit_sum` を実装してください。文字列に変換せず、`% 10` と `/ 10` の算術演算だけで解いてください。\n\n```rust\nassert_eq!(digit_sum(12345), 15); // 1+2+3+4+5\nassert_eq!(digit_sum(1000), 1);   // 1+0+0+0\nassert_eq!(digit_sum(7), 7);\nassert_eq!(digit_sum(0), 0);\n```\n\n- `n % 10` で 1 の位が取り出せます。\n- `n / 10` (整数除算) で 1 の位を取り除けます。\n- この 2 つをループで繰り返し、桁を下から順に足し込みます。",
@@ -1650,6 +1742,7 @@
   },
   {
     "id": "b093",
+    "language": "rust",
     "level": "beginner",
     "title": "数値を桁ごとに反転",
     "description_md": "非負整数 `n` を受け取り、10 進数の桁の並びを反転した数を返す関数 `reverse_number` を実装してください。文字列への変換は使わず、算術演算だけで解いてください。\n\n```rust\nassert_eq!(reverse_number(12345), 54321);\nassert_eq!(reverse_number(120), 21); // 末尾の 0 は先頭に来て消える\nassert_eq!(reverse_number(7), 7);\nassert_eq!(reverse_number(0), 0);\n```\n\n- `n % 10` で取り出した桁を、結果を「10 倍して足す」ことで上の桁から積み直します。\n- `120` のように末尾に 0 がある場合、反転結果は `021` ではなく `21` になります (数値としては同じ)。\n- オーバーフローする入力は与えられません。",
@@ -1668,6 +1761,7 @@
   },
   {
     "id": "b094",
+    "language": "rust",
     "level": "beginner",
     "title": "回文数の判定",
     "description_md": "非負整数 `n` を受け取り、10 進数で表したときに前から読んでも後ろから読んでも同じ (回文数) であれば `true` を返す関数 `is_palindrome` を実装してください。\n\n前問で作った「桁の反転」を部品として再利用しましょう。反転した数が元の数と等しければ回文数です。文字列への変換は使わず、算術演算だけで解いてください。\n\n```rust\nassert_eq!(is_palindrome(121), true);\nassert_eq!(is_palindrome(1221), true);\nassert_eq!(is_palindrome(123), false);\nassert_eq!(is_palindrome(10), false); // 反転すると 1 になり一致しない\nassert_eq!(is_palindrome(7), true);   // 1 桁は常に回文\n```\n\n反転処理はファイル内に補助関数として自分で定義して構いません (公開する必要はないので `fn` のままでも大丈夫です)。",
@@ -1686,6 +1780,7 @@
   },
   {
     "id": "b095",
+    "language": "rust",
     "level": "beginner",
     "title": "最大公約数を求める",
     "description_md": "非負整数 `a` と `b` を受け取り、最大公約数 (GCD) を返す関数 `gcd` を実装してください。ユークリッドの互除法を `while` ループと剰余 `%` で実装します。\n\nユークリッドの互除法は「`gcd(a, b)` は `gcd(b, a % b)` に等しい」という性質を、`b` が `0` になるまで繰り返すアルゴリズムです。`b` が `0` になったときの `a` が答えです。\n\n```rust\nassert_eq!(gcd(12, 18), 6);\nassert_eq!(gcd(7, 13), 1);  // 互いに素なら 1\nassert_eq!(gcd(0, 5), 5);   // gcd(0, b) = b\nassert_eq!(gcd(5, 0), 5);   // gcd(a, 0) = a\n```\n\n- `a < b` の場合も特別扱いは不要です。1 回目のループで自然に入れ替わります。\n- `gcd(0, 0)` は入力として与えられません。",
@@ -1704,6 +1799,7 @@
   },
   {
     "id": "b096",
+    "language": "rust",
     "level": "beginner",
     "title": "素数かどうか",
     "description_md": "整数が素数かどうかを判定する関数 `is_prime` を実装してください。\n\n素数とは「1 と自分自身以外に約数を持たない 2 以上の整数」です。判定には**試し割り**を使います。2 から順に割ってみて、割り切れる数が見つかったら素数ではありません。約数は `d * d <= n` の範囲まで調べれば十分です(それより大きい約数があれば、対になる小さい約数が必ず存在するため)。\n\n仕様:\n\n- `n` が 2 未満(0 や 1)の場合は `false` を返します。\n- `n` が 2 以上の場合、2 以上の約数(自分自身を除く)が 1 つでもあれば `false`、なければ `true` を返します。\n\n```rust\nassert_eq!(is_prime(0), false);\nassert_eq!(is_prime(1), false);\nassert_eq!(is_prime(2), true);\nassert_eq!(is_prime(9), false); // 3 で割り切れる\nassert_eq!(is_prime(97), true);\n```\n",
@@ -1722,6 +1818,7 @@
   },
   {
     "id": "b097",
+    "language": "rust",
     "level": "beginner",
     "title": "要素の位置を探す",
     "description_md": "スライスの中から目的の値を探し、その**位置(添字)**を返す関数 `find_index` を実装してください。\n\n仕様:\n\n- `values` の先頭から順に調べて、`target` と等しい**最初の**要素の添字を `Some(添字)` で返します。添字は 0 始まりです。\n- 見つからなかった場合は `None` を返します。空のスライスでも panic せず `None` を返します。\n\n標準ライブラリのイテレータには、この処理をそのまま行う `position` メソッドがあります。`values.iter().position(条件)` の形で使ってみましょう。\n\n```rust\nlet v = [10, 20, 30, 40];\nassert_eq!(find_index(&v, 30), Some(2));\nassert_eq!(find_index(&v, 99), None);\n```\n",
@@ -1740,6 +1837,7 @@
   },
   {
     "id": "b098",
+    "language": "rust",
     "level": "beginner",
     "title": "2番目に大きい値",
     "description_md": "スライスの中で **2 番目に大きい値** を返す関数 `second_largest` を実装してください。\n\n仕様:\n\n- 同じ値の重複は 1 つとして数えます。つまり「最大値より小さい値のうち最大のもの」を `Some(値)` で返します。\n- 異なる値が 2 種類未満しかない場合(空のスライス、要素 1 個、全要素が同じ値など)は `None` を返します。\n- ソートは使わず、スライスを **1 回走査するだけ** で求めてください。「これまでの最大値」と「これまでの 2 番目の値」の 2 つを同時に更新しながら進めるのがポイントです。\n\n```rust\nassert_eq!(second_largest(&[3, 1, 4, 1, 5]), Some(4));\nassert_eq!(second_largest(&[5, 5, 3]), Some(3)); // 重複した 5 は 1 つと数える\nassert_eq!(second_largest(&[7, 7, 7]), None);    // 値が 1 種類しかない\nassert_eq!(second_largest(&[]), None);\n```\n",
@@ -1758,6 +1856,7 @@
   },
   {
     "id": "b099",
+    "language": "rust",
     "level": "beginner",
     "title": "平均以上の要素を数える",
     "description_md": "スライスの **平均値以上** の要素がいくつあるかを数える関数 `count_above_average` を実装してください。\n\n仕様:\n\n- まず全要素の平均を `f64` で求めます(合計 ÷ 要素数)。\n- 次に、その平均 **以上**(平均と等しい場合も含む)の要素の個数を返します。\n- 空のスライスの場合は 0 を返します(0 で割らないように注意してください)。\n\n処理が 2 段階になるのがこの問題のポイントです。1 段階目の集計結果(平均)を、2 段階目(カウント)の閾値として使います。\n\n```rust\nassert_eq!(count_above_average(&[1, 2, 3, 4]), 2); // 平均 2.5 以上は 3 と 4\nassert_eq!(count_above_average(&[1, 2, 3]), 2);    // 平均 2.0 以上は 2 と 3\nassert_eq!(count_above_average(&[]), 0);\n```\n",
@@ -1776,6 +1875,7 @@
   },
   {
     "id": "b100",
+    "language": "rust",
     "level": "beginner",
     "title": "統計サマリを返す",
     "description_md": "スライスの統計サマリ(合計・最大・最小・件数)をまとめた構造体 `Stats` を返す関数 `summarize` を実装してください。初級の総仕上げとして、struct の定義・`Option`・イテレータでの集計を組み合わせる総合問題です。\n\n仕様:\n\n- `Stats` は次の 4 つのフィールドを持ちます(定義済みです)。\n  - `sum: i64` — 全要素の合計。要素は `i32` ですが、合計はあふれないよう `i64` で持ちます(`v as i64` で変換)。\n  - `max: i32` — 最大値\n  - `min: i32` — 最小値\n  - `count: usize` — 要素数\n- 空のスライスには最大値も最小値も存在しないため、`None` を返します。要素が 1 個以上なら `Some(Stats)` を返します。\n\n```rust\nlet s = summarize(&[3, 1, 4]).unwrap();\nassert_eq!(s.sum, 8);\nassert_eq!(s.max, 4);\nassert_eq!(s.min, 1);\nassert_eq!(s.count, 3);\n\nassert!(summarize(&[]).is_none());\n```\n",

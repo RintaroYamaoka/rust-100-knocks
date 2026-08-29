@@ -1,6 +1,7 @@
 [
   {
     "id": "i001",
+    "language": "rust",
     "level": "intermediate",
     "title": "Option で先頭文字を返す",
     "description_md": "文字列 `s` の **先頭の文字** を `Option<char>` で返す関数 `first_char` を完成させましょう。\n\n```rust\nfirst_char(\"rust\") // => Some('r')\nfirst_char(\"\")     // => None\n```\n\n空文字列のときに panic せず `None` を返すのがポイントです。",
@@ -19,6 +20,7 @@
   },
   {
     "id": "i002",
+    "language": "rust",
     "level": "intermediate",
     "title": "トレイトを実装する",
     "description_md": "図形の面積を表すトレイト `Area` があります。長方形 `Rect` に `Area` を実装しましょう。\n\n```rust\npub trait Area {\n    fn area(&self) -> f64;\n}\n\npub struct Rect { pub width: f64, pub height: f64 }\n```\n\n`Rect { width: 3.0, height: 4.0 }.area()` が `12.0` になるようにしてください。",
@@ -36,6 +38,7 @@
   },
   {
     "id": "i003",
+    "language": "rust",
     "level": "intermediate",
     "title": "偶数だけを集める",
     "description_md": "整数スライスから **偶数だけ** を集めた `Vec<i32>` を返す関数 `evens` を完成させましょう。\n\n```rust\nevens(&[1, 2, 3, 4]) // => vec![2, 4]\n```\n\nイテレータの `filter` と `collect` を使うのが定番です。",
@@ -55,6 +58,7 @@
   },
   {
     "id": "i004",
+    "language": "rust",
     "level": "intermediate",
     "title": "Optionの中身を変換する",
     "description_md": "`Option<i32>` を受け取り、中身の値を 2 倍にした `Option<i32>` を返す関数 `double` を実装してください。\n\n- `Some(n)` を受け取ったら `Some(n * 2)` を返します。\n- `None` を受け取ったら `None` をそのまま返します。\n- `match` 式を書かずに、`Option::map` を使って実装することが目標です。\n\n```rust\nassert_eq!(double(Some(3)), Some(6));\nassert_eq!(double(None), None);\n```\n\n注意: 値がオーバーフローするケースは考慮しなくて構いません。",
@@ -73,6 +77,7 @@
   },
   {
     "id": "i005",
+    "language": "rust",
     "level": "intermediate",
     "title": "デフォルト値で取り出す",
     "description_md": "`Option` から値を取り出すとき、`None` なら既定値を使う 2 つの関数を実装してください。\n\n1. `score_or_zero(x: Option<i32>) -> i32` — `Some(n)` なら `n` を、`None` なら `0` を返します。`unwrap_or` を使いましょう。\n2. `name_or_generated(name: Option<String>, id: u32) -> String` — `Some(s)` なら `s` を、`None` なら `\"user{id}\"` という形式の文字列 (例: id が 42 なら `\"user42\"`) を生成して返します。既定値の生成にコストがかかる場合を想定し、`unwrap_or_else` を使いましょう。\n\n```rust\nassert_eq!(score_or_zero(Some(80)), 80);\nassert_eq!(score_or_zero(None), 0);\nassert_eq!(name_or_generated(Some(\"alice\".to_string()), 1), \"alice\");\nassert_eq!(name_or_generated(None, 42), \"user42\");\n```",
@@ -91,6 +96,7 @@
   },
   {
     "id": "i006",
+    "language": "rust",
     "level": "intermediate",
     "title": "変換を連鎖させる",
     "description_md": "文字列を整数にパースし、その値を `divisor` で割る関数 `parse_then_div` を実装してください。パースと除算のどちらが失敗しても `None` を返します。\n\n- `s` を `i32` としてパースします。失敗したら `None` です (`str::parse` と `Result::ok` が使えます)。\n- パースに成功したら `checked_div(divisor)` で割ります。`divisor` が 0 の場合やオーバーフローする場合、`checked_div` は `None` を返します。\n- 「失敗しうる処理の連鎖」を `Option::and_then` で平坦につなぐのが目標です。\n\n```rust\nassert_eq!(parse_then_div(\"10\", 2), Some(5));\nassert_eq!(parse_then_div(\"abc\", 2), None); // パース失敗\nassert_eq!(parse_then_div(\"10\", 0), None);  // ゼロ除算\n```",
@@ -109,6 +115,7 @@
   },
   {
     "id": "i007",
+    "language": "rust",
     "level": "intermediate",
     "title": "条件を満たす値だけ残す",
     "description_md": "`Option<i32>` を受け取り、中身が **0 以上 100 以下** ならそのまま残し、範囲外なら `None` に落とす関数 `valid_score` を実装してください。\n\n- `Some(n)` で `0 <= n <= 100` なら `Some(n)` を返します。\n- `Some(n)` で範囲外なら `None` を返します。\n- `None` なら `None` のままです。\n- `match` や `if` の分岐を自分で書かずに、`Option::filter` で表現するのが目標です。\n\n```rust\nassert_eq!(valid_score(Some(85)), Some(85));\nassert_eq!(valid_score(Some(120)), None);\nassert_eq!(valid_score(None), None);\n```",
@@ -127,6 +134,7 @@
   },
   {
     "id": "i008",
+    "language": "rust",
     "level": "intermediate",
     "title": "OptionをResultに変換する",
     "description_md": "文字列のスライス `items` から `target` と一致する要素を探し、見つかればその**インデックス**を `Ok` で、見つからなければエラーメッセージを `Err` で返す関数 `find_index` を実装してください。\n\n- シグネチャ: `pub fn find_index(items: &[&str], target: &str) -> Result<usize, String>`\n- 見つかった場合: 最初に一致した位置を `Ok(インデックス)` で返します。\n- 見つからない場合: `Err` に **`\"{target} が見つかりません\"`** という形式の文字列を入れて返します (例: target が `\"bob\"` なら `\"bob が見つかりません\"`)。\n- 検索には `Iterator::position` が使えます。`position` は `Option<usize>` を返すので、`ok_or` または `ok_or_else` で `Result` に変換しましょう。\n\n```rust\nlet users = [\"alice\", \"bob\", \"carol\"];\nassert_eq!(find_index(&users, \"bob\"), Ok(1));\nassert_eq!(find_index(&users, \"dave\"), Err(\"dave が見つかりません\".to_string()));\n```",
@@ -146,6 +154,7 @@
   },
   {
     "id": "i009",
+    "language": "rust",
     "level": "intermediate",
     "title": "?演算子でOptionを伝播する",
     "description_md": "整数スライスの**末尾の要素から先頭の要素を引いた差**を返す関数 `first_last_diff` を実装してください。\n\n- シグネチャ: `pub fn first_last_diff(v: &[i32]) -> Option<i32>`\n- スライスが空なら `None` を返します。\n- 要素が 1 つなら、先頭と末尾は同じ要素なので `Some(0)` になります。\n- `slice::first` と `slice::last` はどちらも `Option<&i32>` を返します。`match` やネストした `if let` を書かずに、**`?` 演算子**で `None` を早期リターンさせるのが目標です。\n\n```rust\nassert_eq!(first_last_diff(&[1, 2, 3]), Some(2)); // 3 - 1\nassert_eq!(first_last_diff(&[]), None);\nassert_eq!(first_last_diff(&[5]), Some(0));\n```",
@@ -164,6 +173,7 @@
   },
   {
     "id": "i010",
+    "language": "rust",
     "level": "intermediate",
     "title": "Resultの成功値とエラーを変換する",
     "description_md": "文字列を `i32` にパースして **2 倍した値**を返す関数 `parse_and_double` を実装してください。パースに失敗した場合は、独自のエラーメッセージ文字列を返します。\n\n- シグネチャ: `pub fn parse_and_double(s: &str) -> Result<i32, String>`\n- パース成功時: 値を 2 倍して `Ok` で返します (`Result::map` を使いましょう)。\n- パース失敗時: `Err` に **`\"数値ではありません: {s}\"`** という形式の文字列を入れて返します (例: 入力が `\"abc\"` なら `\"数値ではありません: abc\"`)。`Result::map_err` を使いましょう。\n\n```rust\nassert_eq!(parse_and_double(\"21\"), Ok(42));\nassert_eq!(parse_and_double(\"abc\"), Err(\"数値ではありません: abc\".to_string()));\n```\n\n注意: オーバーフローするケースは考慮しなくて構いません。",
@@ -182,6 +192,7 @@
   },
   {
     "id": "i011",
+    "language": "rust",
     "level": "intermediate",
     "title": "?演算子でResultを連鎖する",
     "description_md": "2 つの文字列をそれぞれ `i32` にパースし、その**和**を返す関数 `sum_of_strs` を実装してください。\n\n- シグネチャ: `pub fn sum_of_strs(a: &str, b: &str) -> Result<i32, std::num::ParseIntError>`\n- 両方のパースに成功したら `Ok(和)` を返します。\n- どちらか一方でもパースに失敗したら、その `ParseIntError` をそのまま `Err` で返します。\n- `match` を書かずに、**`?` 演算子**でエラーを伝播させるのが目標です。\n\n```rust\nassert_eq!(sum_of_strs(\"1\", \"2\"), Ok(3));\nassert!(sum_of_strs(\"x\", \"2\").is_err());\nassert!(sum_of_strs(\"1\", \"y\").is_err());\n```\n\n注意: オーバーフローするケースは考慮しなくて構いません。",
@@ -200,6 +211,7 @@
   },
   {
     "id": "i012",
+    "language": "rust",
     "level": "intermediate",
     "title": "失敗する除算を設計する",
     "description_md": "ゼロ除算をパニックではなく `Err` で表す安全な除算関数 `safe_div` を実装してください。\n\n- シグネチャ: `pub fn safe_div(a: i32, b: i32) -> Result<i32, String>`\n- `b` が 0 でなければ `Ok(a / b)` を返します (整数除算なので小数点以下は切り捨てです)。\n- `b` が 0 なら `Err` に **`\"0 で割ることはできません\"`** という文字列 (この文言そのまま) を入れて返します。\n- どんな入力でも**パニックさせない**ことがこの API の設計目標です。\n\n```rust\nassert_eq!(safe_div(10, 2), Ok(5));\nassert_eq!(safe_div(10, 0), Err(\"0 で割ることはできません\".to_string()));\n```\n\n注意: `i32::MIN / -1` のオーバーフローは考慮しなくて構いません。",
@@ -218,6 +230,7 @@
   },
   {
     "id": "i013",
+    "language": "rust",
     "level": "intermediate",
     "title": "独自エラーenumを定義する",
     "description_md": "ユーザー名を検証する関数 `validate_username` と、その失敗理由を表すエラー enum `UsernameError` を実装してください。\n\n### エラー enum\n\n次の 3 つのバリアントを持つ `pub enum UsernameError` を定義します。テストで `assert_eq!` による比較とデバッグ表示ができるよう、**`Debug` と `PartialEq` を derive** してください。\n\n- `Empty` — 空文字列だった\n- `TooLong` — 文字数が多すぎた\n- `InvalidChar` — 使えない文字が含まれていた\n\n### 検証関数\n\n- シグネチャ: `pub fn validate_username(name: &str) -> Result<(), UsernameError>`\n- 検証ルール (**上から順に検査**し、最初に該当したエラーを返します):\n  1. 空文字列なら `Err(UsernameError::Empty)`\n  2. 文字数 (`chars().count()`) が **10 文字を超える** (11 文字以上) なら `Err(UsernameError::TooLong)`\n  3. **ASCII 英数字** (`char::is_ascii_alphanumeric`) 以外の文字が 1 つでもあれば `Err(UsernameError::InvalidChar)`\n  4. すべて通れば `Ok(())`\n\n```rust\nassert_eq!(validate_username(\"alice123\"), Ok(()));\nassert_eq!(validate_username(\"\"), Err(UsernameError::Empty));\nassert_eq!(validate_username(\"abcdefghijk\"), Err(UsernameError::TooLong)); // 11 文字\nassert_eq!(validate_username(\"alice bob\"), Err(UsernameError::InvalidChar)); // 空白\n```",
@@ -236,6 +249,7 @@
   },
   {
     "id": "i014",
+    "language": "rust",
     "level": "intermediate",
     "title": "エラー型を変換して統一する",
     "description_md": "文字列をテストのスコア (0〜100 の整数) として解釈する関数 `parse_score` を実装してください。\n\n仕様は次のとおりです。\n\n- 入力 `s` を `u32` としてパースします。パースに失敗した場合 (数値でない、負数、空文字列など) は `Err(ScoreError::NotANumber(入力文字列そのもの))` を返します。\n- パースには成功したが値が **100 を超える** 場合は `Err(ScoreError::OutOfRange(その値))` を返します。\n- それ以外 (0〜100) は `Ok(値)` を返します。\n\n`ScoreError` は定義済みです。標準ライブラリの `ParseIntError` をそのまま返すのではなく、`map_err` を使って自作のエラー型へ変換するのがこの問題のポイントです。\n\n```rust\nassert_eq!(parse_score(\"80\"), Ok(80));\nassert_eq!(parse_score(\"abc\"), Err(ScoreError::NotANumber(\"abc\".to_string())));\nassert_eq!(parse_score(\"150\"), Err(ScoreError::OutOfRange(150)));\n```\n\n注意: `\"-1\"` のような負数は `u32` のパース自体が失敗するため `NotANumber` になります。",
@@ -254,6 +268,7 @@
   },
   {
     "id": "i015",
+    "language": "rust",
     "level": "intermediate",
     "title": "複数の失敗要因を1つのenumで扱う",
     "description_md": "文字列をポート番号 (1〜65535) として解釈する関数 `parse_port` を実装してください。失敗要因は 2 つあり、どちらも `ConfigError` という 1 つの enum で表現します。\n\n仕様は次のとおりです。\n\n1. まず `From<ParseIntError> for ConfigError` を実装し、`ConfigError::Parse` バリアントに包むようにします。\n2. `parse_port` では入力を `i64` としてパースします。失敗した場合は `?` 演算子 **だけ** でエラーが `ConfigError::Parse` に変換されて返るようにします (`map_err` は使いません)。\n3. パースした値が 1〜65535 の範囲外なら `Err(ConfigError::OutOfRange(その値))` を返します。\n4. 範囲内なら `Ok(値 as u16)` を返します。\n\n```rust\nassert_eq!(parse_port(\"8080\"), Ok(8080));\nassert!(matches!(parse_port(\"abc\"), Err(ConfigError::Parse(_))));\nassert_eq!(parse_port(\"0\"), Err(ConfigError::OutOfRange(0)));\nassert_eq!(parse_port(\"-5\"), Err(ConfigError::OutOfRange(-5)));\n```\n\n注意: `\"-5\"` や `\"70000\"` は `i64` としてはパースできるので、`Parse` ではなく `OutOfRange` になります。",
@@ -273,6 +288,7 @@
   },
   {
     "id": "i016",
+    "language": "rust",
     "level": "intermediate",
     "title": "失敗時にフォールバックする",
     "description_md": "文字列を柔軟に整数として解釈する関数 `parse_int_flexible` を実装してください。第一候補の解釈に失敗したら、別の形式で再解釈を試みる「フォールバック」パターンの練習です。\n\n仕様は次のとおりです。\n\n1. まず入力 `s` を **10進数の `i64`** としてパースします。成功したらその値を `Ok` で返します。\n2. 失敗した場合、`s` が `\"0x\"` で始まっていれば、`\"0x\"` を取り除いた残りを **16進数** としてパースします (`i64::from_str_radix(残り, 16)` が使えます)。\n3. どちらでも解釈できない場合は `Err(format!(\"invalid: {s}\"))` を返します (`s` は元の入力全体です)。\n\n```rust\nassert_eq!(parse_int_flexible(\"42\"), Ok(42));\nassert_eq!(parse_int_flexible(\"-10\"), Ok(-10));\nassert_eq!(parse_int_flexible(\"0xff\"), Ok(255));\nassert_eq!(parse_int_flexible(\"abc\"), Err(\"invalid: abc\".to_string()));\n```\n\n注意: `\"ff\"` のように `\"0x\"` が付いていない 16 進風の文字列はエラーです。フォールバックは `\"0x\"` 始まりの場合のみ行います。`or_else` や `and_then` を使うと綺麗に書けますが、`match` で書いても構いません。",
@@ -291,6 +307,7 @@
   },
   {
     "id": "i017",
+    "language": "rust",
     "level": "intermediate",
     "title": "matchガードで数値を分類する",
     "description_md": "整数 `n` を次の 4 種類に分類する関数 `classify` を実装してください。判定は上から順に行い、最初に当てはまったものを返します。\n\n1. `n` が負の数 → `\"負\"`\n2. `n` がゼロ → `\"ゼロ\"`\n3. `n` が偶数 → `\"偶数\"`\n4. それ以外 (正の奇数) → `\"奇数\"`\n\n優先順位に注意してください。たとえば `-4` は偶数でもありますが、先に「負」の判定に当たるので `\"負\"` です。\n\n```rust\nassert_eq!(classify(-4), \"負\");\nassert_eq!(classify(0), \"ゼロ\");\nassert_eq!(classify(8), \"偶数\");\nassert_eq!(classify(7), \"奇数\");\n```\n\n`if` の連鎖でも書けますが、この問題では **match のガード条件** (`パターン if 条件 => ...`) を使って 1 つの `match` 式で書いてみましょう。",
@@ -309,6 +326,7 @@
   },
   {
     "id": "i018",
+    "language": "rust",
     "level": "intermediate",
     "title": "@バインディングで値を捕まえる",
     "description_md": "試験の点数 (`u32`) を成績に分類しつつ、**メッセージに元の点数も埋め込む** 関数 `grade` を実装してください。\n\n仕様は次のとおりです (`{n}` の部分に点数が入ります)。\n\n- 0〜59 点 → `\"不合格({n}点)\"`\n- 60〜89 点 → `\"合格({n}点)\"`\n- 90〜100 点 → `\"優秀({n}点)\"`\n- 101 点以上 → `\"無効({n}点)\"`\n\n```rust\nassert_eq!(grade(45), \"不合格(45点)\");\nassert_eq!(grade(90), \"優秀(90点)\");\nassert_eq!(grade(101), \"無効(101点)\");\n```\n\n範囲パターン (`0..=59` など) でマッチさせると、そのままでは「どの値だったか」が分からなくなります。`n @ 0..=59` のように **@ バインディング** を使うと、範囲にマッチさせながら値自体も変数に束縛できます。",
@@ -327,6 +345,7 @@
   },
   {
     "id": "i019",
+    "language": "rust",
     "level": "intermediate",
     "title": "タプルパターンで象限を判定する",
     "description_md": "座標 `(x, y)` を受け取り、平面上のどこにあるかを判定する関数 `quadrant` を実装してください。\n\n仕様は次のとおりです (上から順に判定します)。\n\n- `(0, 0)` → `\"原点\"`\n- `y == 0` (x 軸の上、原点以外) → `\"x軸上\"`\n- `x == 0` (y 軸の上、原点以外) → `\"y軸上\"`\n- `x > 0` かつ `y > 0` → `\"第1象限\"`\n- `x < 0` かつ `y > 0` → `\"第2象限\"`\n- `x < 0` かつ `y < 0` → `\"第3象限\"`\n- `x > 0` かつ `y < 0` → `\"第4象限\"`\n\n```rust\nassert_eq!(quadrant((3, 4)), \"第1象限\");\nassert_eq!(quadrant((-3, -4)), \"第3象限\");\nassert_eq!(quadrant((5, 0)), \"x軸上\");\nassert_eq!(quadrant((0, 0)), \"原点\");\n```\n\n引数はタプル `(i32, i32)` です。`match` の **タプルパターン** で `(x, y)` に分解し、リテラル `0`・ワイルドカード `_`・ガード条件を組み合わせて分類してください。",
@@ -345,6 +364,7 @@
   },
   {
     "id": "i020",
+    "language": "rust",
     "level": "intermediate",
     "title": "スライスパターンで分解する",
     "description_md": "整数スライス `&[i32]` の中身を説明する文字列を返す関数 `describe_slice` を実装してください。\n\n仕様は次のとおりです。\n\n- 空のスライス → `\"空です\"`\n- 要素が 1 個 (その値を `x` とする) → `\"唯一の要素は{x}です\"`\n- 要素が 2 個以上 (先頭 `first`、末尾 `last`) → `\"先頭は{first}、末尾は{last}です\"`\n\n```rust\nassert_eq!(describe_slice(&[]), \"空です\");\nassert_eq!(describe_slice(&[7]), \"唯一の要素は7です\");\nassert_eq!(describe_slice(&[3, 1, 4, 1, 5]), \"先頭は3、末尾は5です\");\n```\n\n`len()` やインデックスアクセスではなく、`match` の **スライスパターン** (`[]`, `[x]`, `[first, .., last]`) を使って場合分けしてください。`..` は「間の要素が 0 個以上」を表す rest パターンです。",
@@ -363,6 +383,7 @@
   },
   {
     "id": "i021",
+    "language": "rust",
     "level": "intermediate",
     "title": "ネストしたOptionとResultを一撃で分解する",
     "description_md": "`Option<Result<i32, String>>` という **ネストした型** を受け取り、状態を説明する文字列を返す関数 `describe_input` を実装してください。\n\nこの型は「入力がそもそも無いかもしれない (`Option`)。あったとしてもパース済みの値かエラーのどちらかである (`Result`)」という、実務でもよく現れる形です。\n\n仕様は次のとおりです。\n\n- `Some(Ok(n))` → `\"値: {n}\"`\n- `Some(Err(e))` → `\"エラー: {e}\"` (`e` はエラーメッセージの `String`)\n- `None` → `\"入力なし\"`\n\n```rust\nassert_eq!(describe_input(Some(Ok(42))), \"値: 42\");\nassert_eq!(describe_input(Some(Err(\"bad\".to_string()))), \"エラー: bad\");\nassert_eq!(describe_input(None), \"入力なし\");\n```\n\n`match` を二重にネストさせるのではなく、`Some(Ok(n))` のような **ネストしたパターン** を使って 1 つの `match` で 3 分岐してください。",
@@ -381,6 +402,7 @@
   },
   {
     "id": "i022",
+    "language": "rust",
     "level": "intermediate",
     "title": "長方形にメソッドを生やす",
     "description_md": "長方形を表す構造体 `Rectangle` に、`impl` ブロックで 2 つのメソッドを実装してください。\n\n1. `area(&self) -> u32` — 面積 (幅 × 高さ) を返します。\n2. `can_hold(&self, other: &Rectangle) -> bool` — 自分の中に `other` が **完全に収まるか** を返します。幅と高さの **両方** が相手より **厳密に大きい** とき `true` です (等しい場合は `false`、回転は考えません)。\n\n```rust\nlet big = Rectangle { width: 10, height: 8 };\nlet small = Rectangle { width: 5, height: 4 };\nassert_eq!(big.area(), 80);\nassert!(big.can_hold(&small));\nassert!(!small.can_hold(&big));\n```\n\nどちらのメソッドも自身を変更しないので、`&self` (不変借用) を受け取ります。`can_hold` の相手も読むだけなので `&Rectangle` で借りるだけにします。",
@@ -399,6 +421,7 @@
   },
   {
     "id": "i023",
+    "language": "rust",
     "level": "intermediate",
     "title": "関連関数newでコンストラクタを作る",
     "description_md": "円を表す構造体 `Circle` に、コンストラクタの役割を果たす **関連関数** とメソッドを実装してください。\n\n1. `Circle::new(radius: f64) -> Self` — 指定した半径の円を作る関連関数。\n2. `Circle::unit() -> Self` — 半径 `1.0` の単位円を作る関連関数。内部で `Self::new` を呼んで実装してください。\n3. `area(&self) -> f64` — 面積 (π r²) を返すメソッド。円周率は `std::f64::consts::PI` を使います。\n\n```rust\nlet c = Circle::new(2.0);\nassert_eq!(c.radius, 2.0);\nlet u = Circle::unit();\nassert_eq!(u.radius, 1.0);\n// c.area() は 4π = 12.566... になります\n```\n\n関連関数は `self` を取らず、`Circle::new(...)` のように **型名::関数名** で呼び出します。Rust には言語機能としてのコンストラクタはなく、`new` という名前の関連関数を用意するのが慣習です。",
@@ -417,6 +440,7 @@
   },
   {
     "id": "i024",
+    "language": "rust",
     "level": "intermediate",
     "title": "Defaultで初期値を設計する",
     "description_md": "設定を表す構造体 `Config` に `Default` トレイトを手動で実装し、一部のフィールドだけを上書きする関数を書きます。\n\n以下を実装してください。\n\n1. `Config`(フィールド: `host: String`, `port: u16`, `debug: bool`)に `Default` を実装し、デフォルト値を `host = \"localhost\"`, `port = 8080`, `debug = false` とします。\n2. `pub fn with_port(port: u16) -> Config` — 構造体更新記法 `..Default::default()` を使い、`port` フィールドだけを引数の値にした `Config` を返します。他のフィールドはデフォルト値のままです。\n\n```rust\nlet c = Config::default();\nassert_eq!(c.host, \"localhost\");\nassert_eq!(c.port, 8080);\nassert_eq!(c.debug, false);\n\nlet c = with_port(3000);\nassert_eq!(c.port, 3000);\nassert_eq!(c.host, \"localhost\"); // 他のフィールドはデフォルトのまま\nassert_eq!(c.debug, false);\n```\n\n注意: `#[derive(Default)]` ではなく `impl Default for Config` を自分で書いてください(`port` のデフォルトを 8080 にするためです)。\n",
@@ -435,6 +459,7 @@
   },
   {
     "id": "i025",
+    "language": "rust",
     "level": "intermediate",
     "title": "データを持つenumで図形を表す",
     "description_md": "データを持つ enum で図形を表し、面積を計算するメソッドを実装します。\n\n次の `Shape` enum が定義されています。\n\n- `Circle(f64)` — 半径を持つ円\n- `Rect(f64, f64)` — 幅と高さを持つ長方形\n\n`impl Shape` ブロックに `pub fn area(&self) -> f64` を実装してください。\n\n- 円の面積は「円周率 × 半径 × 半径」です。円周率は `std::f64::consts::PI` を使ってください。\n- 長方形の面積は「幅 × 高さ」です。\n\n```rust\nlet c = Shape::Circle(2.0);\n// c.area() は約 12.566(= PI * 4.0)\n\nlet r = Shape::Rect(3.0, 4.0);\nassert_eq!(r.area(), 12.0);\n```\n",
@@ -453,6 +478,7 @@
   },
   {
     "id": "i026",
+    "language": "rust",
     "level": "intermediate",
     "title": "enumで状態遷移を実装する",
     "description_md": "信号機の状態遷移を enum のメソッドとして実装します。\n\n信号機を表す enum `Signal` には `Green`(青)・`Yellow`(黄)・`Red`(赤)の 3 つの状態があります。信号は次の順で循環します。\n\n`Green → Yellow → Red → Green → ...`\n\n`impl Signal` ブロックに、次の状態を返すメソッド `pub fn next(self) -> Signal` を実装してください。\n\n```rust\nassert_eq!(Signal::Green.next(), Signal::Yellow);\nassert_eq!(Signal::Yellow.next(), Signal::Red);\nassert_eq!(Signal::Red.next(), Signal::Green);\n\n// 3 回進むと元に戻る\nassert_eq!(Signal::Green.next().next().next(), Signal::Green);\n```\n\n注意: enum に付いている `#[derive(Debug, PartialEq, Clone, Copy)]` はそのまま残してください(テストで `assert_eq!` を使うために必要です)。\n",
@@ -470,6 +496,7 @@
   },
   {
     "id": "i027",
+    "language": "rust",
     "level": "intermediate",
     "title": "メソッドチェーンで組み立てる",
     "description_md": "HTTP リクエストの設定を組み立てる簡易ビルダーを実装します。ポイントは「`self` を値で受け取り、変更した `Self` を返す」ことでメソッドチェーンを可能にすることです。\n\n完成品を表す `Request` 構造体(`url: String`, `method: String`, `timeout_secs: u64`)はすでに定義されています。`RequestBuilder` に以下の 4 つのメソッドを実装してください。\n\n1. `pub fn new(url: &str) -> Self` — ビルダーを作ります。初期値は `method = \"GET\"`, `timeout_secs = 30` です。\n2. `pub fn method(self, method: &str) -> Self` — メソッド名を差し替えた自身を返します。\n3. `pub fn timeout_secs(self, secs: u64) -> Self` — タイムアウト秒数を差し替えた自身を返します。\n4. `pub fn build(self) -> Request` — 設定値から `Request` を作って返します。\n\n同じ設定メソッドを複数回呼んだ場合は、後から呼んだ値が有効になります。\n\n```rust\nlet req = RequestBuilder::new(\"https://example.com\").build();\nassert_eq!(req.method, \"GET\");       // 何も指定しなければ初期値\nassert_eq!(req.timeout_secs, 30);\n\nlet req = RequestBuilder::new(\"https://api.example.com\")\n    .method(\"POST\")\n    .timeout_secs(5)\n    .build();\nassert_eq!(req.method, \"POST\");\nassert_eq!(req.timeout_secs, 5);\n```\n",
@@ -488,6 +515,7 @@
   },
   {
     "id": "i028",
+    "language": "rust",
     "level": "intermediate",
     "title": "デフォルト実装を上書きする",
     "description_md": "デフォルト実装を持つトレイトを定義し、型によって「そのまま使う」か「上書きする」かを使い分けます。\n\n以下を実装してください。\n\n1. トレイト `Sound` の中に、メソッド `fn sound(&self) -> String` を「`\"...\"` を返す」デフォルト実装つきで定義します。\n2. ユニット構造体 `Stone` に `Sound` を実装します。デフォルト実装をそのまま使うので、impl ブロックの中身は空にします。\n3. ユニット構造体 `Dog` に `Sound` を実装します。`sound` を上書きして `\"ワン\"` を返すようにします。\n\n```rust\nassert_eq!(Stone.sound(), \"...\"); // デフォルト実装のまま\nassert_eq!(Dog.sound(), \"ワン\");  // 上書きした実装\n```\n\n注意: `Stone` と `Dog` の定義(`pub struct Stone;` など)は変更しないでください。\n",
@@ -506,6 +534,7 @@
   },
   {
     "id": "i029",
+    "language": "rust",
     "level": "intermediate",
     "title": "1つのトレイトを複数の型に実装する",
     "description_md": "同じトレイトを複数の型に実装し、共通のインタフェースとして振る舞わせます。\n\nトレイト `Animal` と 2 つの構造体 `Dog`, `Cat`(どちらも `name: String` フィールドを持つ)が定義されています。\n\n```rust\npub trait Animal {\n    fn name(&self) -> String;\n    fn cry(&self) -> String;\n}\n```\n\n`Dog` と `Cat` それぞれに `Animal` を実装してください。\n\n- `name()` はどちらの型でも、構造体の `name` フィールドの値をそのまま返します。\n- `cry()` は `Dog` なら `\"ワン\"`、`Cat` なら `\"ニャー\"` を返します。\n\n```rust\nlet d = Dog { name: \"ポチ\".to_string() };\nassert_eq!(d.name(), \"ポチ\");\nassert_eq!(d.cry(), \"ワン\");\n\nlet c = Cat { name: \"タマ\".to_string() };\nassert_eq!(c.name(), \"タマ\");\nassert_eq!(c.cry(), \"ニャー\");\n```\n",
@@ -524,6 +553,7 @@
   },
   {
     "id": "i030",
+    "language": "rust",
     "level": "intermediate",
     "title": "トレイト境界つき関数を書く",
     "description_md": "トレイト境界 `T: Trait` を使って、「あるトレイトを実装した任意の型」を受け取るジェネリック関数を書きます。\n\n要約を作るトレイト `Summary` と 2 つの構造体が定義されています。以下を実装してください。\n\n1. `Article`(`title: String`, `body: String`)に `Summary` を実装し、`summarize()` が `\"タイトル: 本文\"` 形式(区切りはコロン + 半角スペース `\": \"`)の文字列を返すようにします。\n2. `Tweet`(`user: String`, `text: String`)に `Summary` を実装し、`summarize()` が `\"@ユーザー名: 本文\"` 形式の文字列を返すようにします。\n3. トレイト境界つきのジェネリック関数 `pub fn notify<T: Summary>(item: &T) -> String` を実装し、`\"速報! \"`(`!` の後ろに半角スペース)の直後に `item.summarize()` の結果をつなげた文字列を返すようにします。\n\n```rust\nlet a = Article { title: \"Rust入門\".to_string(), body: \"所有権を学ぶ\".to_string() };\nassert_eq!(a.summarize(), \"Rust入門: 所有権を学ぶ\");\n\nlet t = Tweet { user: \"ferris\".to_string(), text: \"こんにちは\".to_string() };\nassert_eq!(t.summarize(), \"@ferris: こんにちは\");\n\nassert_eq!(notify(&a), \"速報! Rust入門: 所有権を学ぶ\");\n```\n",
@@ -542,6 +572,7 @@
   },
   {
     "id": "i031",
+    "language": "rust",
     "level": "intermediate",
     "title": "impl Traitで受け取り返す",
     "description_md": "具体的な型名を書かずにトレイトだけを指定する `impl Trait` 記法を、戻り値と引数の両方で使います。\n\n以下の 2 つの関数を実装してください。\n\n1. `pub fn evens_up_to(n: i32) -> impl Iterator<Item = i32>` — `0` から `n` まで(両端を含む)の偶数を小さい順に返すイテレータを返します。`n` が負の場合は 1 つも要素を返しません。\n2. `pub fn apply_twice(f: impl Fn(i32) -> i32, x: i32) -> i32` — 関数 `f` を `x` に 2 回適用した結果(`f(f(x))`)を返します。\n\n```rust\nlet v: Vec<i32> = evens_up_to(10).collect();\nassert_eq!(v, vec![0, 2, 4, 6, 8, 10]);\n\nlet v: Vec<i32> = evens_up_to(-1).collect();\nassert!(v.is_empty());\n\nassert_eq!(apply_twice(|x| x + 3, 10), 16); // (10 + 3) + 3\n```\n\nヒント: 範囲 `0..=n` に `filter` を組み合わせると、`Vec` を作らずにイテレータのまま返せます。\n",
@@ -560,6 +591,7 @@
   },
   {
     "id": "i032",
+    "language": "rust",
     "level": "intermediate",
     "title": "dyn Traitで異なる型を1つのVecに入れる",
     "description_md": "トレイトオブジェクト `Box<dyn Trait>` を使って、異なる型の値を 1 つの `Vec` に格納し、動的ディスパッチでまとめて処理します。\n\nトレイト `Shape` と 2 つの構造体 `Circle`(`radius: f64`)、`Square`(`side: f64`)が定義されています。以下を実装してください。\n\n1. `Circle` に `Shape` を実装します。面積は「`std::f64::consts::PI` × 半径 × 半径」です。\n2. `Square` に `Shape` を実装します。面積は「一辺 × 一辺」です。\n3. `pub fn total_area(shapes: &[Box<dyn Shape>]) -> f64` — スライス内のすべての図形の面積の合計を返します。空スライスなら `0.0` を返します。\n\n```rust\nlet shapes: Vec<Box<dyn Shape>> = vec![\n    Box::new(Circle { radius: 1.0 }),\n    Box::new(Square { side: 2.0 }),\n];\n// total_area(&shapes) は PI + 4.0 (約 7.1416)\n```\n",
@@ -578,6 +610,7 @@
   },
   {
     "id": "i033",
+    "language": "rust",
     "level": "intermediate",
     "title": "デフォルト実装から抽象メソッドを呼ぶ",
     "description_md": "デフォルト実装の中から必須メソッドを呼び出す「テンプレートメソッド」的なトレイトを設計します。実装者は最小限のメソッドを書くだけで、組み立て済みの振る舞いを手に入れられます。\n\n以下を実装してください。\n\n1. トレイト `Greeter` を定義します。\n   - 必須メソッド: `fn name(&self) -> String`(シグネチャのみ)\n   - デフォルト実装つきメソッド: `fn greet(&self) -> String` — `\"こんにちは、{name}さん!\"` という文字列(`{name}` の部分は `self.name()` の結果)を返します。`!` は半角です。\n2. `Person`(`name: String`)に `Greeter` を実装します。`name()` は `name` フィールドの値を返します。`greet` は上書きしません。\n3. `Robot`(`id: u32`)に `Greeter` を実装します。`name()` は `\"ロボット{id}号\"` 形式の文字列(例: id が 3 なら `\"ロボット3号\"`)を返します。`greet` は上書きしません。\n\n```rust\nlet p = Person { name: \"花子\".to_string() };\nassert_eq!(p.greet(), \"こんにちは、花子さん!\");\n\nlet r = Robot { id: 3 };\nassert_eq!(r.name(), \"ロボット3号\");\nassert_eq!(r.greet(), \"こんにちは、ロボット3号さん!\");\n```\n",
@@ -596,6 +629,7 @@
   },
   {
     "id": "i034",
+    "language": "rust",
     "level": "intermediate",
     "title": "スーパートレイトで前提を要求する",
     "description_md": "トレイトが別のトレイトの実装を前提とする「スーパートレイト」を学びます。\n\n次の 3 つを定義してください。\n\n1. トレイト `Describe`。`std::fmt::Display` を**スーパートレイト**として要求します。メソッド `fn describe(&self) -> String` を持ち、デフォルト実装は `format!(\"<{}>\", self)` を返します (`Display` の出力を `<` と `>` で囲んだ文字列)。\n2. 構造体 `Temperature`。`pub celsius: i32` フィールドを 1 つ持ちます。\n3. `Temperature` への `Display` 実装 (`\"{celsius}°C\"` 形式、例: `25°C`) と、`Describe` 実装 (デフォルト実装をそのまま使うので中身は空)。\n\n```rust\nlet t = Temperature { celsius: 25 };\nassert_eq!(format!(\"{}\", t), \"25°C\");\nassert_eq!(t.describe(), \"<25°C>\");\n\nlet cold = Temperature { celsius: -5 };\nassert_eq!(cold.describe(), \"<-5°C>\");\n```\n\n注意: `Describe` のデフォルト実装の中で `self` を `{}` で整形するには、「`Describe` を実装する型は必ず `Display` も実装している」という保証が必要です。それを表現するのがスーパートレイトです。\n",
@@ -614,6 +648,7 @@
   },
   {
     "id": "i035",
+    "language": "rust",
     "level": "intermediate",
     "title": "ジェネリックに最大値を求める",
     "description_md": "比較可能な型のスライスならどれでも動く、最大値を探すジェネリック関数を実装します。\n\n関数 `largest` を実装してください。\n\n- シグネチャ: `pub fn largest<T: PartialOrd>(list: &[T]) -> Option<&T>`\n- スライスの中で最大の要素への**参照**を `Some` で返します。\n- スライスが空のときは `None` を返します。\n- 最大の要素が複数ある場合は、そのうちどれを指す参照でも構いません (値としては同じです)。\n\n```rust\nassert_eq!(largest(&[3, 7, 2]), Some(&7));\nassert_eq!(largest(&['a', 'z', 'm']), Some(&'z'));\n\nlet empty: Vec<i32> = vec![];\nassert_eq!(largest(&empty), None);\n```\n\n注意: 戻り値は `Option<T>` ではなく `Option<&T>` です。`T` に `Clone` や `Copy` を要求しないため、`String` のような型のスライスでもコピーせずに使えます。\n",
@@ -632,6 +667,7 @@
   },
   {
     "id": "i036",
+    "language": "rust",
     "level": "intermediate",
     "title": "ジェネリック構造体Pairを作る",
     "description_md": "同じ型の値を 2 つ持つジェネリック構造体 `Pair<T>` を作り、メソッドを実装します。\n\n次を実装してください。\n\n- 構造体 `Pair<T>`: フィールド `first: T` と `second: T` を持ちます (フィールドは非公開で構いません)。\n- `pub fn new(first: T, second: T) -> Self`: コンストラクタです。\n- `pub fn first(&self) -> &T`: 1 つ目の値への参照を返します。\n- `pub fn second(&self) -> &T`: 2 つ目の値への参照を返します。\n- `pub fn swap(self) -> Self`: 自身を消費し、2 つの値を入れ替えた新しい `Pair` を返します。\n\n```rust\nlet p = Pair::new(1, 2);\nassert_eq!(*p.first(), 1);\nassert_eq!(*p.second(), 2);\n\nlet q = Pair::new(\"a\".to_string(), \"b\".to_string()).swap();\nassert_eq!(q.first(), \"b\");\nassert_eq!(q.second(), \"a\");\n```\n\n注意: `T` にはどんな型でも入れられるようにするため、`Clone` などの境界は付けません。`swap` は `&mut self` ではなく `self` を受け取る消費型のメソッドとして定義します。\n",
@@ -650,6 +686,7 @@
   },
   {
     "id": "i037",
+    "language": "rust",
     "level": "intermediate",
     "title": "2つの型パラメータを操る",
     "description_md": "複数の独立した型パラメータを持つ関数を書きます。\n\nタプル `(A, B)` の各要素にそれぞれ別の関数を適用して `(C, D)` に変換する `map_pair` を実装してください。\n\n- シグネチャ: `pub fn map_pair<A, B, C, D>(pair: (A, B), f: impl FnOnce(A) -> C, g: impl FnOnce(B) -> D) -> (C, D)`\n- 1 つ目の要素には `f` を、2 つ目の要素には `g` を適用し、結果をタプルで返します。\n- `A` `B` `C` `D` はすべて独立した型パラメータです。同じ型でも違う型でも動きます。\n\n```rust\n// i32 -> String, &str -> usize にそれぞれ変換\nlet (s, len) = map_pair((42, \"hello\"), |n| n.to_string(), |s: &str| s.len());\nassert_eq!(s, \"42\");\nassert_eq!(len, 5);\n\n// 同じ型同士でももちろん動く\nassert_eq!(map_pair((2, 3), |x| x * 10, |y| y + 1), (20, 4));\n```\n",
@@ -667,6 +704,7 @@
   },
   {
     "id": "i038",
+    "language": "rust",
     "level": "intermediate",
     "title": "where句で境界を整理する",
     "description_md": "トレイト境界が増えてきたときに、シグネチャを読みやすく保つ `where` 句を練習します。\n\n次の 2 つの関数を実装してください。どちらも境界は `where` 句で書きます (シグネチャは提示済みです)。\n\n1. `pub fn min_max<T>(items: &[T]) -> Option<(T, T)> where T: Clone + PartialOrd`\n   - スライスの最小値と最大値を**クローンして** `Some((min, max))` で返します。\n   - 空スライスなら `None` を返します。要素が 1 つなら最小値と最大値は同じ値になります。\n2. `pub fn debug_join<T>(items: &[T], sep: &str) -> String where T: std::fmt::Debug`\n   - 各要素を `{:?}` (Debug 形式) で文字列化し、`sep` で連結して返します。\n   - 空スライスなら空文字列 `\"\"` を返します。\n\n```rust\nassert_eq!(min_max(&[3, 1, 4, 1, 5]), Some((1, 5)));\nlet empty: Vec<i32> = vec![];\nassert_eq!(min_max(&empty), None);\n\nassert_eq!(debug_join(&[1, 2, 3], \", \"), \"1, 2, 3\");\nassert_eq!(debug_join(&[\"a\", \"b\"], \"-\"), \"\\\"a\\\"-\\\"b\\\"\"); // &str の Debug 表示は引用符付き\n```\n",
@@ -685,6 +723,7 @@
   },
   {
     "id": "i039",
+    "language": "rust",
     "level": "intermediate",
     "title": "条件付きメソッド実装",
     "description_md": "ジェネリック型のメソッドを「型パラメータが特定のトレイトを実装しているときだけ」提供する、条件付き実装を学びます。\n\n次を実装してください。\n\n- 構造体 `Pair<T>`: フィールド `x: T` と `y: T` を持ちます (非公開で構いません)。\n- `pub fn new(x: T, y: T) -> Self`: **どんな `T` でも**使えるコンストラクタです。境界なしの `impl<T> Pair<T>` ブロックに実装します。\n- `pub fn larger_display(&self) -> String`: `x` と `y` のうち大きい方を `\"larger: {値}\"` という形式の文字列で返します。`x >= y` のときは `x` を採用します。このメソッドは **`T: std::fmt::Display + PartialOrd` のときだけ**使えるように、境界付きの別の `impl` ブロックに実装します。\n\n```rust\nassert_eq!(Pair::new(3, 8).larger_display(), \"larger: 8\");\nassert_eq!(Pair::new(\"apple\", \"pear\").larger_display(), \"larger: pear\");\nassert_eq!(Pair::new(5, 5).larger_display(), \"larger: 5\"); // 等しいときは x\n\n// 境界を満たさない型でも new は使える (larger_display は呼べない)\nstruct NoOrd;\nlet _p = Pair::new(NoOrd, NoOrd);\n```\n",
@@ -702,6 +741,7 @@
   },
   {
     "id": "i040",
+    "language": "rust",
     "level": "intermediate",
     "title": "インデックス付きで処理する",
     "description_md": "添字ループ `for i in 0..v.len()` を、`enumerate` を使ったイテレータ処理に置き換える練習です。\n\n次の 2 つの関数を実装してください。どちらも `enumerate` を使うと簡潔に書けます。\n\n1. `pub fn even_indexed(items: &[i32]) -> Vec<i32>`\n   - インデックスが偶数 (0, 2, 4, ...) の要素だけを順番に集めた `Vec` を返します。\n   - 空スライスなら空の `Vec` を返します。\n2. `pub fn weighted_sum(items: &[i32]) -> i64`\n   - 各要素について「インデックス × 値」を計算し、その総和を `i64` で返します。\n   - 例: `[5, 6, 7]` なら `0*5 + 1*6 + 2*7 = 20` です。空スライスなら `0` です。\n\n```rust\nassert_eq!(even_indexed(&[10, 11, 12, 13, 14]), vec![10, 12, 14]);\nassert_eq!(weighted_sum(&[5, 6, 7]), 20);\nassert_eq!(weighted_sum(&[-3, 4]), 4); // 0*(-3) + 1*4\n```\n\n注意: インデックスは `usize`、要素は `i32`、戻り値は `i64` です。掛け算の前にそれぞれ `i64` へキャストしてください。\n",
@@ -720,6 +760,7 @@
   },
   {
     "id": "i041",
+    "language": "rust",
     "level": "intermediate",
     "title": "zipで2列を束ねる",
     "description_md": "並行する 2 つの列を同時に走査する `zip` を練習します。\n\n次の 2 つの関数を実装してください。\n\n1. `pub fn dot(a: &[i64], b: &[i64]) -> i64`\n   - 2 つのスライスの**内積** (対応する要素同士の積の総和) を返します。\n   - 長さが違う場合は、**短い方に合わせて**余った要素は無視します (`zip` の標準的な挙動です)。\n   - どちらかが空なら `0` を返します。\n2. `pub fn label_scores(names: &[&str], scores: &[i32]) -> Vec<String>`\n   - 名前と点数を対応順に `\"名前:点数\"` 形式で結合した `Vec<String>` を返します。\n   - こちらも短い方に合わせます。\n\n```rust\nassert_eq!(dot(&[1, 2, 3], &[4, 5, 6]), 32); // 1*4 + 2*5 + 3*6\nassert_eq!(dot(&[1, 2, 3, 100], &[10, 20, 30]), 140); // 100 は相手がいないので無視\n\nassert_eq!(label_scores(&[\"ann\", \"bob\"], &[90, 75]), vec![\"ann:90\", \"bob:75\"]);\n```\n",
@@ -738,6 +779,7 @@
   },
   {
     "id": "i042",
+    "language": "rust",
     "level": "intermediate",
     "title": "foldで畳み込む",
     "description_md": "初期値とアキュムレータ (累積値) を使ってイテレータを 1 つの値に畳み込む `fold` を練習します。\n\n次の 2 つの関数を、`fold` を使って実装してください。\n\n1. `pub fn digit_sum(n: u64) -> u32`\n   - 非負整数 `n` の 10 進数の各桁の和を返します。\n   - 例: `12345` なら `1+2+3+4+5 = 15`。`0` なら `0` です。\n2. `pub fn product(items: &[i64]) -> i64`\n   - 全要素の積を返します。\n   - 空スライスのときは `1` (掛け算の単位元) を返します。\n\n```rust\nassert_eq!(digit_sum(12345), 15);\nassert_eq!(digit_sum(0), 0);\n\nassert_eq!(product(&[2, 3, 4]), 24);\nassert_eq!(product(&[]), 1);\nassert_eq!(product(&[-1, -2, -3]), -6);\n```\n\nヒント: `digit_sum` は `n.to_string().chars()` で各桁の文字を取り出し、`c.to_digit(10)` で数値に変換できます。\n",
@@ -756,6 +798,7 @@
   },
   {
     "id": "i043",
+    "language": "rust",
     "level": "intermediate",
     "title": "all / anyで判定する",
     "description_md": "「すべての要素が条件を満たすか」(全称) と「条件を満たす要素が 1 つでもあるか」(存在) を判定する `all` / `any` を練習します。\n\n次の 2 つの関数を実装してください。\n\n1. `pub fn is_ascending(items: &[i32]) -> bool`\n   - 隣り合うすべてのペアで「左 < 右」が成り立つ (狭義単調増加である) とき `true` を返します。\n   - 等しい要素が隣り合う場合 (例: `[1, 1, 2]`) は `false` です。\n   - 要素数が 0 または 1 のときは `true` を返します (比較するペアが存在しないため)。\n2. `pub fn has_negative(items: &[i32]) -> bool`\n   - 負の数が 1 つでも含まれていれば `true`、なければ `false` を返します。\n   - 空スライスは `false` です。\n\n```rust\nassert!(is_ascending(&[1, 2, 3]));\nassert!(!is_ascending(&[1, 3, 2]));\nassert!(!is_ascending(&[1, 1, 2])); // 等しい要素は昇順とみなさない\nassert!(is_ascending(&[]));\n\nassert!(has_negative(&[1, -2, 3]));\nassert!(!has_negative(&[0, 1, 2]));\n```\n\nヒント: 隣り合うペアは `items.windows(2)` で取り出せます (長さ 2 の窓を 1 つずつずらして走査します)。\n",
@@ -774,6 +817,7 @@
   },
   {
     "id": "i044",
+    "language": "rust",
     "level": "intermediate",
     "title": "positionで位置を探す",
     "description_md": "条件を満たす最初の要素を探す 2 つの関数を実装してください。\n\n1. `position_first_even(v: &[i32]) -> Option<usize>` : スライスの中で **最初の偶数** が現れる位置 (0 始まりのインデックス) を返します。偶数が 1 つもなければ `None` を返します。\n2. `find_first_even(v: &[i32]) -> Option<i32>` : スライスの中で **最初の偶数そのもの** を返します。偶数が 1 つもなければ `None` を返します。\n\nどちらもイテレータの `position` / `find` を使って実装してください。0 は偶数、負の偶数 (-8 など) も偶数として扱います。\n\n```rust\nassert_eq!(position_first_even(&[1, 3, 4, 6]), Some(2));\nassert_eq!(find_first_even(&[1, 3, 4, 6]), Some(4));\nassert_eq!(position_first_even(&[1, 3, 5]), None);\nassert_eq!(find_first_even(&[]), None);\n```",
@@ -792,6 +836,7 @@
   },
   {
     "id": "i045",
+    "language": "rust",
     "level": "intermediate",
     "title": "take_whileとskip_whileで区切る",
     "description_md": "スライスの「先頭に連続して並ぶ正の数の区間」を境目として、列を 2 つに分ける関数を実装してください。\n\n1. `leading_positives(v: &[i32]) -> Vec<i32>` : 先頭から見て **正の数 (x > 0) が続いている間** の要素を集めた `Vec` を返します。最初に正でない要素 (0 や負数) が現れた時点で打ち切ります。\n2. `after_leading_positives(v: &[i32]) -> Vec<i32>` : 先頭の正の数の区間を **読み飛ばした残り** をすべて集めた `Vec` を返します。読み飛ばしをやめた後に正の数が現れても、それは残します。\n\nそれぞれ `take_while` / `skip_while` を使って実装してください。\n\n```rust\nassert_eq!(leading_positives(&[1, 2, -1, 3]), vec![1, 2]);\nassert_eq!(after_leading_positives(&[1, 2, -1, 3]), vec![-1, 3]);\nassert_eq!(leading_positives(&[0, 1]), vec![]);\nassert_eq!(after_leading_positives(&[0, 1]), vec![0, 1]);\n```",
@@ -810,6 +855,7 @@
   },
   {
     "id": "i046",
+    "language": "rust",
     "level": "intermediate",
     "title": "chainで連結しflat_mapで展開する",
     "description_md": "列を合成する 2 つの関数を実装してください。\n\n1. `concat_slices(a: &[i32], b: &[i32]) -> Vec<i32>` : `a` の要素の後ろに `b` の要素を続けた `Vec` を返します。`chain` を使ってください。\n2. `repeat_each(v: &[i32], n: usize) -> Vec<i32>` : 各要素をその場で `n` 回ずつ繰り返した `Vec` を返します。`flat_map` を使ってください。`n` が 0 のときは空の `Vec` になります。\n\n```rust\nassert_eq!(concat_slices(&[1, 2], &[3]), vec![1, 2, 3]);\nassert_eq!(repeat_each(&[1, 2], 3), vec![1, 1, 1, 2, 2, 2]);\nassert_eq!(repeat_each(&[1, 2], 0), vec![]);\n```",
@@ -828,6 +874,7 @@
   },
   {
     "id": "i047",
+    "language": "rust",
     "level": "intermediate",
     "title": "filter_mapでパースと選別を同時に行う",
     "description_md": "文字列スライスの配列から、`i32` として **正しくパースできたものだけ** を順番を保って集める関数を実装してください。\n\n`parse_valid(items: &[&str]) -> Vec<i32>`\n\n- パースに失敗した要素 (数字でない文字列、空文字列、`i32` の範囲を超える数など) は黙って捨てます。\n- `\"-5\"` のような負数は正しくパースできます。\n- 前後に空白がある `\" 1\"` のような文字列は `parse` が失敗するため、捨てられます (トリムは行いません)。\n\n`filter_map` と `parse().ok()` を組み合わせて実装してください。\n\n```rust\nassert_eq!(parse_valid(&[\"1\", \"abc\", \"-5\", \"\"]), vec![1, -5]);\nassert_eq!(parse_valid(&[\"x\", \"y\"]), vec![]);\n```",
@@ -846,6 +893,7 @@
   },
   {
     "id": "i048",
+    "language": "rust",
     "level": "intermediate",
     "title": "windowsで移動平均を計算する",
     "description_md": "スライスの重なり合う部分列 (スライディングウィンドウ) を使う 2 つの関数を実装してください。\n\n1. `moving_average(v: &[f64], k: usize) -> Vec<f64>` : 幅 `k` の移動平均を返します。先頭から 1 つずつずらした連続する `k` 要素の平均を順に並べます。`v.len() < k` のときは空の `Vec` を返します。`k` は 1 以上であることが保証されます。\n2. `adjacent_diff(v: &[i32]) -> Vec<i32>` : 隣接する 2 要素の差 (`後 - 前`) を並べた `Vec` を返します。要素数が 1 以下なら空の `Vec` を返します。\n\nどちらも `slice::windows` を使って実装してください。\n\n```rust\nassert_eq!(moving_average(&[1.0, 2.0, 3.0, 4.0], 2), vec![1.5, 2.5, 3.5]);\nassert_eq!(adjacent_diff(&[3, 1, 4]), vec![-2, 3]);\nassert_eq!(moving_average(&[1.0], 3), vec![]);\n```",
@@ -864,6 +912,7 @@
   },
   {
     "id": "i049",
+    "language": "rust",
     "level": "intermediate",
     "title": "chunksで固定長に分割する",
     "description_md": "スライスを先頭から固定長 `size` のブロックに分割し、**各ブロックの合計** を並べた `Vec` を返す関数を実装してください。\n\n`chunk_sums(v: &[i32], size: usize) -> Vec<i32>`\n\n- 要素数が `size` で割り切れないときは、最後のブロックだけ要素数が少なくなります。その端数ブロックの合計もそのまま含めます。\n- 空スライスのときは空の `Vec` を返します。\n- `size` は 1 以上であることが保証されます。\n\n`slice::chunks` を使って実装してください。\n\n```rust\nassert_eq!(chunk_sums(&[1, 2, 3, 4, 5], 2), vec![3, 7, 5]);\nassert_eq!(chunk_sums(&[1, 2, 3, 4], 2), vec![3, 7]);\nassert_eq!(chunk_sums(&[], 3), vec![]);\n```",
@@ -882,6 +931,7 @@
   },
   {
     "id": "i050",
+    "language": "rust",
     "level": "intermediate",
     "title": "partitionで二分する",
     "description_md": "スライスの要素を「偶数」と「奇数」の 2 つの `Vec` に振り分ける関数を実装してください。\n\n`split_even_odd(v: &[i32]) -> (Vec<i32>, Vec<i32>)`\n\n- タプルの 1 番目が偶数の `Vec`、2 番目が奇数の `Vec` です。\n- それぞれの中では元の順序を保ちます。\n- 0 は偶数、負の数もその偶奇どおりに振り分けます (-3 は奇数、-4 は偶数)。\n\nイテレータの `partition` を使って実装してください。\n\n```rust\nassert_eq!(split_even_odd(&[1, 2, 3, 4]), (vec![2, 4], vec![1, 3]));\nassert_eq!(split_even_odd(&[]), (vec![], vec![]));\n```",
@@ -900,6 +950,7 @@
   },
   {
     "id": "i051",
+    "language": "rust",
     "level": "intermediate",
     "title": "max_by_keyでキー最大を選ぶ",
     "description_md": "文字列スライスの配列から、**文字列の長さ (バイト長)** をキーとして最長・最短の要素を選ぶ 2 つの関数を実装してください。\n\n1. `longest<'a>(words: &[&'a str]) -> Option<&'a str>` : 最も長い文字列を返します。同じ長さが複数あるときは **最後** に現れたものを返します。\n2. `shortest<'a>(words: &[&'a str]) -> Option<&'a str>` : 最も短い文字列を返します。同じ長さが複数あるときは **最初** に現れたものを返します。\n\n配列が空のときはどちらも `None` を返します。`max_by_key` / `min_by_key` を使って実装してください (同値のときの規則は、この 2 つのメソッドの仕様そのものです)。\n\n```rust\nassert_eq!(longest(&[\"a\", \"abc\", \"ab\"]), Some(\"abc\"));\nassert_eq!(shortest(&[\"a\", \"abc\", \"ab\"]), Some(\"a\"));\nassert_eq!(longest(&[\"ab\", \"cd\"]), Some(\"cd\"));\nassert_eq!(shortest(&[\"ab\", \"cd\"]), Some(\"ab\"));\nassert_eq!(longest(&[]), None);\n```",
@@ -918,6 +969,7 @@
   },
   {
     "id": "i052",
+    "language": "rust",
     "level": "intermediate",
     "title": "イテレータチェーンでパイプラインを組む",
     "description_md": "次の多段処理を 1 つの関数として実装してください。\n\n`top_k_even_square_sum(v: &[i32], k: usize) -> i64`\n\n処理の内容:\n\n1. スライスから **偶数だけ** を選ぶ (0 と負の偶数も含む)\n2. それぞれを **二乗** する (オーバーフローを避けるため `i64` に変換してから二乗する)\n3. 二乗した値を **大きい順** に並べたときの **上位 `k` 個の和** を返す\n\n- 偶数の個数が `k` 未満のときは、あるものすべての和を返します。\n- `k` が 0 のときや偶数が 1 つもないときは 0 を返します。\n\n`filter` / `map` / `collect` / ソート / `take` / `sum` を組み合わせて実装してください。\n\n```rust\n// 偶数 2, 4, 6 → 二乗 4, 16, 36 → 大きい順 36, 16, 4 → 上位 2 個の和\nassert_eq!(top_k_even_square_sum(&[1, 2, 3, 4, 5, 6], 2), 52);\nassert_eq!(top_k_even_square_sum(&[1, 3, 5], 3), 0);\nassert_eq!(top_k_even_square_sum(&[2, 4], 10), 20);\n```",
@@ -936,6 +988,7 @@
   },
   {
     "id": "i053",
+    "language": "rust",
     "level": "intermediate",
     "title": "foldでランレングス圧縮する",
     "description_md": "文字列を **ランレングス圧縮** する関数を実装してください。同じ文字の連続を `(文字, 連続数)` のペアにまとめ、出現順に並べた `Vec` を返します。\n\n`run_length_encode(s: &str) -> Vec<(char, usize)>`\n\n- 例えば `\"aaabbc\"` は `[('a', 3), ('b', 2), ('c', 1)]` になります。\n- 同じ文字でも連続が途切れたら別のペアになります (`\"abab\"` → 4 つのペア)。\n- 空文字列は空の `Vec` になります。\n- 文字単位は `char` です (日本語などマルチバイト文字も 1 文字として数えます)。\n\n`chars()` と `fold` を使い、アキュムレータに `Vec<(char, usize)>` を持たせて実装してください。\n\n```rust\nassert_eq!(run_length_encode(\"aaabbc\"), vec![('a', 3), ('b', 2), ('c', 1)]);\nassert_eq!(run_length_encode(\"\"), vec![]);\n```",
@@ -954,6 +1007,7 @@
   },
   {
     "id": "i054",
+    "language": "rust",
     "level": "intermediate",
     "title": "クロージャを引数に取る",
     "description_md": "クロージャを引数として受け取るジェネリック関数 `apply_twice` を実装してください。\n\n- `apply_twice(f, x)` は、クロージャ `f` を `x` に **2回** 適用した結果、つまり `f(f(x))` を返します。\n- `f` は `i32` を受け取って `i32` を返すクロージャです。トレイト境界 `F: Fn(i32) -> i32` を使ってジェネリックに受け取ります。\n\n```rust\nassert_eq!(apply_twice(|x| x + 3, 10), 16); // (10 + 3) + 3 = 16\nassert_eq!(apply_twice(|x| x * 2, 5), 20);  // (5 * 2) * 2 = 20\n```\n\n注意: クロージャの型は 1 つ 1 つ異なるため、具体的な型名では受け取れません。ジェネリック型パラメータとトレイト境界を使うのがポイントです。",
@@ -973,6 +1027,7 @@
   },
   {
     "id": "i055",
+    "language": "rust",
     "level": "intermediate",
     "title": "環境をキャプチャするクロージャ",
     "description_md": "スライスの「累積和 (running total)」を計算する関数 `running_total` を実装してください。\n\n- `running_total(values)` は、先頭から各位置までの合計を並べた `Vec<i32>` を返します。\n- 実装には、外側の可変変数 (例: `let mut sum = 0;`) をキャプチャして更新する **クロージャ** と `map` を使ってください (for ループで書いても仕様は満たせますが、この問題ではクロージャによるキャプチャを体験するのが目的です)。\n\n```rust\nassert_eq!(running_total(&[1, 2, 3]), vec![1, 3, 6]);\nassert_eq!(running_total(&[5, -3, -10]), vec![5, 2, -8]);\nassert_eq!(running_total(&[]), Vec::<i32>::new());\n```\n\n注意: 環境の変数を書き換えるクロージャは `Fn` ではなく `FnMut` として扱われます。`map` は `FnMut` を受け取れるので、そのまま渡せます。",
@@ -992,6 +1047,7 @@
   },
   {
     "id": "i056",
+    "language": "rust",
     "level": "intermediate",
     "title": "sort_by_keyで思い通りに並べる",
     "description_md": "`sort_by_key` を使って、2 種類の並べ替え関数を実装してください。\n\n1. `sort_by_length(words)` — `Vec<String>` を **文字数 (`chars().count()`) の昇順** に並べ替えます。同じ長さの単語どうしは元の順序を保ちます (安定ソート)。\n2. `sort_by_price(items)` — `Vec<Item>` を **`price` フィールドの昇順** に並べ替えます。同じ価格どうしは元の順序を保ちます。\n\n`Item` 構造体は次の定義をそのまま使ってください。\n\n```rust\npub struct Item {\n    pub name: String,\n    pub price: u32,\n}\n```\n\n入出力例:\n\n```rust\nlet mut words = vec![\"banana\".to_string(), \"fig\".to_string(), \"apple\".to_string()];\nsort_by_length(&mut words);\nassert_eq!(words, vec![\"fig\", \"apple\", \"banana\"]);\n```\n\n注意: `Vec::sort_by_key` は安定ソートなので、キーが等しい要素の順序は自動的に保たれます。",
@@ -1011,6 +1067,7 @@
   },
   {
     "id": "i057",
+    "language": "rust",
     "level": "intermediate",
     "title": "関数を作る関数",
     "description_md": "「関数を返す関数」`make_adder` を実装してください。\n\n- `make_adder(n)` は「引数に `n` を足して返すクロージャ」を返します。\n- 戻り値の型は `impl Fn(i32) -> i32` です。\n- 返すクロージャは何回でも呼び出せる必要があります。\n\n```rust\nlet add5 = make_adder(5);\nassert_eq!(add5(10), 15);\nassert_eq!(add5(0), 5); // 同じクロージャを何度でも呼べる\n\nlet sub3 = make_adder(-3);\nassert_eq!(sub3(10), 7);\n```\n\n注意: 引数 `n` は `make_adder` のローカル変数なので、関数が終わると消えてしまいます。クロージャに `n` を **所有させる** 工夫が必要です。スターターコードはそのままではコンパイルできません。エラーメッセージを読んで直してみましょう。",
@@ -1030,6 +1087,7 @@
   },
   {
     "id": "i058",
+    "language": "rust",
     "level": "intermediate",
     "title": "文字列を反転する",
     "description_md": "文字列を **文字 (char) 単位** で反転する関数 `reverse_string` を実装してください。\n\n- `reverse_string(s)` は、`s` の文字を逆順に並べた新しい `String` を返します。\n- バイト単位ではなく `char` 単位で反転してください。日本語や絵文字を含む文字列でも壊れないようにするためです。\n\n```rust\nassert_eq!(reverse_string(\"hello\"), \"olleh\");\nassert_eq!(reverse_string(\"こんにちは\"), \"はちにんこ\");\nassert_eq!(reverse_string(\"\"), \"\");\n```\n\n注意: Rust の `String` は UTF-8 でエンコードされており、1 文字が 1〜4 バイトを占めます。バイト列を逆順にすると UTF-8 として壊れた列になってしまいます。",
@@ -1049,6 +1107,7 @@
   },
   {
     "id": "i059",
+    "language": "rust",
     "level": "intermediate",
     "title": "回文を判定する",
     "description_md": "文字列が回文 (前から読んでも後ろから読んでも同じ) かどうかを判定する関数 `is_palindrome` を実装してください。\n\n判定ルール:\n\n1. **英数字以外の文字 (空白・記号など) は無視** します。`char::is_alphanumeric` を使ってください。\n2. **大文字と小文字は区別しません**。小文字に揃えてから比較します。\n3. 正規化した結果が空 (例: 空文字列や記号だけの文字列) の場合は `true` を返します。\n\n```rust\nassert!(is_palindrome(\"A man, a plan, a canal: Panama\"));\nassert!(is_palindrome(\"12321\"));\nassert!(!is_palindrome(\"race a car\"));\nassert!(is_palindrome(\"\")); // 空は回文とみなす\n```",
@@ -1068,6 +1127,7 @@
   },
   {
     "id": "i060",
+    "language": "rust",
     "level": "intermediate",
     "title": "各単語の先頭を大文字にする",
     "description_md": "各単語の先頭文字を大文字にする関数 `capitalize_words` を実装してください。\n\n仕様:\n\n1. 入力を `split_whitespace` で単語に分割します (連続する空白やタブ・改行は区切りとしてまとめて扱われます)。\n2. 各単語の **先頭の 1 文字だけ** を大文字にし、2 文字目以降はそのまま変えません。\n3. 結果の単語を **半角スペース 1 個** で連結して返します。先頭・末尾の空白は消えます。\n4. 空文字列や空白だけの入力には空文字列を返します。\n\n```rust\nassert_eq!(capitalize_words(\"hello world\"), \"Hello World\");\nassert_eq!(capitalize_words(\"  rust   is  fun \"), \"Rust Is Fun\");\nassert_eq!(capitalize_words(\"rUst\"), \"RUst\"); // 2文字目以降はそのまま\nassert_eq!(capitalize_words(\"\"), \"\");\n```",
@@ -1087,6 +1147,7 @@
   },
   {
     "id": "i061",
+    "language": "rust",
     "level": "intermediate",
     "title": "アナグラムを判定する",
     "description_md": "2 つの文字列がアナグラム (文字を並べ替えるともう一方になる関係) かどうかを判定する関数 `is_anagram` を実装してください。\n\n判定ルール:\n\n1. **すべての文字を対象** にします (空白や記号も 1 文字として数えます)。\n2. **大文字と小文字は区別** します (`\"Aba\"` と `\"aab\"` はアナグラムではありません)。\n3. 各文字の出現回数まで一致して初めてアナグラムです (`\"aab\"` と `\"abb\"` は不一致)。\n4. 空文字列どうしはアナグラムとみなします。\n\n```rust\nassert!(is_anagram(\"listen\", \"silent\"));\nassert!(!is_anagram(\"hello\", \"world\"));\nassert!(!is_anagram(\"abc\", \"ab\"));   // 長さが違う\nassert!(!is_anagram(\"Aba\", \"aab\"));  // 大文字小文字は区別\n```\n\nヒント: 両方の文字列を「正規化した同じ形」に変換して比較するのがポイントです。ソート済みの文字列にするか、文字ごとの頻度表を作る方法があります。",
@@ -1106,6 +1167,7 @@
   },
   {
     "id": "i062",
+    "language": "rust",
     "level": "intermediate",
     "title": "単語の出現回数を数える",
     "description_md": "テキスト中の単語の出現回数を集計する関数 `word_count` を実装してください。\n\n仕様:\n\n1. 入力を `split_whitespace` で単語に分割します (空白・タブ・改行が区切りです)。\n2. 単語をキー、出現回数を値とする `HashMap<String, usize>` を返します。\n3. 大文字小文字はそのまま区別します。変換は行いません。\n4. 空文字列には空のマップを返します。\n\n```rust\nlet counts = word_count(\"the quick the lazy the\");\nassert_eq!(counts[\"the\"], 3);\nassert_eq!(counts[\"quick\"], 1);\nassert_eq!(counts.len(), 3); // the, quick, lazy\n```\n\nヒント: `HashMap` の `entry` API を使うと「キーがなければ 0 で挿入し、あれば加算する」を 1 行で書けます。",
@@ -1125,6 +1187,7 @@
   },
   {
     "id": "i063",
+    "language": "rust",
     "level": "intermediate",
     "title": "CSVの1行をパースする",
     "description_md": "`\"name,age,score\"` 形式の CSV 1 行を、検証つきでタプルに分解する関数 `parse_line` を実装してください。\n\nシグネチャ:\n\n```rust\npub fn parse_line(line: &str) -> Result<(String, u32, f64), String>\n```\n\n仕様:\n\n1. 入力をカンマ `,` で分割します。フィールド数が **ちょうど 3 個** でなければ `Err` を返します (多くても少なくてもエラー)。\n2. 1 番目のフィールドは名前としてそのまま `String` にします (トリムや検証は不要)。\n3. 2 番目のフィールドは `u32` に、3 番目は `f64` にパースします。失敗したら `Err` を返します。\n4. エラーの値は、何が悪かったかが分かる日本語または英語のメッセージ (`String`) とします。メッセージの文言自体は自由です。\n\n```rust\nassert_eq!(parse_line(\"alice,30,89.5\"), Ok((\"alice\".to_string(), 30, 89.5)));\nassert!(parse_line(\"bob,abc,1.0\").is_err());   // age が数値でない\nassert!(parse_line(\"only_name\").is_err());     // フィールド不足\nassert!(parse_line(\"a,1,2.0,extra\").is_err()); // フィールド過多\n```",
@@ -1144,6 +1207,7 @@
   },
   {
     "id": "i064",
+    "language": "rust",
     "level": "intermediate",
     "title": "CSV複数行をstructのVecにする",
     "description_md": "複数行の CSV 文字列を構造体 `Record` の `Vec` に変換する関数 `parse_records` を実装してください。\n\n## 仕様\n\n- 入力は `\"名前,年齢\"` 形式の行が改行 (`\\n`) で並んだ文字列です。\n- 各行はカンマ (`,`) で分割したとき **ちょうど 2 フィールド** でなければなりません。フィールド数が違う行があれば `Err(String)` を返します (エラーメッセージの内容は自由です)。\n- 名前・年齢とも前後の空白は `trim` で取り除きます。\n- 年齢は `u32` としてパースします。パースできない行があれば `Err(String)` を返します。\n- 1 行でも不正なら全体を `Err` とし、すべて正常なら `Ok(Vec<Record>)` を返します。\n- 空文字列の入力は `Ok(vec![])` を返します。\n\n## 入出力例\n\n```rust\nlet records = parse_records(\"alice,30\\nbob,25\").unwrap();\nassert_eq!(records[0], Record { name: \"alice\".to_string(), age: 30 });\nassert_eq!(records[1], Record { name: \"bob\".to_string(), age: 25 });\n\nassert_eq!(\n    parse_records(\" carol , 40 \").unwrap(),\n    vec![Record { name: \"carol\".to_string(), age: 40 }]\n);\n\nassert!(parse_records(\"alice,abc\").is_err()); // 年齢が数値でない\nassert!(parse_records(\"alice\").is_err());     // フィールド数が足りない\n```\n\n各行を `Result` に変換するイテレータを作り、`collect::<Result<Vec<_>, _>>()` で「全部 Ok なら Ok、1 つでも Err なら最初の Err」に一括変換するイディオムを使ってみましょう。",
@@ -1162,6 +1226,7 @@
   },
   {
     "id": "i065",
+    "language": "rust",
     "level": "intermediate",
     "title": "シーザー暗号を実装する",
     "description_md": "英字を `shift` 文字分だけ後ろにずらすシーザー暗号の暗号化関数 `caesar_encrypt` と復号関数 `caesar_decrypt` を実装してください。\n\n## 仕様\n\n- ASCII の英字 (`a`〜`z`, `A`〜`Z`) だけをシフトします。`z` の次は `a` に巡回します。\n- 大文字は大文字のまま、小文字は小文字のままシフトします。\n- 英字以外 (空白・記号・数字など) はそのまま出力します。\n- `shift` は `u8` で、26 以上の値が渡されることもあります (`shift % 26` として扱います)。\n- `caesar_decrypt(caesar_encrypt(s, n), n)` は元の文字列 `s` に戻ります。\n\n## 入出力例\n\n```rust\nassert_eq!(caesar_encrypt(\"abc\", 3), \"def\");\nassert_eq!(caesar_encrypt(\"xyz\", 3), \"abc\");            // 巡回する\nassert_eq!(caesar_encrypt(\"Hello, World!\", 5), \"Mjqqt, Btwqi!\");\nassert_eq!(caesar_decrypt(\"def\", 3), \"abc\");\nassert_eq!(caesar_encrypt(\"abc\", 27), \"bcd\");           // 27 % 26 = 1\n```\n\n`char` と `u8` の相互変換 (`c as u8`, `byte as char`) と剰余演算を使って実装しましょう。",
@@ -1180,6 +1245,7 @@
   },
   {
     "id": "i066",
+    "language": "rust",
     "level": "intermediate",
     "title": "最頻値を求める",
     "description_md": "整数スライスの最頻値 (最も多く現れる値) を返す関数 `mode` を実装してください。\n\n## 仕様\n\n- 出現回数が最大の値を `Some(値)` で返します。\n- 出現回数が同じ値が複数あるときは、**最も小さい値** を返します。\n- 空スライスのときは `None` を返します。\n\n## 入出力例\n\n```rust\nassert_eq!(mode(&[1, 2, 2, 3, 2]), Some(2));\nassert_eq!(mode(&[3, 3, 1, 1, 2]), Some(1)); // 3 と 1 が同数 → 小さい方\nassert_eq!(mode(&[]), None);\n```\n\n`HashMap` で頻度を集計してから、`max_by_key` で「頻度が最大、同数なら値が最小」の要素を選ぶ 2 段構成で実装しましょう。",
@@ -1198,6 +1264,7 @@
   },
   {
     "id": "i067",
+    "language": "rust",
     "level": "intermediate",
     "title": "entry APIでグループ化する",
     "description_md": "単語のスライスを「頭文字 → その頭文字で始まる単語のリスト」にグループ化する関数 `group_by_initial` を実装してください。\n\n## 仕様\n\n- 戻り値は `HashMap<char, Vec<String>>` です。キーは各単語の先頭の文字 (`chars().next()`) です。\n- 各 `Vec` の中の単語は、入力に現れた順序を保ちます。\n- 空文字列 (`\"\"`) は頭文字がないので無視します。\n- 入力が空なら空のマップを返します。\n\n## 入出力例\n\n```rust\nlet map = group_by_initial(&[\"apple\", \"banana\", \"avocado\"]);\nassert_eq!(map.get(&'a'), Some(&vec![\"apple\".to_string(), \"avocado\".to_string()]));\nassert_eq!(map.get(&'b'), Some(&vec![\"banana\".to_string()]));\nassert_eq!(map.get(&'z'), None);\n```\n\n「キーがなければ空の `Vec` を挿入し、あればそれに追加する」処理を `HashMap::entry` + `or_insert_with` の定石で書いてみましょう。",
@@ -1216,6 +1283,7 @@
   },
   {
     "id": "i068",
+    "language": "rust",
     "level": "intermediate",
     "title": "HashSetで集合演算する",
     "description_md": "2 つの整数スライスを集合とみなし、共通要素・和集合・差集合を求める 3 つの関数を実装してください。\n\n## 仕様\n\n- `intersection(a, b)`: 両方に含まれる要素を返します。\n- `union(a, b)`: 少なくとも一方に含まれる要素を返します。\n- `difference(a, b)`: `a` に含まれ `b` に含まれない要素を返します。\n- いずれも戻り値は **昇順にソート済みで重複のない** `Vec<i32>` です (入力には重複があってもかまいません)。\n\n## 入出力例\n\n```rust\nassert_eq!(intersection(&[3, 1, 2, 3], &[2, 3, 4]), vec![2, 3]);\nassert_eq!(union(&[3, 1, 1], &[2, 3]), vec![1, 2, 3]);\nassert_eq!(difference(&[1, 2, 3, 2], &[2, 4]), vec![1, 3]);\n```\n\n`HashSet` の `intersection` / `union` / `difference` メソッドを使うと、重複除去と集合演算をまとめて任せられます。最後に `sort` して順序を決定的にしましょう。",
@@ -1234,6 +1302,7 @@
   },
   {
     "id": "i069",
+    "language": "rust",
     "level": "intermediate",
     "title": "最初の重複を検出する",
     "description_md": "整数スライスを先頭から走査し、**最初に 2 回目の出現を迎えた要素** を返す関数 `first_duplicate` を実装してください。\n\n## 仕様\n\n- 先頭から順に見ていき、初めて「既に出た値」に出会った時点でその値を `Some(値)` で返します。\n- 重複が 1 つもなければ `None` を返します。\n- 空スライスも `None` です。\n\n## 入出力例\n\n```rust\nassert_eq!(first_duplicate(&[2, 1, 3, 1, 2]), Some(1)); // 1 の 2 回目が 2 の 2 回目より先\nassert_eq!(first_duplicate(&[1, 2, 3]), None);\nassert_eq!(first_duplicate(&[]), None);\n```\n\n`HashSet::insert` は「新規に挿入できたら `true`、既に存在したら `false`」を返します。この戻り値を使うと、`contains` で調べてから `insert` する 2 段階を 1 回の操作にまとめられます。",
@@ -1252,6 +1321,7 @@
   },
   {
     "id": "i070",
+    "language": "rust",
     "level": "intermediate",
     "title": "BTreeMapでキー順に集計する",
     "description_md": "テストの点数リストから「10 点刻みの点数帯ごとの人数」を集計し、点数帯の昇順で返す関数 `score_distribution` を実装してください。\n\n## 仕様\n\n- 点数帯は `点数 / 10 * 10` で求めます (整数除算)。例: 85 点 → 80 の帯、100 点 → 100 の帯。\n- 戻り値は `(点数帯, 人数)` のタプルを **点数帯の昇順** に並べた `Vec<(u32, usize)>` です。\n- 人数が 0 の帯は含めません。\n- 空スライスなら空の `Vec` を返します。\n\n## 入出力例\n\n```rust\nlet scores = [85, 92, 71, 85, 100, 68];\nassert_eq!(\n    score_distribution(&scores),\n    vec![(60, 1), (70, 1), (80, 2), (90, 1), (100, 1)]\n);\nassert_eq!(score_distribution(&[]), vec![]);\n```\n\n`HashMap` はイテレーション順が不定なので、キー昇順で取り出したいこの問題では **`BTreeMap`** が適任です。`BTreeMap` はキーをソート済みの状態で保持し、`iter()` / `into_iter()` が常にキー昇順で要素を返します。",
@@ -1270,6 +1340,7 @@
   },
   {
     "id": "i071",
+    "language": "rust",
     "level": "intermediate",
     "title": "VecDequeでリングバッファを作る",
     "description_md": "`VecDeque` を使って、(1) 直近 N 件だけを保持する履歴バッファ `History` と、(2) スライスを左回転する関数 `rotate_left` を実装してください。\n\n## 仕様\n\n### History (固定容量の履歴バッファ)\n\n- `History::new(capacity)`: 容量 `capacity` (1 以上) の空のバッファを作ります。\n- `push(value)`: 値を末尾に追加します。すでに `capacity` 件保持している場合は、**最も古い要素を捨ててから** 追加します。\n- `items()`: 保持中の要素を古い順に並べた `Vec<i32>` を返します。\n\n### rotate_left\n\n- `rotate_left(nums, n)`: スライスを左に `n` 要素分回転した `Vec<i32>` を返します。`n` は長さを超えてもよく (`n % len` として扱う)、空スライスなら空の `Vec` を返します。\n\n## 入出力例\n\n```rust\nlet mut h = History::new(3);\nh.push(1);\nh.push(2);\nh.push(3);\nh.push(4); // 容量 3 を超えるので最古の 1 が捨てられる\nassert_eq!(h.items(), vec![2, 3, 4]);\n\nassert_eq!(rotate_left(&[1, 2, 3, 4, 5], 2), vec![3, 4, 5, 1, 2]);\nassert_eq!(rotate_left(&[1, 2, 3], 5), vec![3, 1, 2]); // 5 % 3 = 2\n```\n\n`Vec` で先頭を削除する `remove(0)` は全要素をずらす O(n) 操作ですが、`VecDeque` の `pop_front` は O(1) です。両端キューの出番です。",
@@ -1288,6 +1359,7 @@
   },
   {
     "id": "i072",
+    "language": "rust",
     "level": "intermediate",
     "title": "頻度上位N件を取り出す",
     "description_md": "テキスト中の単語の出現頻度を数え、上位 `n` 件を返す関数 `top_n_words` を実装してください。\n\n## 仕様\n\n- 単語は `split_whitespace()` で区切ります (大文字小文字はそのまま区別します)。\n- 戻り値は `(単語, 出現回数)` の `Vec<(String, usize)>` です。\n- 並び順は **出現回数の降順**、同数の場合は **単語の辞書順 (昇順)** です。\n- 異なり語数が `n` 未満ならある分だけ返します。`n == 0` や空テキストでは空の `Vec` を返します。\n\n## 入出力例\n\n```rust\nlet text = \"b a b c a b\";\nassert_eq!(\n    top_n_words(text, 2),\n    vec![(\"b\".to_string(), 3), (\"a\".to_string(), 2)]\n);\n\n// apple と pear は同数 2 回 → 辞書順で apple が先\nlet text = \"pear apple pear apple orange\";\nassert_eq!(\n    top_n_words(text, 2),\n    vec![(\"apple\".to_string(), 2), (\"pear\".to_string(), 2)]\n);\n```\n\n`HashMap` で集計 → `Vec` に変換 → 複合キーでソート → `truncate(n)`、という流れで実装しましょう。",
@@ -1306,6 +1378,7 @@
   },
   {
     "id": "i073",
+    "language": "rust",
     "level": "intermediate",
     "title": "転置インデックスを構築する",
     "description_md": "複数の文書から「単語 → その単語が出現する文書番号のリスト」を引ける転置インデックス (inverted index) を構築する関数 `build_index` を実装してください。転置インデックスは全文検索エンジンの基本データ構造です。\n\n## 仕様\n\n- 入力は文書のスライスで、各文書の番号はスライス内のインデックス (0 始まり) です。\n- 単語は `split_whitespace()` で区切ります。\n- 戻り値は `HashMap<String, Vec<usize>>` で、各単語に対して出現する文書番号を **昇順・重複なし** で持ちます (同じ文書に同じ単語が何回出ても、その文書番号は 1 回だけ)。\n- 空の入力や単語を含まない文書はエントリを作りません。\n\n## 入出力例\n\n```rust\nlet docs = [\"rust is fast\", \"go is simple\", \"rust is safe\"];\nlet index = build_index(&docs);\nassert_eq!(index.get(\"rust\"), Some(&vec![0, 2]));\nassert_eq!(index.get(\"is\"), Some(&vec![0, 1, 2]));\nassert_eq!(index.get(\"go\"), Some(&vec![1]));\nassert_eq!(index.get(\"python\"), None);\n```\n\n`HashMap<String, Vec<usize>>` というネストしたコレクションを entry API で組み立てます。文書を番号順に処理すれば、「`Vec` の末尾が今の文書番号かどうか」を見るだけで重複を防げます。",
@@ -1324,6 +1397,7 @@
   },
   {
     "id": "i074",
+    "language": "rust",
     "level": "intermediate",
     "title": "Fromで型を変換する",
     "description_md": "摂氏温度を表す `Celsius` 型から、華氏温度を表す `Fahrenheit` 型への変換を `From` トレイトで実装してください。\n\n## 仕様\n\n- `Celsius(pub f64)` と `Fahrenheit(pub f64)` はどちらもタプル構造体として定義済みです\n- `impl From<Celsius> for Fahrenheit` を完成させてください\n- 変換式は **華氏 = 摂氏 × 9.0 / 5.0 + 32.0** です\n\n`From` を実装すると、`Fahrenheit::from(c)` だけでなく `c.into()` も自動で使えるようになります。\n\n## 入出力例\n\n```rust\nlet f = Fahrenheit::from(Celsius(0.0));\nassert_eq!(f.0, 32.0);\n\n// From を実装すると .into() も自動で使える\nlet f2: Fahrenheit = Celsius(100.0).into();\nassert_eq!(f2.0, 212.0);\n```\n\n## 注意\n\n- 計算は `f64` のまま行ってください (整数への丸めは行いません)\n",
@@ -1342,6 +1416,7 @@
   },
   {
     "id": "i075",
+    "language": "rust",
     "level": "intermediate",
     "title": "Into境界で柔軟に受け取る",
     "description_md": "`&str` と `String` のどちらでも受け取れる挨拶関数 `greet` を実装してください。\n\n## 仕様\n\n- シグネチャは `pub fn greet(name: impl Into<String>) -> String` です (変更しないでください)\n- 受け取った `name` を `String` に変換し、`\"Hello, {name}!\"` 形式の文字列を返します\n  - 例: `name` が `\"Alice\"` なら `\"Hello, Alice!\"`\n- 引数境界に `impl Into<String>` を使っているため、呼び出し側は `&str` でも `String` でもそのまま渡せます\n\n## 入出力例\n\n```rust\n// &str を渡せる\nassert_eq!(greet(\"Alice\"), \"Hello, Alice!\");\n\n// String もそのまま渡せる\nassert_eq!(greet(String::from(\"Bob\")), \"Hello, Bob!\");\n```\n\n## 注意\n\n- 空文字列を渡した場合は `\"Hello, !\"` になります (特別扱いは不要です)\n",
@@ -1360,6 +1435,7 @@
   },
   {
     "id": "i076",
+    "language": "rust",
     "level": "intermediate",
     "title": "TryFromで検証つき変換する",
     "description_md": "0〜100 の点数だけを表せる `Score` 型への、検証つき変換を `TryFrom` で実装してください。\n\n## 仕様\n\n- `Score(pub i32)` はタプル構造体として定義済みです (`Debug`, `PartialEq` を導出済み)\n- `impl TryFrom<i32> for Score` を完成させてください\n  - 関連型は `type Error = String;` です\n  - `value` が **0 以上 100 以下**なら `Ok(Score(value))` を返します\n  - 範囲外なら `Err` を返します (エラーメッセージの文言は自由です)\n\n`From` が「必ず成功する変換」であるのに対し、`TryFrom` は「失敗しうる変換」を表します。範囲外の値を型のレベルで弾けるようになります。\n\n## 入出力例\n\n```rust\nassert_eq!(Score::try_from(85), Ok(Score(85)));\nassert_eq!(Score::try_from(0), Ok(Score(0)));\n\n// 範囲外は Err\nassert!(Score::try_from(-1).is_err());\nassert!(Score::try_from(101).is_err());\n```\n",
@@ -1378,6 +1454,7 @@
   },
   {
     "id": "i077",
+    "language": "rust",
     "level": "intermediate",
     "title": "タプルからRGBをTryFromで作る",
     "description_md": "`(i32, i32, i32)` のタプルから、RGB 色を表す `Rgb` 構造体への検証つき変換を実装してください。\n\n## 仕様\n\n- `Rgb { pub r: u8, pub g: u8, pub b: u8 }` は定義済みです (`Debug`, `PartialEq` を導出済み)\n- まず補助関数 `check_component` を完成させてください\n  - `value` が **0 以上 255 以下**なら `Ok(value as u8)` を返します\n  - 範囲外なら `Err` を返します (メッセージの文言は自由です)\n- 次に `impl TryFrom<(i32, i32, i32)> for Rgb` を完成させてください\n  - タプルは `(r, g, b)` の順です\n  - 3 成分すべてが 0〜255 なら `Ok(Rgb { .. })` を返します\n  - **1 つでも範囲外なら** `Err` を返します。`check_component` の結果を `?` 演算子でつなぐと簡潔に書けます\n  - 関連型は `type Error = String;` です\n\n## 入出力例\n\n```rust\nassert_eq!(\n    Rgb::try_from((255, 128, 0)),\n    Ok(Rgb { r: 255, g: 128, b: 0 })\n);\n\n// どれか 1 成分でも範囲外なら Err\nassert!(Rgb::try_from((-1, 0, 0)).is_err());\nassert!(Rgb::try_from((0, 0, 256)).is_err());\n```\n",
@@ -1396,6 +1473,7 @@
   },
   {
     "id": "i078",
+    "language": "rust",
     "level": "intermediate",
     "title": "Displayで座標を整形する",
     "description_md": "2 次元座標を表す `Point` に `fmt::Display` を実装し、`\"(x, y)\"` 形式で表示できるようにしてください。\n\n## 仕様\n\n- `Point { pub x: i32, pub y: i32 }` は定義済みです\n- `impl fmt::Display for Point` の `fmt` メソッドを完成させてください\n- 表示形式は `(x, y)` です。**丸かっこで囲み、カンマの後に半角スペースを 1 つ**入れます\n  - 例: `x = 3, y = 5` なら `(3, 5)`\n- `write!` マクロを使ってフォーマッタ `f` に書き込みます\n\n`Display` を実装すると、`format!(\"{}\", p)` や `println!(\"{}\", p)` に加えて `p.to_string()` も自動で使えるようになります。\n\n## 入出力例\n\n```rust\nlet p = Point { x: 3, y: 5 };\nassert_eq!(format!(\"{}\", p), \"(3, 5)\");\n\n// Display を実装すると to_string() も自動で使える\nassert_eq!(p.to_string(), \"(3, 5)\");\n```\n",
@@ -1414,6 +1492,7 @@
   },
   {
     "id": "i079",
+    "language": "rust",
     "level": "intermediate",
     "title": "enumに表示名を与える",
     "description_md": "曜日を表す enum `Weekday` に `fmt::Display` を実装し、日本語の曜日名で表示できるようにしてください。\n\n## 仕様\n\n- `Weekday` は `Monday` から `Sunday` までの 7 バリアントを持つ enum として定義済みです\n- `impl fmt::Display for Weekday` を完成させ、次の対応で表示してください\n\n| バリアント | 表示 |\n|---|---|\n| `Monday` | `月曜日` |\n| `Tuesday` | `火曜日` |\n| `Wednesday` | `水曜日` |\n| `Thursday` | `木曜日` |\n| `Friday` | `金曜日` |\n| `Saturday` | `土曜日` |\n| `Sunday` | `日曜日` |\n\n- `match` で全バリアントを網羅してください\n\n内部表現 (英語のバリアント名) と表示 (日本語) を分離するのが狙いです。\n\n## 入出力例\n\n```rust\nassert_eq!(format!(\"{}\", Weekday::Monday), \"月曜日\");\nassert_eq!(Weekday::Sunday.to_string(), \"日曜日\");\n```\n",
@@ -1432,6 +1511,7 @@
   },
   {
     "id": "i080",
+    "language": "rust",
     "level": "intermediate",
     "title": "Debugを手で実装する",
     "description_md": "パスワードを伏せ字にして出力する `Debug` を、`derive` を使わずに手で実装してください。\n\n## 仕様\n\n- `Account { pub username: String, pub password: String }` は定義済みです\n- `impl fmt::Debug for Account` を完成させてください\n- `f.debug_struct(\"Account\")` を使い、次のとおり出力します\n  - `username` フィールド: 実際の値をそのまま出す\n  - `password` フィールド: 実際の値の代わりに、**常に文字列 `****`** (アスタリスク 4 つ) を出す\n- `{:?}` での出力例: `Account { username: \"alice\", password: \"****\" }`\n\nログに `{:?}` で出力してもパスワードが漏れない型を作るのが狙いです。`derive(Debug)` は全フィールドをそのまま出してしまうため、こうした加工には手動実装が必要です。\n\n## 入出力例\n\n```rust\nlet acc = Account {\n    username: String::from(\"alice\"),\n    password: String::from(\"secret123\"),\n};\nlet s = format!(\"{:?}\", acc);\nassert_eq!(s, r#\"Account { username: \"alice\", password: \"****\" }\"#);\nassert!(!s.contains(\"secret123\"));\n```\n\n## 注意\n\n- パスワードの長さによらず伏せ字は `****` の 4 文字固定です\n- `.field(\"password\", &\"****\")` のように `&str` への参照を渡すと、`\"****\"` と引用符つきで出力されます\n",
@@ -1450,6 +1530,7 @@
   },
   {
     "id": "i081",
+    "language": "rust",
     "level": "intermediate",
     "title": "Addで座標を足す",
     "description_md": "`Point + Point` が書けるように、`std::ops::Add` を実装してください。\n\n## 仕様\n\n- `Point { pub x: i32, pub y: i32 }` は定義済みです (`Debug`, `Clone`, `Copy`, `PartialEq` を導出済み)\n- `impl Add for Point` を完成させてください\n  - 関連型は `type Output = Point;` です\n  - `x` 同士、`y` 同士をそれぞれ足した新しい `Point` を返します\n\n`Add` を実装すると `+` 演算子がその型で使えるようになります (演算子オーバーロード)。\n\n## 入出力例\n\n```rust\nlet a = Point { x: 1, y: 2 };\nlet b = Point { x: 3, y: 4 };\nassert_eq!(a + b, Point { x: 4, y: 6 });\n```\n",
@@ -1467,6 +1548,7 @@
   },
   {
     "id": "i082",
+    "language": "rust",
     "level": "intermediate",
     "title": "複素数の四則を定義する",
     "description_md": "複素数型 `Complex` に足し算 (`Add`) と掛け算 (`Mul`) を実装し、`+` と `*` で計算できるようにしてください。\n\n## 仕様\n\n- `Complex { pub re: f64, pub im: f64 }` は定義済みです (`re` が実部、`im` が虚部。`Debug`, `Clone`, `Copy`, `PartialEq` を導出済み)\n- `impl Add for Complex` を完成させてください\n  - `(a + bi) + (c + di) = (a + c) + (b + d)i`\n  - つまり実部同士・虚部同士を足します\n- `impl Mul for Complex` を完成させてください\n  - `(a + bi) × (c + di) = (ac − bd) + (ad + bc)i`\n  - 実部は `ac − bd`、虚部は `ad + bc` です\n- どちらも `type Output = Complex;` です\n\n1 つの型に複数の演算子トレイトを実装し、数学的な型を組み立てる練習です。\n\n## 入出力例\n\n```rust\nlet a = Complex { re: 1.0, im: 2.0 };\nlet b = Complex { re: 3.0, im: 4.0 };\n\nassert_eq!(a + b, Complex { re: 4.0, im: 6.0 });\nassert_eq!(a * b, Complex { re: -5.0, im: 10.0 }); // (1*3 - 2*4) + (1*4 + 2*3)i\n```\n",
@@ -1485,6 +1567,7 @@
   },
   {
     "id": "i083",
+    "language": "rust",
     "level": "intermediate",
     "title": "AddAssignとNegを実装する",
     "description_md": "2 次元ベクトル型 `Vec2` に、複合代入演算子 `+=` (`AddAssign`) と単項マイナス `-` (`Neg`) を実装してください。\n\n## 仕様\n\n- `Vec2 { pub x: i32, pub y: i32 }` は定義済みです (`Debug`, `Clone`, `Copy`, `PartialEq` を導出済み)\n- `impl AddAssign for Vec2` を完成させてください\n  - `v += w` で `v.x` に `w.x` を、`v.y` に `w.y` を**その場で加算**します\n  - `add_assign` は `&mut self` を取り、**何も返しません** (自分自身を書き換えます)\n- `impl Neg for Vec2` を完成させてください\n  - `-v` で `x`, `y` の符号を反転した**新しい** `Vec2` を返します\n  - `type Output = Vec2;` です\n\n`Add` (新しい値を返す) と `AddAssign` (自分を書き換える) のシグネチャの違いに注目してください。\n\n## 入出力例\n\n```rust\nlet mut v = Vec2 { x: 1, y: 2 };\nv += Vec2 { x: 3, y: 4 };\nassert_eq!(v, Vec2 { x: 4, y: 6 });\n\nlet w = -Vec2 { x: 5, y: -3 };\nassert_eq!(w, Vec2 { x: -5, y: 3 });\n```\n",
@@ -1503,6 +1586,7 @@
   },
   {
     "id": "i084",
+    "language": "rust",
     "level": "intermediate",
     "title": "Indexでグリッドにアクセスする",
     "description_md": "1次元の `Vec<i32>` でデータを保持する2次元グリッド型 `Grid` に、`std::ops::Index` と `std::ops::IndexMut` を実装して、`grid[(row, col)]` という記法で要素を読み書きできるようにしてください。\n\n## 仕様\n\n- `Grid::new(rows, cols)` は `rows` 行 `cols` 列、全要素 `0` のグリッドを作ります (実装済みです)。\n- `grid[(row, col)]` は `row` 行 `col` 列の要素を指します。内部は行優先 (row-major) レイアウトで、`data[row * cols + col]` に対応させてください。\n- 範囲外の添字 (`row >= rows` または `col >= cols`) でアクセスした場合は panic してください。\n\n## 例\n\n```rust\nlet mut grid = Grid::new(2, 3);\ngrid[(0, 1)] = 10;\ngrid[(1, 2)] = -4;\nassert_eq!(grid[(0, 1)], 10);\nassert_eq!(grid[(1, 2)], -4);\nassert_eq!(grid[(0, 0)], 0);\n```\n",
@@ -1521,6 +1605,7 @@
   },
   {
     "id": "i085",
+    "language": "rust",
     "level": "intermediate",
     "title": "Boxで再帰enumを定義する",
     "description_md": "関数型言語でおなじみの「コンスリスト」を Rust の enum で定義し、その長さを数える関数を実装してください。\n\nコンスリストは「値と、残りのリスト」の組 (`Cons`) か、終端 (`Nil`) のどちらかです。残りのリストは `Box<List>` としてヒープに置きます (enum の定義は starter に用意済みです)。\n\n## 実装する関数\n\n- `pub fn len(list: &List) -> usize` — リストに含まれる `Cons` セルの個数を返します。\n\n## 例\n\n```rust\nlet list = List::Cons(1, Box::new(List::Cons(2, Box::new(List::Nil))));\nassert_eq!(len(&list), 2);\nassert_eq!(len(&List::Nil), 0);\n```\n\n## 注意\n\n- ループではなく再帰で書いてみましょう (どちらでもテストは通ります)。\n",
@@ -1539,6 +1624,7 @@
   },
   {
     "id": "i086",
+    "language": "rust",
     "level": "intermediate",
     "title": "コンスリストとVecを相互変換する",
     "description_md": "コンスリスト `List` (定義済み) と `Vec<i32>` を相互変換する関数と、リストの合計を求める関数を実装してください。\n\n## 実装する関数\n\n- `pub fn from_vec(values: &[i32]) -> List` — スライスの先頭から順に `Cons` をつなげたリストを返します。空スライスなら `Nil` です。\n- `pub fn to_vec(list: &List) -> Vec<i32>` — リストの先頭から順に要素を集めた `Vec` を返します。\n- `pub fn sum(list: &List) -> i32` — 全要素の合計を返します。空リストなら `0` です。\n\n## 例\n\n```rust\nlet list = from_vec(&[1, 2]);\nassert_eq!(list, List::Cons(1, Box::new(List::Cons(2, Box::new(List::Nil)))));\nassert_eq!(to_vec(&list), vec![1, 2]);\nassert_eq!(sum(&list), 3);\nassert_eq!(sum(&List::Nil), 0);\n```\n\n## 注意\n\n- 要素の順序を保存してください (`from_vec(&[1, 2])` の先頭は `1`)。\n",
@@ -1557,6 +1643,7 @@
   },
   {
     "id": "i087",
+    "language": "rust",
     "level": "intermediate",
     "title": "二分探索木に挿入する",
     "description_md": "`Option<Box<Node>>` で子を持つ二分探索木 (BST) を実装してください。構造体の定義は starter に用意済みです。\n\n## 実装するメソッド\n\n- `Bst::new() -> Bst` — 空の木を作ります。\n- `Bst::insert(&mut self, value: i32)` — BST の規則に従って値を挿入します。すでに同じ値がある場合は何もしません。\n- `Bst::contains(&self, value: i32) -> bool` — 値が木に含まれるかを返します。\n\n## BST の規則\n\n- あるノードの左部分木にはそのノードより小さい値だけ、右部分木には大きい値だけが入ります。\n- 挿入は「小さければ左へ、大きければ右へ」と根からたどり、空いている場所 (`None`) に新しいノードを置きます。\n\n## 例\n\n```rust\nlet mut bst = Bst::new();\nbst.insert(5);\nbst.insert(3);\nbst.insert(8);\nassert!(bst.contains(3));\nassert!(bst.contains(5));\nassert!(!bst.contains(7));\n```\n",
@@ -1575,6 +1662,7 @@
   },
   {
     "id": "i088",
+    "language": "rust",
     "level": "intermediate",
     "title": "二分木を歩いて集める",
     "description_md": "`Option<Box<Node>>` を根とする二分木に対して、通りがけ順 (in-order) 走査と高さの計算を実装してください。`Node` の定義と `Node::new` は starter に用意済みです。\n\n## 実装する関数\n\n- `pub fn inorder(root: &Option<Box<Node>>) -> Vec<i32>` — 「左部分木 → 自分 → 右部分木」の順で値を集めた `Vec` を返します。二分探索木に適用するとソート済みの列が得られます。\n- `pub fn height(root: &Option<Box<Node>>) -> usize` — 木の高さを返します。空の木 (`None`) は `0`、ノード1個の木は `1` とします (根から最も遠い葉までのノード数)。\n\n## 例\n\n```rust\n// 木:   2\n//      / \\\n//     1   3\nlet root = Some(Box::new(Node {\n    value: 2,\n    left: Some(Box::new(Node::new(1))),\n    right: Some(Box::new(Node::new(3))),\n}));\nassert_eq!(inorder(&root), vec![1, 2, 3]);\nassert_eq!(height(&root), 2);\nassert_eq!(height(&None), 0);\n```\n",
@@ -1593,6 +1681,7 @@
   },
   {
     "id": "i089",
+    "language": "rust",
     "level": "intermediate",
     "title": "sort_byとOrderingで降順に並べる",
     "description_md": "`sort_by` と `Ordering` を使って、`i32` のスライスを降順 (大きい順) に並べ替える関数を実装してください。\n\n## 実装する関数\n\n- `pub fn sort_desc(values: &mut [i32])` — `values` をその場で降順に並べ替えます。\n\n## 例\n\n```rust\nlet mut v = vec![3, 1, 4, 1, 5];\nsort_desc(&mut v);\nassert_eq!(v, vec![5, 4, 3, 1, 1]);\n```\n\n## 注意\n\n- `sort_by` に渡す比較関数 (クロージャ) は `std::cmp::Ordering` を返します。`cmp` が返す `Ordering` を `reverse()` で反転する書き方を試してみましょう。\n",
@@ -1610,6 +1699,7 @@
   },
   {
     "id": "i090",
+    "language": "rust",
     "level": "intermediate",
     "title": "複数キーでソートする",
     "description_md": "学生のリストを「点数の降順、同点なら名前の昇順 (辞書順)」で並べ替える関数を、`Ordering::then_with` を使って実装してください。\n\n## 実装する関数\n\n- `pub fn sort_students(students: &mut [Student])` — 上記の規則でその場で並べ替えます。\n\n`Student` は starter に定義済みです (`name: String`, `score: u32`)。\n\n## 例\n\n```rust\nlet mut students = vec![\n    Student { name: \"Bob\".to_string(), score: 80 },\n    Student { name: \"Alice\".to_string(), score: 90 },\n    Student { name: \"Carol\".to_string(), score: 80 },\n];\nsort_students(&mut students);\n// 点数降順。80 点同士は名前の昇順\nassert_eq!(students[0].name, \"Alice\");\nassert_eq!(students[1].name, \"Bob\");\nassert_eq!(students[2].name, \"Carol\");\n```\n",
@@ -1628,6 +1718,7 @@
   },
   {
     "id": "i091",
+    "language": "rust",
     "level": "intermediate",
     "title": "Ordを自分で実装する",
     "description_md": "絶対値の小さい順に並ぶ整数型 `AbsInt` を作り、`Ord` と `PartialOrd` を手動で実装してください。\n\n## 型と規則\n\n- `pub struct AbsInt(pub i32);` (定義済み。`PartialEq` / `Eq` / `Debug` は derive 済みです)\n- 大小規則: **絶対値の昇順**。絶対値が等しい場合は**値そのものの昇順** (負の数が先) とします。\n  - 例: `AbsInt(-1) < AbsInt(1) < AbsInt(2) < AbsInt(-3)`\n\nタイブレーク (絶対値が同じときの規則) を入れているのは、`cmp` が `Equal` を返すのは `==` が `true` のときだけ、という `Ord` の一貫性ルールを守るためです。\n\n## 実装するトレイト\n\n- `impl Ord for AbsInt` — 上記の規則で `cmp` を実装します。\n- `impl PartialOrd for AbsInt` — `cmp` に委譲します。\n\n`Ord` を実装すると、`Vec<AbsInt>` に対して `sort()` や `max()` がそのまま使えるようになります。\n\n## 例\n\n```rust\nlet mut v = vec![AbsInt(-3), AbsInt(1), AbsInt(-1), AbsInt(2)];\nv.sort();\nassert_eq!(v, vec![AbsInt(-1), AbsInt(1), AbsInt(2), AbsInt(-3)]);\n```\n\n## 注意\n\n- 入力に `i32::MIN` は含まれない前提で構いません (`abs()` のオーバーフローは考慮不要)。\n",
@@ -1646,6 +1737,7 @@
   },
   {
     "id": "i092",
+    "language": "rust",
     "level": "intermediate",
     "title": "f64を安全にソートする",
     "description_md": "`f64` のスライスを昇順に並べ替える関数を実装してください。\n\n`Vec<f64>` に対して `sort()` は使えません。`f64` は `NaN` の存在により全順序 (`Ord`) を持たないためです。代わりに `sort_by` に比較関数を渡します。\n\n## 実装する関数\n\n- `pub fn sort_floats(values: &mut [f64])` — `values` をその場で昇順に並べ替えます。\n\n## 例\n\n```rust\nlet mut v = vec![3.5, -1.25, 0.5];\nsort_floats(&mut v);\nassert_eq!(v, vec![-1.25, 0.5, 3.5]);\n```\n\n## 注意\n\n- 入力に `NaN` は含まれない前提で構いません。ただし `f64::INFINITY` / `f64::NEG_INFINITY` は正しく並ぶこと。\n- `f64::total_cmp` を使う方法と、`partial_cmp` を使う方法があります。解説で違いを確認しましょう。\n",
@@ -1663,6 +1755,7 @@
   },
   {
     "id": "i093",
+    "language": "rust",
     "level": "intermediate",
     "title": "2要素を同時に可変参照する",
     "description_md": "スライスの2つの要素を入れ替える関数を、`split_at_mut` を使って実装してください。\n\nRust では同じスライスから `&mut values[i]` と `&mut values[j]` を同時に作ることはできません (可変借用は同時に1つまで)。`split_at_mut` はスライスを重なりのない2つの可変スライスに分割することで、この制約の中で「2箇所を同時に書き換える」ことを可能にします。\n\n## 実装する関数\n\n- `pub fn swap_elements(values: &mut [i32], i: usize, j: usize)` — `values[i]` と `values[j]` を入れ替えます。\n  - `i == j` のときは何もしません。\n  - `i > j` で呼ばれても正しく動くこと。\n  - `i`, `j` は有効な添字である前提で構いません (範囲チェック不要)。\n  - `slice.swap()` を使わず、`split_at_mut` と `std::mem::swap` で実装してください (テストでは結果のみ検証します)。\n\n## 例\n\n```rust\nlet mut v = vec![10, 20, 30, 40];\nswap_elements(&mut v, 0, 3);\nassert_eq!(v, vec![40, 20, 30, 10]);\nswap_elements(&mut v, 2, 2);\nassert_eq!(v, vec![40, 20, 30, 10]); // i == j は変化なし\n```\n",
@@ -1681,6 +1774,7 @@
   },
   {
     "id": "i094",
+    "language": "rust",
     "level": "intermediate",
     "title": "一時変数で借用の衝突をほどく",
     "description_md": "`HashMap<String, i32>` をポイント台帳として扱い、あるキーの値を別のキーに「加算コピー」する関数 `add_from` を完成させてください。\n\n仕様は次のとおりです。\n\n- `src` キーが存在しない場合は、マップを一切変更せずに `false` を返します。\n- `src` キーが存在する場合は、その値を `dst` キーのエントリに加算して `true` を返します。`dst` が存在しないときは 0 から作って加算します。\n- `src` の値そのものは変更しません。\n- `src` と `dst` が同じキーの場合は、自分の値を自分に足すので値が 2 倍になります。\n\n```rust\nuse std::collections::HashMap;\n\nlet mut m = HashMap::new();\nm.insert(\"alice\".to_string(), 100);\nm.insert(\"bob\".to_string(), 30);\n\nassert_eq!(add_from(&mut m, \"alice\", \"bob\"), true);\nassert_eq!(m[\"bob\"], 130);   // 30 + 100\nassert_eq!(m[\"alice\"], 100); // src は変わらない\n\nassert_eq!(add_from(&mut m, \"nobody\", \"bob\"), false);\nassert_eq!(m[\"bob\"], 130);   // 失敗時は何も変わらない\n```\n\n注意: 初期コードはロジックとしては正しそうに見えますが、`map.get(src)` の不変借用が生きたまま `map.entry(...)` で可変借用を取ろうとするため、コンパイルエラー (E0502) になります。値を一時変数にコピーして「読み終えてから書く」形に直してください。`i32` は `Copy` なので、参照から値を取り出すだけで借用を切り離せます。\n",
@@ -1699,6 +1793,7 @@
   },
   {
     "id": "i095",
+    "language": "rust",
     "level": "intermediate",
     "title": "フィールド借用を分割する",
     "description_md": "観測値の最大値を追跡する構造体 `Tracker` があります。\n\n```rust\npub struct Tracker {\n    pub values: Vec<i32>, // 観測値のリスト\n    pub max: i32,         // これまでに確定している最大値\n}\n```\n\nメソッド `scan` は、`values` の各要素を順に見て、`max` より大きい値があれば `max` を更新します。つまり `scan` 実行後の `max` は「元の `max` と `values` の全要素のうちの最大値」になります。`values` 自体は変更しません。\n\n```rust\nlet mut t = Tracker { values: vec![3, 1, 4, 1, 5], max: 0 };\nt.scan();\nassert_eq!(t.max, 5);\nassert_eq!(t.values, vec![3, 1, 4, 1, 5]); // values はそのまま\n\nlet mut t2 = Tracker { values: vec![1, 2], max: 10 };\nt2.scan();\nassert_eq!(t2.max, 10); // 元の max のほうが大きければ据え置き\n```\n\n初期コードでは、`&self.values` をイテレートしている最中に `&mut self` を取るメソッド `record` を呼んでいるため、コンパイルエラー (E0502) になります。`values.clone()` に逃げるのではなく、**フィールド単位で借用を分割する** (例: `&mut self.max` と `&self.values` を別々に取る) ことでエラーを解消してください。\n\n- 変更してよいのは `Tracker` の impl の中身です。`record` メソッドは削除したり、`&mut self` を取らない形に作り替えたりして構いません。\n- `pub fn scan(&mut self)` のシグネチャと、構造体の定義は変更しないでください。\n",
@@ -1717,6 +1812,7 @@
   },
   {
     "id": "i096",
+    "language": "rust",
     "level": "intermediate",
     "title": "GCDとLCMを実装する",
     "description_md": "最大公約数 `gcd` と最小公倍数 `lcm` を実装してください。\n\n- `pub fn gcd(a: u64, b: u64) -> u64`\n  ユークリッドの互除法で最大公約数を返します。`gcd(x, 0)` と `gcd(0, x)` は `x`、`gcd(0, 0)` は `0` とします。\n- `pub fn lcm(a: u64, b: u64) -> u64`\n  最小公倍数を返します。どちらかが `0` のときは `0` とします。\n\n```rust\nassert_eq!(gcd(12, 18), 6);\nassert_eq!(gcd(0, 5), 5);\nassert_eq!(lcm(4, 6), 12);\nassert_eq!(lcm(0, 10), 0);\n\n// a * b が u64 に収まらなくても、lcm 自体が収まるなら正しく計算できること\nassert_eq!(lcm(u64::MAX, u64::MAX), u64::MAX);\n```\n\n注意: `lcm` を `a * b / gcd(a, b)` の順で計算すると、`a * b` の途中結果が u64 からあふれて panic (デバッグビルド) または誤答になります。**先に割ってから掛ける** `a / gcd(a, b) * b` の形にしてください。`a` は `gcd(a, b)` で必ず割り切れるので、この順序でも誤差は出ません。\n",
@@ -1735,6 +1831,7 @@
   },
   {
     "id": "i097",
+    "language": "rust",
     "level": "intermediate",
     "title": "素数を判定し列挙する",
     "description_md": "素数判定と素数の列挙を実装してください。\n\n- `pub fn is_prime(n: u64) -> bool`\n  `n` が素数なら `true` を返します。素数とは「1 より大きく、1 と自分自身以外に約数を持たない整数」です。`0` と `1` は素数ではありません。\n- `pub fn primes_up_to(n: u64) -> Vec<u64>`\n  `n` 以下の素数を小さい順に集めた `Vec` を返します。`n < 2` のときは空の `Vec` を返します。\n\n```rust\nassert!(is_prime(2));\nassert!(!is_prime(1));\nassert!(!is_prime(9));\nassert!(is_prime(97));\n\nassert_eq!(primes_up_to(20), vec![2, 3, 5, 7, 11, 13, 17, 19]);\nassert_eq!(primes_up_to(1), Vec::<u64>::new());\n```\n\n注意: `is_prime` の試し割りは `n - 1` まで回すのではなく、**`i * i <= n` の範囲** (つまり平方根まで) で打ち切ってください。合成数には必ず平方根以下の約数があるため、それで十分です。この工夫で計算量が O(n) から O(√n) に下がります。\n",
@@ -1753,6 +1850,7 @@
   },
   {
     "id": "i098",
+    "language": "rust",
     "level": "intermediate",
     "title": "オーバーフローしないフィボナッチ",
     "description_md": "`n` 番目のフィボナッチ数を返す関数を実装してください。ただし u64 で表現できない場合は `None` を返します。\n\n- `pub fn fib_checked(n: u32) -> Option<u64>`\n- フィボナッチ数列は `fib(0) = 0`, `fib(1) = 1`, `fib(n) = fib(n-1) + fib(n-2)` と定義します。\n- 計算の途中で u64 の範囲を超える加算が必要になった場合は `None` を返します。u64 に収まる最大のフィボナッチ数は `fib(93) = 12200160415121876738` なので、`n <= 93` では `Some`、`n >= 94` では `None` を返すことになります。\n\n```rust\nassert_eq!(fib_checked(0), Some(0));\nassert_eq!(fib_checked(1), Some(1));\nassert_eq!(fib_checked(10), Some(55));\nassert_eq!(fib_checked(93), Some(12200160415121876738));\nassert_eq!(fib_checked(94), None);\n```\n\n注意:\n\n- 再帰ではなく **反復 (ループ)** で計算してください。素朴な二重再帰は指数時間になります。\n- 加算には `checked_add` を使ってください。通常の `+` はデバッグビルドで panic、リリースビルドでは黙って wrap するため、「失敗を `None` で返す」契約を満たせません。\n- 境界に注意: `fib(93)` を求めるのに `fib(94)` まで計算してしまう実装だと、`n = 93` で誤って `None` を返してしまいます。\n",
@@ -1771,6 +1869,7 @@
   },
   {
     "id": "i099",
+    "language": "rust",
     "level": "intermediate",
     "title": "二分探索を自作する",
     "description_md": "標準ライブラリの `slice::binary_search` と同じ契約の二分探索を自作してください。\n\n- `pub fn my_binary_search(xs: &[i32], target: i32) -> Result<usize, usize>`\n- `xs` は昇順にソート済みで、**重複はない** ものとします。\n- `target` が見つかった場合は `Ok(そのインデックス)` を返します。\n- 見つからなかった場合は `Err(挿入位置)` を返します。挿入位置とは「ソート順を保ったまま `target` を挿入できるインデックス」です。\n\n```rust\nlet xs = [1, 3, 5, 7, 9];\nassert_eq!(my_binary_search(&xs, 5), Ok(2));\nassert_eq!(my_binary_search(&xs, 4), Err(2));  // 3 と 5 の間に入る\nassert_eq!(my_binary_search(&xs, 0), Err(0));  // 先頭に入る\nassert_eq!(my_binary_search(&xs, 10), Err(5)); // 末尾に入る\nassert_eq!(my_binary_search(&[], 1), Err(0));  // 空スライス\n```\n\n注意:\n\n- 標準の `binary_search` を呼ぶのではなく、`lo` / `hi` の 2 つの添字を使ったループで自分で実装してください。\n- 中央の計算は `lo + (hi - lo) / 2` の形にすると、`lo + hi` の加算があふれる心配がありません (添字計算の定石です)。\n- 計算量は O(log n) です。線形探索でもテストは通ってしまいますが、二分探索として書いてください。\n",
@@ -1789,6 +1888,7 @@
   },
   {
     "id": "i100",
+    "language": "rust",
     "level": "intermediate",
     "title": "逆ポーランド記法電卓を作る",
     "description_md": "逆ポーランド記法 (RPN) の式を評価する電卓を実装してください。中級編の総仕上げとして、独自エラー enum・`match`・イテレータ・`Vec` をスタックとして使う設計を 1 つにまとめます。\n\nRPN は「オペランドを先に、演算子を後に」書く記法です。例えば `3 4 +` は `3 + 4`、`5 1 2 + 4 * + 3 -` は `5 + (1 + 2) * 4 - 3` を意味します。\n\nまず、エラーを表す enum を定義します (この定義をそのまま使ってください)。\n\n```rust\n#[derive(Debug, PartialEq, Eq)]\npub enum RpnError {\n    UnknownToken(String), // 数値でも演算子でもないトークン (元のトークンを保持)\n    StackUnderflow,       // オペランド不足、または式全体が不完全\n    DivisionByZero,       // ゼロ除算\n}\n```\n\n次に評価関数を実装します。\n\n- `pub fn eval_rpn(input: &str) -> Result<i64, RpnError>`\n- `input` を空白区切りでトークンに分割します (`split_whitespace` が便利です)。\n- 各トークンを順に処理します:\n  - `+` `-` `*` `/` の 4 演算子: スタックから 2 つ取り出し (先に取り出した方が右オペランド)、計算結果を積みます。取り出せない (スタックに 2 個ない) 場合は `Err(RpnError::StackUnderflow)`。`/` は整数除算 (Rust の `/` と同じ、0 方向への切り捨て) で、右オペランドが 0 なら `Err(RpnError::DivisionByZero)`。\n  - それ以外のトークン: `i64` としてパースしてスタックに積みます。`-3` のような負数も数値として扱います。パースできなければ `Err(RpnError::UnknownToken(トークン文字列))`。\n- 全トークン処理後、スタックに **ちょうど 1 個** 値が残っていればそれが答えです。0 個 (空の入力など) や 2 個以上残った場合は式が不完全なので `Err(RpnError::StackUnderflow)` を返します。\n\n```rust\nassert_eq!(eval_rpn(\"3 4 +\"), Ok(7));\nassert_eq!(eval_rpn(\"5 1 2 + 4 * + 3 -\"), Ok(14));\nassert_eq!(eval_rpn(\"1 0 /\"), Err(RpnError::DivisionByZero));\nassert_eq!(eval_rpn(\"1 +\"), Err(RpnError::StackUnderflow));\nassert_eq!(eval_rpn(\"2 3\"), Err(RpnError::StackUnderflow)); // 値が 2 個残る\nassert_eq!(eval_rpn(\"abc\"), Err(RpnError::UnknownToken(\"abc\".to_string())));\n```\n\nヒント: `Vec::pop()` は `Option<i64>` を返すので、`ok_or(...)` で `Result` に変換して `?` で伝播すると簡潔に書けます。\n",

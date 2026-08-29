@@ -1,6 +1,7 @@
 [
   {
     "id": "a001",
+    "language": "rust",
     "level": "advanced",
     "title": "ライフタイム注釈",
     "description_md": "2つの文字列スライスのうち **長いほう** を返す関数 `longest` があります。しかし今のままでは **コンパイルが通りません**。\n\nまず実行してエラー `E0106` (missing lifetime specifier) を確認し、適切な **ライフタイム注釈** を追加して直しましょう。\n\n```rust\nlongest(\"short\", \"longer\") // => \"longer\"\n```",
@@ -19,6 +20,7 @@
   },
   {
     "id": "a002",
+    "language": "rust",
     "level": "advanced",
     "title": "ジェネリクスとトレイト境界",
     "description_md": "スライスの **最大値** を返すジェネリック関数 `largest` を完成させましょう。どんな比較可能な型 (`i32`, `f64`, `char`, ...) でも動く必要があります。\n\n```rust\nlargest(&[1, 5, 3])       // => 5\nlargest(&['a', 'z', 'm']) // => 'z'\n```\n\n空スライスは呼び出し側の責任とし、考えなくて構いません。適切な **トレイト境界** を付けるのがポイントです。",
@@ -37,6 +39,7 @@
   },
   {
     "id": "a003",
+    "language": "rust",
     "level": "advanced",
     "title": "クロージャを返す関数",
     "description_md": "整数 `x` を受け取り、「引数に `x` を足すクロージャ」を返す関数 `make_adder` を完成させましょう。\n\n```rust\nlet add5 = make_adder(5);\nadd5(10) // => 15\nadd5(-5) // => 0\n```\n\nクロージャは呼び出しごとに何度でも使える必要があります。戻り値の型の書き方と、環境のキャプチャ方法がポイントです。",
@@ -55,6 +58,7 @@
   },
   {
     "id": "a004",
+    "language": "rust",
     "level": "advanced",
     "title": "参照を保持する構造体",
     "description_md": "文字列スライスへの参照をフィールドに保持する構造体 `Excerpt` を完成させてください。\n\n構造体が参照を保持する場合、Rust では**ライフタイムパラメータ**の注釈が必須です。初期コードの `Excerpt` にはライフタイムパラメータがないため、そのままではコンパイルできません。\n\n実装する内容は次の 2 つです。\n\n1. `Excerpt` にライフタイムパラメータ `'a` を追加し、フィールド `part: &'a str` を持たせる\n2. 関連関数 `new(text: &str) -> Excerpt` を実装する。`text` の**最初の単語**(最初の半角スペースの手前まで)を `part` に保持します。スペースがなければ `text` 全体を、空文字列なら空文字列をそのまま保持します\n\n```rust\nlet e = Excerpt::new(\"hello world rust\");\nassert_eq!(e.part, \"hello\");\n\nlet e = Excerpt::new(\"single\");\nassert_eq!(e.part, \"single\");\n\nlet e = Excerpt::new(\"\");\nassert_eq!(e.part, \"\");\n```\n\n注意: `part` は元の文字列への参照です。`String` を作ってコピーするのではなく、`&str` のスライスをそのまま保持してください。",
@@ -73,6 +77,7 @@
   },
   {
     "id": "a005",
+    "language": "rust",
     "level": "advanced",
     "title": "複数のライフタイムパラメータ",
     "description_md": "文字列 `text` の中で `marker` が**最初に現れる位置の手前まで**を返す関数 `until_marker` を完成させてください。`marker` が見つからない場合は `text` 全体を返します。\n\n```rust\nassert_eq!(until_marker(\"hello,world\", \",\"), \"hello\");\nassert_eq!(until_marker(\"key=value\", \"=\"), \"key\");\nassert_eq!(until_marker(\"hello\", \"|\"), \"hello\"); // 見つからない場合は全体\n```\n\nポイントはシグネチャです。戻り値は必ず `text` のスライスであり、`marker` とは無関係です。ところが初期コードのように両方の引数を同じ `'a` にしてしまうと、「戻り値は `marker` の生存期間にも縛られる」という**過剰な制約**が付き、次のようなコードがコンパイルできなくなります。\n\n```rust\nlet text = String::from(\"key=value\");\nlet result;\n{\n    let marker = String::from(\"=\");\n    result = until_marker(&text, &marker);\n} // ここで marker は破棄されるが、result は text 由来なので本来は使えてよい\nassert_eq!(result, \"key\");\n```\n\n`'a` と `'b` の 2 つのライフタイムパラメータに分離し、戻り値が `text` だけに由来することをシグネチャで表現してください。",
@@ -90,6 +95,7 @@
   },
   {
     "id": "a006",
+    "language": "rust",
     "level": "advanced",
     "title": "ライフタイム省略規則の限界",
     "description_md": "2 つの文字列スライスのうち**長い方**を返す関数 `longest` をコンパイルが通るように修正してください。長さが同じ場合は最初の引数 `a` を返します(長さはバイト長 `len()` で比較します)。\n\n初期コードにはロジックがすでに書かれていますが、ライフタイム注釈がないため **E0106 (missing lifetime specifier)** でコンパイルできません。\n\n```rust\nassert_eq!(longest(\"hello\", \"hi\"), \"hello\");\nassert_eq!(longest(\"a\", \"abc\"), \"abc\");\nassert_eq!(longest(\"abc\", \"xyz\"), \"abc\"); // 同じ長さなら a\n```\n\nRust には 3 つの**ライフタイム省略規則 (elision rules)** があります。\n\n1. 引数の参照それぞれに別のライフタイムが割り当てられる\n2. 引数の参照が 1 つだけなら、そのライフタイムが戻り値に割り当てられる\n3. メソッドで `&self` があれば、`self` のライフタイムが戻り値に割り当てられる\n\n`longest` は参照引数が 2 つあり `&self` もないため、規則 2・3 が適用できず、戻り値のライフタイムをコンパイラが決められません。ライフタイムパラメータを明示して解決してください。",
@@ -108,6 +114,7 @@
   },
   {
     "id": "a007",
+    "language": "rust",
     "level": "advanced",
     "title": "メソッドが返す参照のライフタイム",
     "description_md": "文字列スライスを保持する構造体 `Text<'a>` に、**最初の行**を返すメソッド `first_line` を実装してください。\n\n- `first_line(&self)` は `content` の最初の行(最初の改行 `\\n` の手前まで)を返します\n- 改行がなければ `content` 全体、空文字列なら `\"\"` を返します\n- 戻り値の型は `&'a str` です。つまり戻り値は `Text` インスタンス (`&self`) ではなく、**保持している元の文字列** (`'a`) と同じだけ生きられます\n\n```rust\nlet t = Text::new(\"alpha\\nbeta\\ngamma\");\nassert_eq!(t.first_line(), \"alpha\");\n\n// 戻り値は Text より長生きできる\nlet source = String::from(\"head\\ntail\");\nlet line;\n{\n    let t = Text::new(&source);\n    line = t.first_line();\n} // t はここで破棄されるが…\nassert_eq!(line, \"head\"); // line は source 由来なので使える\n```\n\nメソッドの戻り値を省略形の `&str` と書くと、第 3 省略規則により `&self` のライフタイムが割り当てられ、上の例がコンパイルできなくなります。`&'a str` を明示する必要があります。",
@@ -126,6 +133,7 @@
   },
   {
     "id": "a008",
+    "language": "rust",
     "level": "advanced",
     "title": "'static ライフタイムの意味",
     "description_md": "バイト数からサイズ区分のラベルを返す関数 `size_label` を実装してください。戻り値の型は `&'static str` です。\n\n- `byte_count` が `1_000_000` 以上なら `\"large\"`\n- `1_000` 以上 `1_000_000` 未満なら `\"medium\"`\n- それ未満なら `\"small\"`\n\n```rust\nassert_eq!(size_label(2_000_000), \"large\");\nassert_eq!(size_label(1_000), \"medium\");\nassert_eq!(size_label(999), \"small\");\nassert_eq!(size_label(0), \"small\");\n```\n\n`\"large\"` のような**文字列リテラル**はプログラムのバイナリに埋め込まれ、プログラムの実行中ずっと有効です。そのため型は `&'static str` になります。この関数はローカル変数への参照を返しているわけではないので、ライフタイムの問題は起きません。\n\n境界値 (`1_000` ちょうど、`1_000_000` ちょうど) の扱いに注意して実装してください。",
@@ -144,6 +152,7 @@
   },
   {
     "id": "a009",
+    "language": "rust",
     "level": "advanced",
     "title": "デフォルト実装とオーバーライド",
     "description_md": "通知メッセージを組み立てるトレイト `Notifier` が定義されています。\n\n```rust\npub trait Notifier {\n    fn title(&self) -> String;\n\n    fn notify(&self) -> String {\n        format!(\"[INFO] {}\", self.title())\n    }\n}\n```\n\n`notify` には**デフォルト実装**があり、`[INFO] タイトル` の形式を返します。このトレイトを 2 つの型に実装してください。\n\n1. `Info` — `title()` は `message` フィールドの内容をそのまま返す。`notify()` は**デフォルト実装のまま**使う\n2. `Alert` — `title()` は `message` フィールドの内容をそのまま返す。`notify()` を**オーバーライド**して `[ALERT] タイトル` の形式を返す\n\n```rust\nlet n = Info { message: String::from(\"deploy done\") };\nassert_eq!(n.notify(), \"[INFO] deploy done\");\n\nlet a = Alert { message: String::from(\"disk full\") };\nassert_eq!(a.notify(), \"[ALERT] disk full\");\n```\n\n共通の動作 (プレフィックス付きの通知) はデフォルト実装に置き、`Alert` だけ挙動を差し替える、という「共通動作と個別動作の分離」を体験する問題です。",
@@ -161,6 +170,7 @@
   },
   {
     "id": "a010",
+    "language": "rust",
     "level": "advanced",
     "title": "関連型で結ぶコンテナ",
     "description_md": "**関連型 (associated type)** を持つトレイト `Container` を定義し、2 つの型に実装してください。\n\nトレイトの形は次のとおりです。\n\n```rust\npub trait Container {\n    type Item;\n\n    fn get(&self, index: usize) -> Option<&Self::Item>;\n    fn size(&self) -> usize;\n}\n```\n\n- `get(index)` は `index` 番目 (0 始まり) の要素への参照を返します。範囲外なら `None` です\n- `size()` は要素数を返します\n\nこれを次の 2 つの型に実装します。\n\n1. `Numbers` (`values: Vec<i32>`) — `Item = i32`\n2. `Words` (`values: Vec<String>`) — `Item = String`\n\n```rust\nlet n = Numbers { values: vec![10, 20, 30] };\nassert_eq!(n.get(1), Some(&20));\nassert_eq!(n.get(9), None);\nassert_eq!(n.size(), 3);\n\nlet w = Words { values: vec![String::from(\"hello\")] };\nassert_eq!(w.get(0).map(|s| s.as_str()), Some(\"hello\"));\n```\n\n関連型は「実装ごとに要素型が**ちょうど 1 つ**決まる」のが特徴です。ジェネリック型パラメータ (`trait Container<T>`) との違いを意識しながら書いてみてください。",
@@ -179,6 +189,7 @@
   },
   {
     "id": "a011",
+    "language": "rust",
     "level": "advanced",
     "title": "型パラメータを持つトレイト",
     "description_md": "**型パラメータ付きトレイト** `Convert<T>` が定義されています。\n\n```rust\npub trait Convert<T> {\n    fn convert(&self) -> T;\n}\n```\n\nタグ番号を表す `Tag(pub u32)` 型に、この `Convert` を **2 回** (別々の型パラメータで) 実装してください。\n\n1. `Convert<u32>` — 内部の数値をそのまま返す\n2. `Convert<String>` — `#` を付けた文字列 (例: `Tag(42)` なら `\"#42\"`) を返す\n\n```rust\nlet n: u32 = Tag(42).convert();\nassert_eq!(n, 42);\n\nlet s: String = Tag(42).convert();\nassert_eq!(s, \"#42\");\n```\n\n関連型のトレイトは 1 つの型に 1 回しか実装できませんが、型パラメータ付きトレイトは `Convert<u32>` と `Convert<String>` が**別のトレイト扱い**になるため、同じ `Tag` に共存できます。呼び出し側は `let n: u32 = ...` のような型注釈でどちらの実装を使うかを選びます。",
@@ -197,6 +208,7 @@
   },
   {
     "id": "a012",
+    "language": "rust",
     "level": "advanced",
     "title": "Add 演算子のオーバーロード",
     "description_md": "2 次元の点を表す `Point` 型に `std::ops::Add` を実装し、`+` 演算子を使えるようにしてください。実装するのは 2 通りです。\n\n1. `Point + Point` — 成分ごとの和を返す\n2. `Point + i32` — 両方の成分にその整数を加えた `Point` を返す\n\n```rust\nlet p = Point { x: 1, y: 2 } + Point { x: 3, y: 4 };\nassert_eq!(p, Point { x: 4, y: 6 });\n\nlet q = Point { x: 1, y: -1 } + 10;\nassert_eq!(q, Point { x: 11, y: 9 });\n```\n\n`Add` トレイトは次の形をしています。\n\n```rust\npub trait Add<Rhs = Self> {\n    type Output;\n    fn add(self, rhs: Rhs) -> Self::Output;\n}\n```\n\n- 型パラメータ `Rhs` は「右辺の型」で、省略すると `Self` (つまり `Point + Point`)\n- 関連型 `Output` は「演算結果の型」で、どちらの実装でも `Point` にします\n\n`a + b` と書くと、コンパイラが `a.add(b)` の呼び出しに置き換えます。",
@@ -215,6 +227,7 @@
   },
   {
     "id": "a013",
+    "language": "rust",
     "level": "advanced",
     "title": "スーパートレイトによる前提要求",
     "description_md": "**スーパートレイト**を使って、「`Display` を実装済みの型だけがレポートを出せる」仕組みを作ります。実装する内容は次のとおりです。\n\n1. トレイト `Report` を定義する\n   - スーパートレイトとして `std::fmt::Display` を要求する (`trait Report: std::fmt::Display`)\n   - デフォルトメソッド `fn report(&self) -> String` を持ち、`\"[REPORT] \"` に `Display` 表示を続けた文字列を返す\n2. `Temperature(pub i32)` に `Display` を実装する — 表示形式は `25度` (値 + `度`)\n3. `Humidity(pub u32)` に `Display` を実装する — 表示形式は `60%` (値 + `%`)\n4. 両方の型に `Report` を実装する (中身は**空**でよい。デフォルト実装をそのまま使う)\n\n```rust\nassert_eq!(format!(\"{}\", Temperature(25)), \"25度\");\nassert_eq!(Temperature(25).report(), \"[REPORT] 25度\");\nassert_eq!(Humidity(60).report(), \"[REPORT] 60%\");\n```\n\nスーパートレイトのおかげで、`Report` のデフォルトメソッドの中では `self.to_string()` (すべての `Display` 型に自動実装される) を安心して呼べます。",
@@ -233,6 +246,7 @@
   },
   {
     "id": "a014",
+    "language": "rust",
     "level": "advanced",
     "title": "静的ディスパッチと動的ディスパッチ",
     "description_md": "図形の面積合計を「静的ディスパッチ」と「動的ディスパッチ」の 2 通りで計算する関数を実装してください。\n\nトレイト `Shape` と、それを実装する `Rect`(長方形)・`Square`(正方形)は定義済みです。次の 2 つの関数を完成させてください。\n\n1. `sum_area_static<T: Shape>(shapes: &[T]) -> u32`\n   ジェネリック境界を使った**静的ディスパッチ**版です。スライス内の全図形の面積 (`area()`) の合計を返します。要素はすべて同じ具象型 `T` である必要があります。空のスライスなら `0` を返します。\n2. `sum_area_dyn(shapes: &[Box<dyn Shape>]) -> u32`\n   トレイトオブジェクトを使った**動的ディスパッチ**版です。`Rect` と `Square` を混ぜたスライスを受け取れます。同じく面積の合計を返し、空なら `0` です。\n\n```rust\n// 静的ディスパッチ: 同じ型だけを並べられる\nlet rects = [Rect { width: 2, height: 3 }, Rect { width: 4, height: 5 }];\nassert_eq!(sum_area_static(&rects), 26);\n\n// 動的ディスパッチ: 異なる型を混ぜられる\nlet mixed: Vec<Box<dyn Shape>> = vec![\n    Box::new(Rect { width: 2, height: 3 }),\n    Box::new(Square { side: 4 }),\n];\nassert_eq!(sum_area_dyn(&mixed), 22);\n```\n\nどちらも「面積を合計する」という同じ処理ですが、コンパイル後の仕組み (単相化 vs vtable) が異なります。その違いを意識しながら実装してください。\n",
@@ -251,6 +265,7 @@
   },
   {
     "id": "a015",
+    "language": "rust",
     "level": "advanced",
     "title": "ブランケット実装",
     "description_md": "**ブランケット実装 (blanket implementation)** を使って、条件を満たすすべての型に一括でトレイトを実装してください。\n\nトレイト `Describe` は、自分自身を説明する文字列を返す `describe` メソッドを持ちます。これを個々の型に 1 つずつ実装するのではなく、`std::fmt::Display` を実装している**すべての型**に対して一度に実装します。\n\n- `describe()` は `\"値は {} です\"` の `{}` に `Display` での表示を埋め込んだ `String` を返します。\n\n```rust\nassert_eq!(42.describe(), \"値は 42 です\");\nassert_eq!(\"hello\".describe(), \"値は hello です\");\nassert_eq!(true.describe(), \"値は true です\");\n```\n\n`i32` にも `&str` にも `bool` にも個別の impl を書いていないのに `describe()` が呼べるようになる、という点がポイントです。標準ライブラリの `ToString` が「`Display` を実装するすべての型」に同じ仕組みで実装されていることも思い出してください。\n",
@@ -268,6 +283,7 @@
   },
   {
     "id": "a016",
+    "language": "rust",
     "level": "advanced",
     "title": "トレイトオブジェクトを返すファクトリ",
     "description_md": "実行時の条件によって**異なる具象型**を返すファクトリ関数を、トレイトオブジェクト `Box<dyn Animal>` を使って実装してください。\n\nトレイト `Animal` と、それを実装する `Dog`・`Cat` は定義済みです。\n\n- `Dog` は `name()` が `\"犬\"`、`cry()` が `\"ワンワン\"` を返します。\n- `Cat` は `name()` が `\"猫\"`、`cry()` が `\"ニャー\"` を返します。\n\n実装する関数は 1 つです。\n\n- `make_animal(kind: &str) -> Box<dyn Animal>`\n  `kind` が `\"dog\"` のときは `Dog` を、**それ以外のとき**は `Cat` を `Box<dyn Animal>` に入れて返します。\n\n```rust\nlet a = make_animal(\"dog\");\nassert_eq!(a.cry(), \"ワンワン\");\n\nlet b = make_animal(\"cat\");\nassert_eq!(b.name(), \"猫\");\n```\n\n戻り値の型を `impl Animal` にすると `if` の両側で異なる具象型を返せずコンパイルエラーになります。なぜ `Box<dyn Animal>` なら可能なのかを考えながら書いてください。\n",
@@ -286,6 +302,7 @@
   },
   {
     "id": "a017",
+    "language": "rust",
     "level": "advanced",
     "title": "Fn・FnMut・FnOnce の使い分け",
     "description_md": "3 種類のクロージャトレイト `Fn` / `FnMut` / `FnOnce` をそれぞれ引数に取る、3 つの高階関数を実装してください。\n\n1. `apply_twice<F: Fn(i32) -> i32>(f: F, x: i32) -> i32`\n   `f` を `x` に **2 回**適用した結果 `f(f(x))` を返します。`f` は環境を不変参照でしかキャプチャしないクロージャです。\n2. `call_n_times<F: FnMut() -> i32>(f: F, n: usize) -> Vec<i32>`\n   `f` を `n` 回呼び出し、戻り値を順番に `Vec` に集めて返します。`n == 0` なら空の `Vec` です。`f` は呼ばれるたびに内部状態を書き換えるかもしれないので `FnMut` で受け取ります。\n3. `run_once<F: FnOnce() -> String>(f: F) -> String`\n   `f` を **1 回だけ**呼び出して結果を返します。`f` はキャプチャした値を消費するかもしれないので `FnOnce` で受け取ります。\n\n```rust\nassert_eq!(apply_twice(|x| x + 3, 1), 7);\n\nlet mut count = 0;\nassert_eq!(call_n_times(|| { count += 1; count }, 3), vec![1, 2, 3]);\n\nlet s = String::from(\"秘密\");\nassert_eq!(run_once(move || s), \"秘密\");\n```\n\n3 つのトレイトの違い (環境を「借りる / 可変で借りる / 奪う」) と、`Fn ⊂ FnMut ⊂ FnOnce` という包含関係を意識して実装してください。\n",
@@ -304,6 +321,7 @@
   },
   {
     "id": "a018",
+    "language": "rust",
     "level": "advanced",
     "title": "FnMut で状態を持つカウンタ",
     "description_md": "呼び出すたびに内部のカウントが増えていく「カウンタクロージャ」を返す関数を実装してください。\n\n- `make_counter(start: i32) -> impl FnMut() -> i32`\n  初期値 `start` を内部に持つクロージャを返します。返されたクロージャは、呼ばれるたびにカウントを **1 増やし、増やした後の値**を返します。\n\n```rust\nlet mut counter = make_counter(10);\nassert_eq!(counter(), 11);\nassert_eq!(counter(), 12);\nassert_eq!(counter(), 13);\n```\n\nポイントは 2 つです。\n\n1. クロージャがローカル変数を**所有**して関数の外に持ち出せるようにすること (`move`)\n2. 呼ぶたびに状態が変わるので、戻り値の型を `impl FnMut() -> i32` と宣言すること\n\nまた、`make_counter` を 2 回呼んで作った 2 つのカウンタは、それぞれ独立に数えることに注意してください。\n\nなお、スターターコードの `move || start` はコンパイルは通りますが、毎回同じ値を返してしまうためテストに失敗します。\n",
@@ -322,6 +340,7 @@
   },
   {
     "id": "a019",
+    "language": "rust",
     "level": "advanced",
     "title": "FnOnce と所有権の消費",
     "description_md": "キャプチャした `String` を**消費する**クロージャを作る関数と、それを 1 回だけ実行する関数を実装してください。\n\n1. `make_shout(s: String) -> impl FnOnce() -> String`\n   `s` の所有権をクロージャに取り込み、呼ばれたら `s` の**末尾に `\"!\"` を付けた `String`** を返すクロージャを作ります。クロージャは `s` そのものを加工して返す (= `s` を消費する) ため、1 回しか呼べない `FnOnce` になります。\n2. `call_once<F: FnOnce() -> String>(f: F) -> String`\n   受け取ったクロージャを 1 回呼び出し、その結果をそのまま返します。\n\n```rust\nlet f = make_shout(String::from(\"やった\"));\nassert_eq!(call_once(f), \"やった!\");\n```\n\n`make_shout` が返すクロージャは、なぜ `Fn` や `FnMut` ではなく `FnOnce` にしかなれないのか——「キャプチャした値をムーブして手放す」という動作に注目して考えてみてください。\n",
@@ -340,6 +359,7 @@
   },
   {
     "id": "a020",
+    "language": "rust",
     "level": "advanced",
     "title": "クロージャを保持する構造体",
     "description_md": "クロージャをフィールドに保持し、計算結果を**メモ化 (キャッシュ)** する構造体 `Cacher` を実装してください。\n\n```rust\npub struct Cacher<F: Fn(u32) -> u32> {\n    calc: F,\n    cache: HashMap<u32, u32>,\n}\n```\n\n実装するメソッドは 2 つです。\n\n1. `Cacher::new(calc: F) -> Cacher<F>`\n   計算用クロージャを受け取り、空のキャッシュを持つ `Cacher` を作ります。\n2. `value(&mut self, arg: u32) -> u32`\n   `arg` に対する計算結果を返します。**同じ `arg` で 2 回目以降に呼ばれたときは、保存済みの結果を返し、クロージャを再実行してはいけません。** 未計算の `arg` なら `calc` を 1 回だけ実行し、結果をキャッシュへ保存してから返します。\n\n```rust\nlet mut cacher = Cacher::new(|x| x * 2);\nassert_eq!(cacher.value(5), 10); // ここで計算される\nassert_eq!(cacher.value(5), 10); // キャッシュから返る (再計算しない)\nassert_eq!(cacher.value(7), 14); // 異なる引数は別々に計算・保存\n```\n\n「再計算していないこと」はテストで検証されます (クロージャの呼び出し回数を数えて確認します)。引数ごとに結果を保存するため、キャッシュには `HashMap<u32, u32>` を使ってください。\n",
@@ -359,6 +379,7 @@
   },
   {
     "id": "a021",
+    "language": "rust",
     "level": "advanced",
     "title": "関数ポインタ fn 型",
     "description_md": "クロージャトレイト (`Fn` など) とは別物である**関数ポインタ型 `fn`** を使った高階関数を実装してください。\n\n1. `triple(x: i32) -> i32`\n   `x` を 3 倍して返す、ふつうの名前付き関数です。\n2. `apply_all(values: &[i32], f: fn(i32) -> i32) -> Vec<i32>`\n   スライスの各要素に `f` を適用した結果を、順番を保って `Vec` に集めて返します。空のスライスなら空の `Vec` です。引数 `f` の型はトレイト境界ではなく、**関数ポインタ型 `fn(i32) -> i32`** です。\n\n```rust\nassert_eq!(apply_all(&[1, 2, 3], triple), vec![3, 6, 9]);\n\n// 環境をキャプチャしないクロージャも fn に型強制されて渡せる\nassert_eq!(apply_all(&[1, 2, 3], |x| x + 1), vec![2, 3, 4]);\n```\n\n`fn` (小文字) は具体的な型であり、`Fn` トレイトとは別物です。名前付き関数と「キャプチャなしのクロージャ」は渡せますが、環境をキャプチャするクロージャは渡せない——という性質を確認しながら実装してください。\n",
@@ -377,6 +398,7 @@
   },
   {
     "id": "a022",
+    "language": "rust",
     "level": "advanced",
     "title": "引数の impl Trait",
     "description_md": "**引数位置の `impl Trait`** を使って、具象型を知らずに「任意のイテレータ」を受け取る関数を 2 つ実装してください。\n\n1. `total(iter: impl Iterator<Item = i32>) -> i32`\n   イテレータが生み出すすべての値の合計を返します。要素が 1 つもなければ `0` です。\n2. `count_positive(iter: impl Iterator<Item = i32>) -> usize`\n   イテレータが生み出す値のうち、**正の数 (0 より大きい)** の個数を返します。\n\n```rust\nassert_eq!(total(vec![1, 2, 3].into_iter()), 6);\nassert_eq!(total(1..=100), 5050);           // Range も Iterator\nassert_eq!(count_positive(vec![-1, 0, 5, 3].into_iter()), 2);\n```\n\n`Vec` のイテレータ・`Range`・`map` や `filter` を挟んだチェーンなど、`Iterator<Item = i32>` でありさえすればどんな型でも渡せる、という API 設計がポイントです。`impl Trait` はジェネリック境界 `<T: Iterator<Item = i32>>` の糖衣構文であることも意識してください。\n",
@@ -394,6 +416,7 @@
   },
   {
     "id": "a023",
+    "language": "rust",
     "level": "advanced",
     "title": "戻り値の impl Trait",
     "description_md": "**戻り値位置の `impl Trait`** を使って、`filter` と `map` を連鎖したイテレータをそのまま返す関数を実装してください。\n\n- `evens_squared(nums: Vec<i32>) -> impl Iterator<Item = i32>`\n  `nums` の中の**偶数だけ**を残し、それぞれを **2 乗**した値を順番に生み出すイテレータを返します。奇数は捨てます。元の順序は保ちます。\n\n```rust\nlet result: Vec<i32> = evens_squared(vec![1, 2, 3, 4]).collect();\nassert_eq!(result, vec![4, 16]);\n```\n\n`filter` や `map` を重ねたイテレータの具象型は `Map<Filter<IntoIter<i32>, ...>, ...>` のような長大な型になり、クロージャの型は名前すら書けません。`impl Iterator<Item = i32>` と書けば「イテレータであること」だけを公開してこの型を隠せます。\n\nなお、`0` は偶数として扱います (`0 * 0 = 0` が結果に含まれます)。関数の中では `Vec` を返すのではなく、**イテレータのまま** (`collect` せずに) 返してください。スターターコードはコンパイルは通りますが、フィルタも 2 乗もしていないためテストに失敗します。\n",
@@ -412,6 +435,7 @@
   },
   {
     "id": "a024",
+    "language": "rust",
     "level": "advanced",
     "title": "Counter イテレータの実装",
     "description_md": "`1` から上限 `limit` までの整数を順番に返すイテレータ `Counter` を実装してください。\n\n`Counter::new(limit)` で作成し、`next` を呼ぶたびに `Some(1)`, `Some(2)`, ... と値を返し、`limit` を返し終えたら以降はずっと `None` を返します。\n\n```rust\nlet v: Vec<u32> = Counter::new(3).collect();\nassert_eq!(v, vec![1, 2, 3]);\n\nlet mut c = Counter::new(1);\nassert_eq!(c.next(), Some(1));\nassert_eq!(c.next(), None);\nassert_eq!(c.next(), None); // 終了後は何度呼んでも None\n```\n\n注意事項:\n\n- `Counter::new(0)` のように上限が 0 の場合は、最初から `None` を返します (要素なし)。\n- `Iterator` トレイトを実装すれば `collect` などのメソッドは自動的に使えるようになります。実装が必要なのは `next` だけです。\n",
@@ -429,6 +453,7 @@
   },
   {
     "id": "a025",
+    "language": "rust",
     "level": "advanced",
     "title": "無限フィボナッチと take",
     "description_md": "フィボナッチ数列 `0, 1, 1, 2, 3, 5, 8, ...` を**無限に**返すイテレータ `Fibonacci` と、それを有限化するヘルパー関数を実装してください。\n\n1. `fibonacci()` が返す `Fibonacci` は、`next` が `Some(0)`, `Some(1)`, `Some(1)`, `Some(2)`, ... と値を返し続け、**決して `None` を返しません**。\n2. `first_n_fibs(n)` は先頭 `n` 個のフィボナッチ数を `Vec<u64>` で返します。内部で `take` を使ってください。\n\n```rust\nassert_eq!(first_n_fibs(6), vec![0, 1, 1, 2, 3, 5]);\nassert_eq!(first_n_fibs(0), Vec::<u64>::new());\n\n// 無限イテレータも take_while で安全に打ち切れます\nlet under_10: Vec<u64> = fibonacci().take_while(|&x| x < 10).collect();\nassert_eq!(under_10, vec![0, 1, 1, 2, 3, 5, 8]);\n```\n\n注意事項:\n\n- `fibonacci()` に対して `collect` を直接呼ぶと無限ループになります。イテレータは遅延評価なので、`take` や `take_while` で先に打ち切ってから消費するのが正しい使い方です。\n",
@@ -447,6 +472,7 @@
   },
   {
     "id": "a026",
+    "language": "rust",
     "level": "advanced",
     "title": "自作イテレータ×標準アダプタ",
     "description_md": "`1` から `limit` までを順に返す自作イテレータ `UpTo` はすでに実装済みです。これに標準ライブラリのアダプタを組み合わせて、関数 `sum_of_products(limit)` を実装してください。\n\n`sum_of_products(limit)` の仕様:\n\n1. `UpTo::new(limit)` (つまり `1, 2, ..., limit`) と、それを 1 つずらした列 (`UpTo::new(limit).skip(1)`、つまり `2, 3, ..., limit`) を `zip` で組にします。\n2. 各ペアの積を `map` で計算します。\n3. そのうち 3 の倍数だけを `filter` で残します。\n4. 残った値の合計を `sum` で返します。\n\n```rust\n// limit = 5 の場合:\n// ペア:      (1,2) (2,3) (3,4) (4,5)\n// 積:        2     6     12    20\n// 3 の倍数:        6     12\n// 合計:      18\nassert_eq!(sum_of_products(5), 18);\n\n// ペアが 1 つも作れない場合は 0\nassert_eq!(sum_of_products(1), 0);\nassert_eq!(sum_of_products(0), 0);\n```\n\n注意事項:\n\n- `UpTo` の実装は変更しないでください。`Iterator` を実装した型には `zip` / `map` / `filter` / `sum` などのアダプタがすべて自動的に提供されている、という点がこの問題のテーマです。\n",
@@ -465,6 +491,7 @@
   },
   {
     "id": "a027",
+    "language": "rust",
     "level": "advanced",
     "title": "IntoIterator の実装",
     "description_md": "曲名のリストを保持する自作コレクション `Playlist` を `for` ループで回せるようにしてください。\n\n`Playlist` 本体 (`new` / `add`) は実装済みです。あなたの仕事は `impl IntoIterator for Playlist` の `into_iter` を完成させることです。`into_iter` は `Playlist` の所有権を受け取り、曲名 `String` を順に返すイテレータを返します。\n\n```rust\nlet mut p = Playlist::new();\np.add(\"Yesterday\");\np.add(\"Let It Be\");\n\n// IntoIterator を実装すると for ループが使えるようになります\nfor song in p {\n    println!(\"{}\", song); // Yesterday, Let It Be の順\n}\n```\n\n注意事項:\n\n- 曲は `add` した順に出てくること。\n- 空の `Playlist` を回した場合は 1 回もループ本体が実行されないこと。\n- イテレータ型は `std::vec::IntoIter<String>` (つまり `Vec` の `into_iter` が返す型) をそのまま利用して構いません。\n",
@@ -483,6 +510,7 @@
   },
   {
     "id": "a028",
+    "language": "rust",
     "level": "advanced",
     "title": "隣接ペアを返すイテレータ",
     "description_md": "整数のベクタから「隣り合う 2 要素のペア」を順に返すイテレータを実装してください。\n\n`adjacent_pairs(v)` は `AdjacentPairs` イテレータを返し、その `next` は `(前の要素, 現在の要素)` のタプルを順に生成します。\n\n```rust\nlet pairs: Vec<(i32, i32)> = adjacent_pairs(vec![1, 2, 3, 4]).collect();\nassert_eq!(pairs, vec![(1, 2), (2, 3), (3, 4)]);\n\n// 要素が 2 個未満ならペアは 1 つも作れません\nassert!(adjacent_pairs(vec![]).next().is_none());\nassert!(adjacent_pairs(vec![7]).next().is_none());\n```\n\n注意事項:\n\n- `AdjacentPairs` は「前回返した要素」を `prev: Option<i32>` として内部に記憶し、`next` のたびに更新するステートフルな設計にしてください (構造体の定義は与えてあります)。\n- 要素数 n のベクタからはペアが n - 1 個 (n < 2 なら 0 個) 出てきます。\n",
@@ -501,6 +529,7 @@
   },
   {
     "id": "a029",
+    "language": "rust",
     "level": "advanced",
     "title": "Box で作る式木",
     "description_md": "四則演算の式を木構造で表す enum `Expr` と、それを評価する関数 `eval` を実装してください。\n\n`Expr` は次の 5 種類のバリアントを持ちます:\n\n- `Num(i64)` — 数値リテラル\n- `Add(左, 右)` / `Sub(左, 右)` / `Mul(左, 右)` / `Div(左, 右)` — 二項演算。子の式は `Box<Expr>` で保持します\n\n`eval(&expr)` は式を再帰的に評価して `i64` を返します。除算は Rust の整数除算 (`/`、0 方向への切り捨て) です。\n\n```rust\n// (1 + 2) * (10 - 4) = 18\nlet e = Expr::Mul(\n    Box::new(Expr::Add(Box::new(Expr::Num(1)), Box::new(Expr::Num(2)))),\n    Box::new(Expr::Sub(Box::new(Expr::Num(10)), Box::new(Expr::Num(4)))),\n);\nassert_eq!(eval(&e), 18);\n```\n\n注意事項:\n\n- スターターコードの `Expr` は子を `Expr` のまま (Box なしで) 持っているため、**そのままではコンパイルできません** (`E0072`)。まず enum を `Box<Expr>` を使う形に直し、それから `eval` を実装してください。\n- ゼロ除算はテストに含まれません。\n",
@@ -519,6 +548,7 @@
   },
   {
     "id": "a030",
+    "language": "rust",
     "level": "advanced",
     "title": "Deref で自作スマートポインタ",
     "description_md": "`Box<T>` のように値を 1 つ包むだけの自作スマートポインタ `MyBox<T>` に `Deref` トレイトを実装し、`*` 演算子と Deref 強制が働くようにしてください。\n\n実装後は次のコードがすべて動くようになります:\n\n```rust\nlet b = MyBox::new(5);\nassert_eq!(*b, 5); // * で中身を取り出せる\n\n// Deref 強制: &MyBox<String> → &String → &str と自動変換される\nlet name = MyBox::new(String::from(\"Rust\"));\nassert_eq!(greet(&name), \"Hello, Rust!\");\n```\n\n`greet(name: &str) -> String` は実装済みです。あなたの仕事は `impl<T> Deref for MyBox<T>` を書くことです (`use std::ops::Deref;` が必要です)。\n\n注意事項:\n\n- `Deref` の関連型 `Target` には「参照外しした結果の型」つまり `T` を指定します。\n- `deref` メソッドは中身への参照 `&T` を返します (所有権は渡しません)。\n",
@@ -537,6 +567,7 @@
   },
   {
     "id": "a031",
+    "language": "rust",
     "level": "advanced",
     "title": "Rc による共有所有権",
     "description_md": "`Rc<T>` (参照カウント式スマートポインタ) を使って、1 つのデータを複数の所有者で共有する 3 つの関数を実装してください。\n\n1. `make_shared(v)` — `Vec<i32>` を受け取り、`Rc<Vec<i32>>` に包んで返します。\n2. `add_owner(data)` — 既存の `Rc<Vec<i32>>` への参照を受け取り、**新しい所有者** (同じデータを指す `Rc` ハンドル) を返します。データ本体は複製しません。\n3. `owner_count(data)` — 現在の所有者数 (強参照カウント) を返します。\n\n```rust\nlet a = make_shared(vec![1, 2, 3]);\nassert_eq!(owner_count(&a), 1); // 所有者は a だけ\n\nlet b = add_owner(&a);\nassert_eq!(owner_count(&a), 2); // a と b が同じデータを共有\nassert_eq!(*b, vec![1, 2, 3]);  // 中身は同じ\n\ndrop(b);\nassert_eq!(owner_count(&a), 1); // b が消えるとカウントが減る\n```\n\n注意事項:\n\n- `add_owner` は `Rc::clone` を使ってください。これはデータのディープコピーではなく、参照カウントを 1 増やすだけの軽い操作です。\n- `owner_count` は `Rc::strong_count` で取得できます。\n",
@@ -555,6 +586,7 @@
   },
   {
     "id": "a032",
+    "language": "rust",
     "level": "advanced",
     "title": "Rc<RefCell> で共有可変データ",
     "description_md": "`Rc<RefCell<Vec<String>>>` を使って、複数のハンドルから同じログに追記できる「共有ログ」を実装してください。\n\n型エイリアス `pub type SharedLog = Rc<RefCell<Vec<String>>>;` は定義済みです。次の 4 つの関数を実装します:\n\n1. `new_log()` — 空の共有ログを作ります。\n2. `clone_handle(log)` — 同じログを指す新しいハンドルを返します (`Rc::clone`)。\n3. `add_entry(log, message)` — ログ末尾にメッセージを追記します (`borrow_mut`)。\n4. `entries(log)` — 現在の全エントリのコピーを `Vec<String>` で返します (`borrow`)。\n\n```rust\nlet log = new_log();\nlet handle = clone_handle(&log);\n\nadd_entry(&log, \"起動しました\");\nadd_entry(&handle, \"接続しました\"); // 別ハンドルからの追記も同じログに入る\n\nassert_eq!(\n    entries(&log),\n    vec![\"起動しました\".to_string(), \"接続しました\".to_string()]\n);\nassert_eq!(entries(&handle), entries(&log)); // どのハンドルから見ても同じ\n```\n\n注意事項:\n\n- エントリは追記された順に保持されます。\n- `Rc` が「複数の所有者」を、`RefCell` が「共有していても書き換えられる内部可変性」を担当します。この組み合わせの役割分担を意識して実装してください。\n",
@@ -573,6 +605,7 @@
   },
   {
     "id": "a033",
+    "language": "rust",
     "level": "advanced",
     "title": "Weak で循環参照を断つ",
     "description_md": "親子関係を持つ木構造のノードを実装してください。親→子は `Rc` (強参照)、子→親は `Weak` (弱参照) で持つことで、循環参照によるメモリリークを防ぎます。\n\n構造体 `Node` は定義済みです:\n\n```rust\npub struct Node {\n    pub value: i32,\n    pub parent: RefCell<Weak<Node>>,      // 子→親は弱参照\n    pub children: RefCell<Vec<Rc<Node>>>, // 親→子は強参照\n}\n```\n\n次の 3 つの関数を実装します:\n\n1. `new_node(value)` — 親なし・子なしのノードを `Rc<Node>` で作ります (親は `Weak::new()` で空に)。\n2. `add_child(parent, child)` — `child` の親を `parent` に設定し (`Rc::downgrade`)、`parent` の子リストに `child` を追加します (`Rc::clone`)。\n3. `parent_value(node)` — 親がまだ生きていれば `Some(親の value)`、いなければ `None` を返します (`upgrade` を使用)。\n\n```rust\nlet parent = new_node(10);\nlet child = new_node(20);\nadd_child(&parent, &child);\n\nassert_eq!(parent_value(&child), Some(10));\nassert_eq!(Rc::strong_count(&parent), 1); // Weak は強参照カウントを増やさない\n```\n\n注意事項:\n\n- `add_child` の後も `Rc::strong_count(&parent)` が 1 のままであること (子→親が `Rc` だとここが 2 になり、循環参照になります)。\n- 親が drop された後の `parent_value` は `None` を返すこと。\n",
@@ -591,6 +624,7 @@
   },
   {
     "id": "a034",
+    "language": "rust",
     "level": "advanced",
     "title": "Cell と Copy 型の内部可変性",
     "description_md": "`Cell<u64>` を使って、不変参照 (`&self`) しか持たない場面でもカウントを更新できる `Counter` 構造体を実装してください。\n\n実装する項目は次の 4 つです。\n\n- `Counter::new() -> Self` — カウント 0 で初期化します\n- `increment(&self)` — カウントを 1 増やします\n- `add(&self, n: u64)` — カウントを `n` 増やします\n- `get(&self) -> u64` — 現在のカウントを返します\n\nすべてのメソッドは `&mut self` ではなく `&self` を取ることに注意してください。\n\n```rust\nlet c = Counter::new();\nc.increment();\nc.increment();\nc.add(10);\nassert_eq!(c.get(), 12); // &self 経由なのに値が更新できている\n```\n\n注意: `Cell` の `get` / `set` を使います。`&mut self` に書き換えてはいけません。",
@@ -609,6 +643,7 @@
   },
   {
     "id": "a035",
+    "language": "rust",
     "level": "advanced",
     "title": "RefCell の borrow と borrow_mut",
     "description_md": "`RefCell<Vec<String>>` を使って、`&self` メソッドしか持たないのにイベント履歴を記録できる `Tracker` 構造体を実装してください。\n\n実装する項目は次の 4 つです。\n\n- `Tracker::new() -> Self` — 空の履歴で初期化します\n- `record(&self, event: &str)` — イベント名を履歴の末尾に追加します\n- `count(&self) -> usize` — 記録済みイベントの件数を返します\n- `last(&self) -> Option<String>` — 最後に記録したイベント名を返します (履歴が空なら `None`)\n\n```rust\nlet t = Tracker::new();\nassert_eq!(t.count(), 0);\nt.record(\"start\");\nt.record(\"stop\");\nassert_eq!(t.count(), 2);\nassert_eq!(t.last(), Some(\"stop\".to_string()));\n```\n\n注意: すべてのメソッドは `&self` を取ります。書き込みには `borrow_mut()`、読み取りには `borrow()` を使い分けてください。",
@@ -627,6 +662,7 @@
   },
   {
     "id": "a036",
+    "language": "rust",
     "level": "advanced",
     "title": "実行時借用エラーの検出",
     "description_md": "`RefCell` は借用規則を実行時に検査し、違反すると panic します。この問題では panic させる代わりに、失敗を `bool` で返す安全版の関数を 2 つ実装してください。\n\n- `try_update(cell: &RefCell<i32>, value: i32) -> bool` — `try_borrow_mut()` で可変借用を試み、成功したら中身を `value` に書き換えて `true` を返します。借用が競合していたら **何も変更せず** `false` を返します\n- `is_readable(cell: &RefCell<i32>) -> bool` — `try_borrow()` が成功するなら `true`、失敗するなら `false` を返します\n\n```rust\nlet cell = RefCell::new(1);\nassert!(try_update(&cell, 42));      // 誰も借りていないので成功\nassert_eq!(*cell.borrow(), 42);\n\nlet guard = cell.borrow_mut();       // 可変借用を保持したまま…\nassert!(!try_update(&cell, 99));     // 競合するので false (panic しない!)\nassert!(!is_readable(&cell));        // 読み取りすら不可\ndrop(guard);\n```\n\n注意: `borrow()` / `borrow_mut()` を使うと競合時に panic してしまいます。必ず `try_borrow` / `try_borrow_mut` を使ってください。",
@@ -645,6 +681,7 @@
   },
   {
     "id": "a037",
+    "language": "rust",
     "level": "advanced",
     "title": "スレッドの生成と join",
     "description_md": "`thread::spawn` で別スレッドを起動し、そのスレッドで計算した結果を `join` で受け取る関数を実装してください。\n\n- `compute_in_thread(n: u64) -> u64` — **新しいスレッドの中で** 1 から `n` までの総和を計算し、その結果を返します。`n` が 0 のときは 0 を返します\n\n計算はクロージャの戻り値としてスレッドから返し、`JoinHandle::join()` で回収してください。\n\n```rust\nassert_eq!(compute_in_thread(10), 55);   // 1+2+...+10\nassert_eq!(compute_in_thread(0), 0);\nassert_eq!(compute_in_thread(100), 5050);\n```\n\n注意: `join()` は `Result` を返します (スレッドが panic した場合に `Err`)。ここでは `unwrap()` で取り出して構いません。",
@@ -663,6 +700,7 @@
   },
   {
     "id": "a038",
+    "language": "rust",
     "level": "advanced",
     "title": "move クロージャとスレッド",
     "description_md": "`Vec` の所有権を `move` クロージャで別スレッドに渡し、そのスレッドで集計した結果を受け取る関数を実装してください。\n\n- `sum_and_len(data: Vec<i64>) -> (i64, usize)` — **新しいスレッドの中で** `data` の総和と要素数を計算し、タプル `(総和, 要素数)` で返します\n\n```rust\nassert_eq!(sum_and_len(vec![1, 2, 3]), (6, 3));\nassert_eq!(sum_and_len(vec![]), (0, 0));\nassert_eq!(sum_and_len(vec![-5, 5]), (0, 2));\n```\n\n注意: `Vec` は `Copy` ではないので、スレッドに渡すには所有権ごと移動する必要があります。クロージャに `move` を付けてください。",
@@ -681,6 +719,7 @@
   },
   {
     "id": "a039",
+    "language": "rust",
     "level": "advanced",
     "title": "複数スレッドの結果集約",
     "description_md": "要素ごとにスレッドを起動して 2 乗を計算し、結果を **元の順序どおり** に集めた `Vec` を返す関数を実装してください。\n\n- `parallel_squares(nums: &[i64]) -> Vec<i64>` — 各要素 `n` につきスレッドを 1 本起動して `n * n` を計算し、入力と同じ順序で結果を返します\n\n実装の手順は次の 2 段階に分けてください。\n\n1. まず **全スレッドを起動** し、`JoinHandle` を `Vec` に集める\n2. その後、ハンドルを先頭から順に `join` して結果を集める\n\n```rust\nassert_eq!(parallel_squares(&[1, 2, 3]), vec![1, 4, 9]);\nassert_eq!(parallel_squares(&[-4]), vec![16]);\nassert_eq!(parallel_squares(&[]), vec![]);\n```\n\n注意: 起動した直後にその場で join すると、スレッドが 1 本ずつ順番に走るだけになり並列になりません。「全部起動してから、まとめて join」の形にしてください。",
@@ -699,6 +738,7 @@
   },
   {
     "id": "a040",
+    "language": "rust",
     "level": "advanced",
     "title": "Arc で読み取り共有",
     "description_md": "同じ `Vec<i32>` を **複数のスレッドから同時に読み取る** ために `Arc` で包み、最小値・最大値・総和を 3 本のスレッドで並列に計算する関数を実装してください。\n\n- `parallel_min_max_sum(data: Vec<i32>) -> Option<(i32, i32, i64)>` — `data` を `Arc<Vec<i32>>` に包み、最小値を求めるスレッド・最大値を求めるスレッド・総和 (`i64` で計算) を求めるスレッドの 3 本を起動して、`(最小値, 最大値, 総和)` を返します。`data` が空のときは `None` を返します\n\n各スレッドには `Arc::clone` した参照カウント付きポインタを `move` で渡してください。\n\n```rust\nassert_eq!(parallel_min_max_sum(vec![3, 1, 4, 1, 5]), Some((1, 5, 14)));\nassert_eq!(parallel_min_max_sum(vec![]), None);\nassert_eq!(parallel_min_max_sum(vec![-7]), Some((-7, -7, -7)));\n```\n\n注意: 総和は `i32` のままだとオーバーフローし得るので、必ず `i64` に変換してから合計してください。",
@@ -717,6 +757,7 @@
   },
   {
     "id": "a041",
+    "language": "rust",
     "level": "advanced",
     "title": "Arc<Mutex> カウンタ",
     "description_md": "複数のスレッドが **同じカウンタ** を安全に加算できるよう、`Arc<Mutex<i64>>` を使った並列カウントを実装してください。\n\n- `parallel_count(num_threads: usize, increments_per_thread: usize) -> i64` — カウンタを 0 で初期化し、`num_threads` 本のスレッドを起動します。各スレッドはカウンタを `increments_per_thread` 回、1 ずつ加算します。全スレッドを join した後の最終値を返します\n\n正しく排他制御できていれば、結果は必ず `num_threads * increments_per_thread` になります。\n\n```rust\nassert_eq!(parallel_count(4, 1000), 4000);\nassert_eq!(parallel_count(0, 100), 0);   // スレッド 0 本なら 0\nassert_eq!(parallel_count(3, 0), 0);     // 加算 0 回なら 0\n```\n\n注意: `lock()` は `Result` を返します (他のスレッドがロック保持中に panic した場合に `Err`)。ここでは `unwrap()` で構いません。",
@@ -735,6 +776,7 @@
   },
   {
     "id": "a042",
+    "language": "rust",
     "level": "advanced",
     "title": "mpsc チャネルで値を集める",
     "description_md": "共有メモリではなく **メッセージ渡し** で並列集計を行います。`mpsc::channel` を使い、複数の producer スレッドが送った部分和を受信側で合計する関数を実装してください。\n\n- `channel_sum(chunks: Vec<Vec<i64>>) -> i64` — チャンク (数値のかたまり) ごとにスレッドを 1 本起動します。各スレッドは自分のチャンクの総和を計算し、`Sender` (`clone` して渡す) でチャネルに送信します。受信側は **チャネルが閉じるまで** 受信した値を合計し、その合計を返します\n\n```rust\nassert_eq!(channel_sum(vec![vec![1, 2], vec![3, 4], vec![5]]), 15);\nassert_eq!(channel_sum(vec![]), 0);          // チャンク 0 個\nassert_eq!(channel_sum(vec![vec![]]), 0);    // 空のチャンク\n```\n\n注意: 手元に残した元の `Sender` を `drop` しないと、受信ループが永遠に終わりません (全 `Sender` が drop されて初めてチャネルが閉じます)。受信は `for v in rx` または `rx.iter()` で行ってください。最後に全スレッドを join してから合計を返してください。",
@@ -753,6 +795,7 @@
   },
   {
     "id": "a043",
+    "language": "rust",
     "level": "advanced",
     "title": "チャンク分割並列集計",
     "description_md": "大きなデータを指定した数のチャンクに分割し、チャンクごとにスレッドで部分和を計算してから統合する、map-reduce の基本形を実装してください。\n\n- `parallel_chunk_sum(data: &[i64], num_chunks: usize) -> i64` — `data` をおよそ `num_chunks` 個のチャンクに分割し、各チャンクの総和を別スレッドで計算し、全スレッドを join して部分和を合計します\n\n仕様の詳細:\n\n- `num_chunks` が 0 のときは 1 として扱います\n- `data` が空のときは 0 を返します\n- 分割数によらず、結果は常に逐次計算の総和と一致しなければなりません (決定的)\n\n```rust\nlet data: Vec<i64> = (1..=100).collect();\nassert_eq!(parallel_chunk_sum(&data, 4), 5050);\nassert_eq!(parallel_chunk_sum(&data, 1), 5050);   // 分割数を変えても同じ\nassert_eq!(parallel_chunk_sum(&[], 4), 0);\n```\n\nヒント: 1 チャンクの長さは `data.len().div_ceil(num_chunks)` で計算でき、`data.chunks(チャンク長)` でスライスを分割できます。スレッドに渡すには各チャンクを `to_vec()` で所有権のある `Vec` にしてください。",
@@ -771,6 +814,7 @@
   },
   {
     "id": "a044",
+    "language": "rust",
     "level": "advanced",
     "title": "Box 連結リストの構築",
     "description_md": "`Box` を使った再帰的な連結リスト型 `List` に対して、構築と集計の関数を実装します。\n\n`List` は次のように定義されています (この定義は変更しないでください)。\n\n```rust\n#[derive(Debug, PartialEq)]\npub enum List {\n    Cons(i32, Box<List>),\n    Nil,\n}\n```\n\n実装するのは次の 3 つです。\n\n1. `from_slice(xs: &[i32]) -> List` — スライスの先頭から順に `Cons` を連ねたリストを作ります。空スライスなら `Nil` を返します\n2. `len(list: &List) -> usize` — 要素数を返します\n3. `sum(list: &List) -> i32` — 全要素の合計を返します (空リストは 0)\n\n```rust\nlet l = from_slice(&[1, 2, 3]);\n// l は Cons(1, Box::new(Cons(2, Box::new(Cons(3, Box::new(Nil)))))) と等しい\nassert_eq!(len(&l), 3);\nassert_eq!(sum(&l), 6);\n\nlet e = from_slice(&[]);\nassert_eq!(len(&e), 0);\nassert_eq!(sum(&e), 0);\n```\n",
@@ -789,6 +833,7 @@
   },
   {
     "id": "a045",
+    "language": "rust",
     "level": "advanced",
     "title": "連結リストの push と pop",
     "description_md": "`Option<Box<Node>>` を head に持つ単方向リストで、スタック (後入れ先出し) を実装します。\n\n```rust\npub struct Node {\n    pub value: i32,\n    pub next: Option<Box<Node>>,\n}\n\npub struct Stack {\n    pub head: Option<Box<Node>>,\n}\n```\n\n実装するメソッドは次の 3 つです。\n\n- `push(&mut self, value: i32)` — 新しいノードをリストの先頭に追加します\n- `pop(&mut self) -> Option<i32>` — 先頭ノードを取り外してその値を返します。空なら `None`\n- `len(&self) -> usize` — 現在の要素数を返します\n\n```rust\nlet mut s = Stack::new();\ns.push(1);\ns.push(2);\nassert_eq!(s.len(), 2);\nassert_eq!(s.pop(), Some(2)); // 後入れ先出し\nassert_eq!(s.pop(), Some(1));\nassert_eq!(s.pop(), None);\n```\n\nhead の付け替えでは `Option::take` を使って所有権を抜き取るのがポイントです。\n",
@@ -807,6 +852,7 @@
   },
   {
     "id": "a046",
+    "language": "rust",
     "level": "advanced",
     "title": "連結リストの反転",
     "description_md": "単方向リストをイテレーティブ (ループ) に反転する `reverse` を実装します。\n\n補助関数 `from_slice` (スライスからリストを作る) と `to_vec` (リストを Vec に写す) は実装済みで、テストにも使われます。\n\n```rust\nlet list = from_slice(&[1, 2, 3]);\nlet rev = reverse(list);\nassert_eq!(to_vec(&rev), vec![3, 2, 1]);\n```\n\n`reverse` はリスト全体の所有権を受け取り、反転後のリストを返します。新しいノードを作り直すのではなく、各ノードの所有権を `prev` 側へ順にムーブし、`next` を繋ぎ替えて反転してください。空リスト (`None`) を渡したら `None` が返ります。\n",
@@ -825,6 +871,7 @@
   },
   {
     "id": "a047",
+    "language": "rust",
     "level": "advanced",
     "title": "二分探索木への挿入と探索",
     "description_md": "二分探索木 (BST) の挿入と探索を実装します。\n\nBST は「各ノードの左部分木には自分より小さい値だけ、右部分木には自分より大きい値だけがある」木構造です。\n\n```rust\npub struct Node {\n    pub value: i32,\n    pub left: Option<Box<Node>>,\n    pub right: Option<Box<Node>>,\n}\n\npub struct Bst {\n    pub root: Option<Box<Node>>,\n}\n```\n\n実装するメソッドは次の 2 つです。\n\n- `insert(&mut self, value: i32)` — BST の条件を保つ位置に値を追加します。すでに同じ値が存在する場合は何もしません\n- `contains(&self, value: i32) -> bool` — 値が木に存在するかを返します\n\n```rust\nlet mut t = Bst::new();\nt.insert(5);\nt.insert(3);\nt.insert(8);\n// 5 が根、3 は根の左の子、8 は根の右の子になる\nassert!(t.contains(3));\nassert!(!t.contains(7));\n```\n\n挿入は「根から大小比較で左右に降りていき、空いている場所 (`None`) に新ノードを置く」だけで、木の形の組み替え (バランス調整) は行いません。\n",
@@ -843,6 +890,7 @@
   },
   {
     "id": "a048",
+    "language": "rust",
     "level": "advanced",
     "title": "二分木の中間順走査",
     "description_md": "二分木を中間順 (in-order) で走査し、訪れた値を順に並べた `Vec<i32>` を返す `in_order` を実装します。\n\n中間順走査とは「左部分木 → 自分 → 右部分木」の順で訪れる走査です。二分探索木 (BST) をこの順で走査すると、値は昇順に並びます。\n\nノード定義と、BST を組み立てるための `insert` (実装済み) は次のとおりです。\n\n```rust\npub struct Node {\n    pub value: i32,\n    pub left: Option<Box<Node>>,\n    pub right: Option<Box<Node>>,\n}\n\n// insert(&mut root, value) で BST の条件を保って挿入 (重複は無視、実装済み)\n```\n\n```rust\nlet mut root = None;\nfor v in [5, 3, 8, 1, 4] {\n    insert(&mut root, v);\n}\nassert_eq!(in_order(&root), vec![1, 3, 4, 5, 8]); // BST なら昇順になる\nassert_eq!(in_order(&None), Vec::<i32>::new());\n```\n\n注意: `in_order` は BST でない木にもそのまま使えます。値を並べ替えるのではなく、必ず「左 → 自分 → 右」の訪問順で `Vec` を作ってください。結果の蓄積には `&mut Vec<i32>` を受け取る補助関数を使うのが定石です。\n",
@@ -861,6 +909,7 @@
   },
   {
     "id": "a049",
+    "language": "rust",
     "level": "advanced",
     "title": "二分木の高さとノード数",
     "description_md": "二分木に対する 2 つの再帰的な集計関数を実装します。\n\n- `height(root: &Option<Box<Node>>) -> usize` — 木の高さを返します。**空の木は 0、ノード 1 個だけの木は 1** と定義します (= 根から葉までの最長経路上のノード数)\n- `count(root: &Option<Box<Node>>) -> usize` — ノードの総数を返します\n\n木を手で組み立てやすいよう、補助関数 `leaf` と `node` を用意してあります (実装済み)。\n\n```rust\npub struct Node {\n    pub value: i32,\n    pub left: Option<Box<Node>>,\n    pub right: Option<Box<Node>>,\n}\n\n// leaf(v)        : 子を持たないノード\n// node(v, 左, 右) : 子つきのノード\n\n// 根 1 の左に葉 2、右に 3 (3 の左に葉 4) という木\nlet t = node(1, leaf(2), node(3, leaf(4), None));\nassert_eq!(height(&t), 3); // 1 → 3 → 4 の経路が最長\nassert_eq!(count(&t), 4);\nassert_eq!(height(&None), 0);\nassert_eq!(count(&None), 0);\n```\n",
@@ -879,6 +928,7 @@
   },
   {
     "id": "a050",
+    "language": "rust",
     "level": "advanced",
     "title": "vec! 風マクロの自作",
     "description_md": "標準ライブラリの `vec!` に似たマクロ `my_vec!` を `macro_rules!` で自作します。\n\n要件は次のとおりです。\n\n- `my_vec![]` は空の `Vec` を返します\n- `my_vec![a, b, c]` のようにカンマ区切りの式を 1 個以上受け取り、**書いた順のまま**要素が入った `Vec` を返します\n- 渡した各式はそれぞれ 1 回だけ評価されます (`$( ... )*` の繰り返し展開で `push` を並べれば自然に満たせます)\n\n```rust\nlet v = my_vec![1, 2, 3];\nassert_eq!(v, vec![1, 2, 3]);\n\nlet e: Vec<i32> = my_vec![];\nassert!(e.is_empty());\n\nlet calc = my_vec![2 + 3, 10 * 2];\nassert_eq!(calc, vec![5, 20]);\n```\n\nヒント: 引数のパターンは `$($x:expr),+` のように「式の繰り返し」で受けます。\n",
@@ -896,6 +946,7 @@
   },
   {
     "id": "a051",
+    "language": "rust",
     "level": "advanced",
     "title": "可変引数の集計マクロ",
     "description_md": "引数を 1 個以上受け取り、その最大値を返すマクロ `max!` を実装します。\n\nRust の関数には可変長引数がありませんが、マクロなら「先頭 + 残り」に分解して再帰的に展開することで、任意個の引数を扱えます。\n\n要件:\n\n- `max!(a)` は `a` をそのまま返します\n- `max!(a, b, ...)` は引数全体の最大値を返します (引数は `i32` など `Ord` を実装した同一の型とします)\n\n```rust\nassert_eq!(max!(3), 3);\nassert_eq!(max!(1, 2), 2);\nassert_eq!(max!(5, -2, 9, 0), 9);\n```\n\nヒント: 2 個以上の場合は `std::cmp::max(先頭, max!(残り))` の形に展開すると、マクロの再帰で処理できます。\n",
@@ -914,6 +965,7 @@
   },
   {
     "id": "a052",
+    "language": "rust",
     "level": "advanced",
     "title": "key => value を受けるマクロ",
     "description_md": "`\"key\" => value` の形で初期値を並べられる `hashmap!` マクロを実装します。\n\n要件:\n\n- `hashmap!{}` は空の `std::collections::HashMap` を返します\n- `hashmap!{ k1 => v1, k2 => v2, ... }` は各ペアを順に `insert` した `HashMap` を返します\n- 同じキーを複数回書いた場合は、`insert` の意味論どおり**後に書いたものが勝ち**ます\n\n```rust\nlet m = hashmap!{ \"a\" => 1, \"b\" => 2 };\nassert_eq!(m.get(\"a\"), Some(&1));\nassert_eq!(m.get(\"b\"), Some(&2));\nassert_eq!(m.len(), 2);\n\nlet e: std::collections::HashMap<i32, i32> = hashmap!{};\nassert!(e.is_empty());\n```\n\nヒント: 繰り返しパターンの中には `=>` のような区切りトークンをそのまま書けます: `$($k:expr => $v:expr),+`\n",
@@ -932,6 +984,7 @@
   },
   {
     "id": "a053",
+    "language": "rust",
     "level": "advanced",
     "title": "newtype で単位を分ける",
     "description_md": "メートルとフィートを別の型として扱う newtype を実装し、単位の混同をコンパイルエラーにします。\n\n```rust\n#[derive(Debug, Clone, Copy, PartialEq)]\npub struct Meters(pub f64);\n\n#[derive(Debug, Clone, Copy, PartialEq)]\npub struct Feet(pub f64);\n```\n\n実装するのは次の 3 つです。換算係数は **1 メートル = 3.28084 フィート**を使ってください。\n\n- `Meters::to_feet(self) -> Feet` — メートル値に 3.28084 を掛けてフィートに変換します\n- `Feet::to_meters(self) -> Meters` — フィート値を 3.28084 で割ってメートルに変換します\n- `Meters + Meters` (`std::ops::Add`) — 同じ単位どうしの加算を可能にします\n\n```rust\nlet f = Meters(10.0).to_feet();\nassert!((f.0 - 32.8084).abs() < 1e-6);\n\nlet total = Meters(1.5) + Meters(2.5);\nassert!((total.0 - 4.0).abs() < 1e-9);\n\n// let bad = Meters(1.0) + Feet(1.0); // ← これはコンパイルエラーになる (のが狙い)\n```\n\n中身はどちらもただの `f64` ですが、型が違うので取り違えるとコンパイルが通りません。これが newtype パターンの価値です。\n",
@@ -950,6 +1003,7 @@
   },
   {
     "id": "a054",
+    "language": "rust",
     "level": "advanced",
     "title": "検証付きコンストラクタ",
     "description_md": "0 以上 100 以下の整数だけを保持できる型 `Score` を実装してください。\n\nフィールドはすでに非公開 (private) になっているため、外部のコードは `Score::new` を通してしか値を作れません。この構造により「101 点の `Score` はプログラム中に存在し得ない」ことが型レベルで保証されます。\n\n実装する関数は次の 2 つです。\n\n1. `Score::new(value: u8) -> Result<Score, String>` — `value` が 0 以上 100 以下なら `Ok(Score)` を、101 以上なら `Err` を返します (エラーメッセージの内容は任意です。テストでは `is_err()` のみ確認します)\n2. `Score::value(&self) -> u8` — 保持している値を返します\n\n```rust\nlet s = Score::new(80).unwrap();\nassert_eq!(s.value(), 80);\n\nassert!(Score::new(101).is_err());\n```\n\n注意: 境界値 (0 と 100) はどちらも有効な値です。",
@@ -969,6 +1023,7 @@
   },
   {
     "id": "a055",
+    "language": "rust",
     "level": "advanced",
     "title": "newtype で孤児ルール回避",
     "description_md": "`Vec<String>` に `std::fmt::Display` を直接実装することはできません。`Vec` も `Display` も外部 (標準ライブラリ) で定義されているため、**孤児ルール (orphan rule)** に違反するからです。\n\nそこで自分のクレートで定義した newtype `CsvRow` でラップし、そのラッパーに `Display` を実装してください。\n\n仕様: 各要素をカンマ `,` で連結した文字列を出力します。要素が 1 個ならそのまま、空 (0 個) なら空文字列を出力します。\n\n```rust\nlet row = CsvRow(vec![\"a\".to_string(), \"b\".to_string(), \"c\".to_string()]);\nassert_eq!(format!(\"{row}\"), \"a,b,c\");\n\nlet empty = CsvRow(vec![]);\nassert_eq!(empty.to_string(), \"\");\n```\n\n注意: `Display` を実装すると `to_string()` も自動的に使えるようになります。",
@@ -988,6 +1043,7 @@
   },
   {
     "id": "a056",
+    "language": "rust",
     "level": "advanced",
     "title": "Cow による遅延クローン",
     "description_md": "文字列中の空白 (半角スペース `' '`) をすべてアンダースコア `'_'` に置き換える関数を、`Cow<str>` を返す形で実装してください。\n\n```rust\npub fn replace_spaces(s: &str) -> std::borrow::Cow<'_, str>\n```\n\n仕様:\n\n- `s` に空白が **1 つも含まれない**場合: 新しい `String` を作らず、入力への参照をそのまま `Cow::Borrowed` で返します\n- `s` に空白が **1 つでも含まれる**場合: 置換した新しい `String` を `Cow::Owned` で返します\n\n```rust\nlet a = replace_spaces(\"hello\");\nassert!(matches!(a, std::borrow::Cow::Borrowed(_)));\nassert_eq!(a, \"hello\");\n\nlet b = replace_spaces(\"hello world\");\nassert!(matches!(b, std::borrow::Cow::Owned(_)));\nassert_eq!(b, \"hello_world\");\n```\n\n注意: テストでは `matches!` で `Borrowed` / `Owned` のどちらが返ったかまで検証します。常に `Owned` を返す実装は不正解です。",
@@ -1007,6 +1063,7 @@
   },
   {
     "id": "a057",
+    "language": "rust",
     "level": "advanced",
     "title": "スライスの Cow",
     "description_md": "`Cow` は文字列専用ではなく、スライス全般に使えます。整数スライスを受け取り、全要素を絶対値にした結果を `Cow<[i32]>` で返す関数を実装してください。\n\n```rust\npub fn abs_all(nums: &[i32]) -> std::borrow::Cow<'_, [i32]>\n```\n\n仕様:\n\n- `nums` に負の数が **1 つも含まれない**場合 (空スライスを含む): 新しい `Vec` を作らず `Cow::Borrowed` で入力をそのまま返します\n- 負の数が **1 つでも含まれる**場合: 全要素を絶対値にした新しい `Vec<i32>` を `Cow::Owned` で返します\n\n```rust\nlet a = abs_all(&[1, 2, 3]);\nassert!(matches!(a, std::borrow::Cow::Borrowed(_)));\n\nlet b = abs_all(&[1, -2, 3]);\nassert!(matches!(b, std::borrow::Cow::Owned(_)));\nassert_eq!(b.as_ref(), &[1, 2, 3][..]);\n```\n\n注意: `i32::MIN` は入力に含まれない前提で構いません。",
@@ -1026,6 +1083,7 @@
   },
   {
     "id": "a058",
+    "language": "rust",
     "level": "advanced",
     "title": "checked 演算で失敗を型に",
     "description_md": "Rust の整数演算は、デバッグビルドではオーバーフロー時にパニックします。失敗する可能性を `Option` として型で表現する **checked 系メソッド**を使い、次の 2 つの関数を実装してください。\n\n1. `pub fn checked_expr(a: i32, b: i32, c: i32) -> Option<i32>` — `(a + b) * c` を計算します。加算・乗算のどこかでオーバーフローしたら `None` を返します\n2. `pub fn safe_div(a: i32, b: i32) -> Option<i32>` — `a / b` を計算します。ゼロ除算、および `i32::MIN / -1` (結果が i32 に収まらない) のときは `None` を返します\n\n```rust\nassert_eq!(checked_expr(2, 3, 4), Some(20));\nassert_eq!(checked_expr(i32::MAX, 1, 1), None); // 加算でオーバーフロー\n\nassert_eq!(safe_div(10, 3), Some(3));\nassert_eq!(safe_div(1, 0), None); // ゼロ除算\n```\n\nヒント: `checked_add` / `checked_mul` / `checked_div` はいずれも `Option<i32>` を返します。`Option` を返す関数の中では `?` 演算子で合成できます。",
@@ -1045,6 +1103,7 @@
   },
   {
     "id": "a059",
+    "language": "rust",
     "level": "advanced",
     "title": "wrapping と saturating",
     "description_md": "整数オーバーフローへの対処には「回り込み (wrapping)」と「飽和 (saturating)」という 2 つの戦略があります。用途の違いを体感するため、`u8` で次の 3 つの関数を実装してください。\n\n1. `pub fn hash_step(acc: u8, x: u8) -> u8` — ハッシュ計算の 1 ステップを想定し、`acc + x` を**回り込み**で計算します (255 を超えたら 0 に戻る)\n2. `pub fn add_gauge(gauge: u8, amount: u8) -> u8` — HP ゲージへの加算を想定し、`gauge + amount` を**飽和**で計算します (255 を超えたら 255 で止まる)\n3. `pub fn sub_gauge(gauge: u8, amount: u8) -> u8` — ゲージからの減算を想定し、`gauge - amount` を**飽和**で計算します (0 を下回ったら 0 で止まる)\n\n```rust\nassert_eq!(hash_step(250, 10), 4);   // 260 % 256 = 4\nassert_eq!(add_gauge(250, 10), 255); // 255 で頭打ち\nassert_eq!(sub_gauge(3, 10), 0);     // 0 で底打ち\n```\n\n注意: 通常の `+` / `-` はデバッグビルドでオーバーフロー時にパニックするため使えません。専用のメソッドを使ってください。",
@@ -1064,6 +1123,7 @@
   },
   {
     "id": "a060",
+    "language": "rust",
     "level": "advanced",
     "title": "overflowing 演算とフラグ",
     "description_md": "`overflowing_add` は `(計算結果, オーバーフローしたか)` のタプルを返します。「回り込んだ事実」そのものが必要になる代表例が、多倍長整数の加算 (キャリー伝播) です。次の 2 つの関数を実装してください。\n\n1. `pub fn add_with_carry(a: u8, b: u8, carry: bool) -> (u8, bool)` — `a + b + (carry を 1 か 0 として)` を計算し、`(下位 8 ビットの結果, 桁上がりが発生したか)` を返します\n2. `pub fn add2(a: [u8; 2], b: [u8; 2]) -> ([u8; 2], bool)` — 16 ビット整数を **リトルエンディアン** (`[下位バイト, 上位バイト]`) で表した 2 数を加算します。下位バイト同士を足し、その桁上がりを上位バイトの加算に伝播させ、`(結果 2 バイト, 最上位からの桁上がり)` を返します\n\n```rust\nassert_eq!(add_with_carry(255, 1, false), (0, true));\nassert_eq!(add_with_carry(100, 50, true), (151, false));\n\n// 255 + 1 = 256 = [0, 1] (リトルエンディアン)\nassert_eq!(add2([255, 0], [1, 0]), ([0, 1], false));\n// 65535 + 1 は 16 ビットから溢れる\nassert_eq!(add2([255, 255], [1, 0]), ([0, 0], true));\n```\n\n注意: `a + b` と `+ carry` の 2 回の加算のどちらでもオーバーフローは起こり得ます。どちらか一方でも起きたら桁上がり `true` です。",
@@ -1083,6 +1143,7 @@
   },
   {
     "id": "a061",
+    "language": "rust",
     "level": "advanced",
     "title": "char_indices とバイト位置",
     "description_md": "Rust の `String` / `str` は UTF-8 でエンコードされたバイト列です。日本語の文字は 1 文字 3 バイトを占めるため、「文字数」と「バイト長」は一致しません。この違いを確認する 3 つの関数を実装してください。\n\n1. `pub fn byte_len(s: &str) -> usize` — UTF-8 バイト列としての長さを返します\n2. `pub fn char_count(s: &str) -> usize` — `char` (Unicode スカラー値) の個数を返します\n3. `pub fn char_byte_offsets(s: &str) -> Vec<usize>` — 各文字の開始バイト位置を先頭から順に返します\n\n```rust\nassert_eq!(byte_len(\"こんにちは\"), 15);   // 3 バイト × 5 文字\nassert_eq!(char_count(\"こんにちは\"), 5);\nassert_eq!(char_byte_offsets(\"こんにちは\"), vec![0, 3, 6, 9, 12]);\n\nassert_eq!(char_byte_offsets(\"a猫b\"), vec![0, 1, 4]); // 'a'=1 バイト, '猫'=3 バイト\n```\n\n注意: `s[0]` のような添字アクセスは Rust の文字列ではコンパイルエラーになります。なぜ許されていないのか、実装しながら考えてみてください。",
@@ -1102,6 +1163,7 @@
   },
   {
     "id": "a062",
+    "language": "rust",
     "level": "advanced",
     "title": "バイト列と文字列の変換",
     "description_md": "文字列とバイト列を相互変換する 2 つの関数を実装してください。\n\n1. `pub fn to_bytes(s: &str) -> Vec<u8>` — 文字列を UTF-8 バイト列 (の所有された `Vec<u8>`) に変換します\n2. `pub fn bytes_to_string(bytes: Vec<u8>) -> Result<String, std::string::FromUtf8Error>` — バイト列を `String` に変換します。UTF-8 として不正な系列なら `Err` を返します\n\n```rust\nassert_eq!(to_bytes(\"abc\"), vec![97, 98, 99]);\nassert_eq!(to_bytes(\"あ\"), vec![0xE3, 0x81, 0x82]); // 'あ' は 3 バイト\n\nassert_eq!(bytes_to_string(vec![97, 98, 99]).unwrap(), \"abc\");\nassert!(bytes_to_string(vec![0xFF, 0xFF]).is_err()); // 不正な UTF-8\n```\n\n考えてみてください: `str → バイト列` は決して失敗しないのに、`バイト列 → String` はなぜ `Result` を返す必要があるのでしょうか。",
@@ -1121,6 +1183,7 @@
   },
   {
     "id": "a063",
+    "language": "rust",
     "level": "advanced",
     "title": "文字境界を守る切り出し",
     "description_md": "`&s[0..4]` のようなバイト添字のスライスは、範囲の端が**文字の途中**を指していると実行時にパニックします (例: `&\"こんにちは\"[0..4]` は「こ」3 バイト +「ん」の 1 バイト目で切れるため panic)。安全に部分文字列を切り出す 2 つの関数を実装してください。\n\n1. `pub fn can_slice_at(s: &str, index: usize) -> bool` — バイト位置 `index` で文字列を切ってよいか (= 文字境界か) を返します。`index` が `s` のバイト長と等しい場合は `true`、バイト長を超える場合は `false` です\n2. `pub fn take_chars(s: &str, n: usize) -> &str` — 先頭から `n` **文字** (バイトではありません) を部分文字列として返します。文字数が `n` に満たない場合は `s` 全体を返します\n\n```rust\nlet s = \"こんにちは\"; // 15 バイト, 5 文字\nassert!(can_slice_at(s, 3));  // 「こ」と「ん」の境界\nassert!(!can_slice_at(s, 1)); // 「こ」の途中\n\nassert_eq!(take_chars(s, 2), \"こん\");\nassert_eq!(take_chars(s, 10), \"こんにちは\"); // 5 文字しかないので全体\n```\n\nヒント: `str::is_char_boundary` と `char_indices` を使います。",
@@ -1140,6 +1203,7 @@
   },
   {
     "id": "a064",
+    "language": "rust",
     "level": "advanced",
     "title": "entry と or_insert_with",
     "description_md": "`HashMap` をキャッシュとして使い、「キーがなければ計算して登録し、あればその値をそのまま返す」関数 `get_or_compute` を実装してください。\n\n```rust\npub fn get_or_compute(map: &mut HashMap<String, usize>, key: &str, calls: &mut u32) -> usize\n```\n\n仕様は次のとおりです。\n\n- `map` に `key` が **存在する** 場合: 登録済みの値をそのまま返します。`calls` は変化させません\n- `map` に `key` が **存在しない** 場合: 「重い計算」の代わりとして `key.len()`(バイト長)を計算し、その値を `map` に登録して返します。このとき `*calls += 1` して、計算が実際に行われた回数を記録します\n\n入出力例:\n\n```rust\nlet mut map = HashMap::new();\nlet mut calls = 0;\n\nassert_eq!(get_or_compute(&mut map, \"hello\", &mut calls), 5);\nassert_eq!(calls, 1); // 初回は計算が走る\n\nassert_eq!(get_or_compute(&mut map, \"hello\", &mut calls), 5);\nassert_eq!(calls, 1); // 2 回目はキャッシュから返るので計算されない\n```\n\n注意事項:\n\n- `map.entry(...)` の `or_insert_with` を使うと、ルックアップ 1 回で「なければ作る」が書けます\n- `or_insert(f())` と書くと `f()` がキーの有無にかかわらず評価されてしまいます。`calls` が増えてはいけないケースがあるので、遅延評価になる書き方を選んでください\n",
@@ -1158,6 +1222,7 @@
   },
   {
     "id": "a065",
+    "language": "rust",
     "level": "advanced",
     "title": "and_modify で更新と挿入を分岐",
     "description_md": "単語のスライスを受け取り、各単語について **出現回数** と **最初に現れた添字** を同時に集計する関数 `count_with_first_index` を実装してください。\n\n```rust\npub fn count_with_first_index(words: &[&str]) -> HashMap<String, (usize, usize)>\n```\n\n戻り値のマップは、キーが単語(`String`)、値がタプル `(出現回数, 初出の添字)` です。\n\n入出力例:\n\n```rust\nlet m = count_with_first_index(&[\"a\", \"b\", \"a\", \"c\", \"a\"]);\nassert_eq!(m[\"a\"], (3, 0)); // 3 回出現、最初は添字 0\nassert_eq!(m[\"b\"], (1, 1));\nassert_eq!(m[\"c\"], (1, 3));\nassert_eq!(m.len(), 3);\n\nlet empty = count_with_first_index(&[]);\nassert!(empty.is_empty());\n```\n\n注意事項:\n\n- `entry(...).and_modify(...).or_insert(...)` を 1 つの式として連鎖させると、「すでにあるキーなら回数だけ増やす」「新しいキーなら `(1, 添字)` を入れる」を分岐なしで書けます\n- 初出の添字は、あとから同じ単語が現れても **上書きしない** でください\n",
@@ -1176,6 +1241,7 @@
   },
   {
     "id": "a066",
+    "language": "rust",
     "level": "advanced",
     "title": "Entry API でグルーピング",
     "description_md": "単語のスライスを受け取り、**アナグラム**(文字を並べ替えると同じになる単語)ごとにグループ化する関数 `group_anagrams` を実装してください。\n\n```rust\npub fn group_anagrams(words: &[&str]) -> HashMap<String, Vec<String>>\n```\n\n仕様は次のとおりです。\n\n- グループのキーは、単語の文字を **昇順にソートして連結した文字列** です(例: `\"eat\"` → `\"aet\"`、`\"tan\"` → `\"ant\"`)\n- 各グループの `Vec<String>` には、その単語を **入力に現れた順** で入れます\n- 同じ単語が複数回現れた場合は、その回数だけ `Vec` に入れます\n\n入出力例:\n\n```rust\nlet g = group_anagrams(&[\"eat\", \"tea\", \"tan\", \"ate\", \"nat\", \"bat\"]);\nassert_eq!(g.len(), 3);\nassert_eq!(g[\"aet\"], vec![\"eat\", \"tea\", \"ate\"]);\nassert_eq!(g[\"ant\"], vec![\"tan\", \"nat\"]);\nassert_eq!(g[\"abt\"], vec![\"bat\"]);\n\nassert!(group_anagrams(&[]).is_empty());\n```\n\n注意事項:\n\n- `entry(key).or_default()` を使うと、キーが無ければ空の `Vec` が自動で用意され、その `&mut Vec` に直接 `push` できます\n",
@@ -1194,6 +1260,7 @@
   },
   {
     "id": "a067",
+    "language": "rust",
     "level": "advanced",
     "title": "binary_search の2つの結果",
     "description_md": "昇順に整列済みの `Vec<i32>` に対して、**整列を保ったまま** 要素を挿入する関数 `sorted_insert` と、要素の有無を二分探索で調べる関数 `contains_sorted` を実装してください。\n\n```rust\npub fn sorted_insert(v: &mut Vec<i32>, x: i32);\npub fn contains_sorted(v: &[i32], x: i32) -> bool;\n```\n\n仕様は次のとおりです。\n\n- `sorted_insert`: `v` は昇順に整列済みであると仮定してよいです。`x` を挿入したあとも `v` は昇順に整列されていなければなりません。すでに同じ値がある場合も **削除せず** 挿入します(結果として同じ値が複数並びます)\n- `contains_sorted`: `v` に `x` が含まれていれば `true` を返します\n\n入出力例:\n\n```rust\nlet mut v = vec![1, 3, 5, 7];\nsorted_insert(&mut v, 4);\nassert_eq!(v, vec![1, 3, 4, 5, 7]);\nsorted_insert(&mut v, 0);\nassert_eq!(v, vec![0, 1, 3, 4, 5, 7]);\nsorted_insert(&mut v, 5);\nassert_eq!(v, vec![0, 1, 3, 4, 5, 5, 7]);\n\nlet mut empty = Vec::new();\nsorted_insert(&mut empty, 42);\nassert_eq!(empty, vec![42]);\n\nassert!(contains_sorted(&[1, 3, 5], 3));\nassert!(!contains_sorted(&[1, 3, 5], 4));\nassert!(!contains_sorted(&[], 1));\n```\n\n注意事項:\n\n- スライスの `binary_search(&x)` は、見つかれば `Ok(位置)`、見つからなければ **「整列を保つために挿入すべき位置」** を `Err(位置)` として返します。この設計を活かすと線形探索なしで挿入位置が O(log n) で求まります\n",
@@ -1212,6 +1279,7 @@
   },
   {
     "id": "a068",
+    "language": "rust",
     "level": "advanced",
     "title": "dedup 系メソッドの使い分け",
     "description_md": "`Vec` の `dedup` / `dedup_by` と `sort` を組み合わせて、3 種類の重複除去関数を実装してください。いずれも引数の `Vec` の所有権を受け取り、処理後の `Vec` を返します。\n\n```rust\npub fn dedup_consecutive(v: Vec<i32>) -> Vec<i32>;\npub fn dedup_all(v: Vec<i32>) -> Vec<i32>;\npub fn dedup_case_insensitive(v: Vec<String>) -> Vec<String>;\n```\n\n仕様は次のとおりです。\n\n- `dedup_consecutive`: **連続して並んでいる** 同じ値だけを 1 つにまとめます。離れた位置にある同じ値はそのまま残します。要素の順序は変えません\n- `dedup_all`: 全体から重複を取り除き、**昇順に整列した** `Vec` を返します\n- `dedup_case_insensitive`: ASCII の大文字・小文字を無視して等しい文字列が **連続して並んでいる** 場合、そのグループの **最初の要素だけ** を残します。順序は変えません\n\n入出力例:\n\n```rust\nassert_eq!(dedup_consecutive(vec![1, 1, 2, 2, 1, 1]), vec![1, 2, 1]);\nassert_eq!(dedup_all(vec![3, 1, 2, 1, 3]), vec![1, 2, 3]);\n\nlet words = vec![\"Rust\".to_string(), \"rust\".to_string(), \"RUST\".to_string(), \"go\".to_string()];\nassert_eq!(dedup_case_insensitive(words), vec![\"Rust\", \"go\"]);\n```\n\n注意事項:\n\n- `dedup` は「連続する重複」しか消しません。全体の重複を消したい場合は先に `sort` する必要があります\n- 大文字・小文字を無視した比較には `str::eq_ignore_ascii_case` が使えます\n",
@@ -1230,6 +1298,7 @@
   },
   {
     "id": "a069",
+    "language": "rust",
     "level": "advanced",
     "title": "retain によるその場フィルタ",
     "description_md": "新しいコレクションを作らずに、条件を満たす要素だけをその場に残す `retain` を使って、次の 2 つの関数を実装してください。\n\n```rust\npub fn keep_long_words(words: &mut Vec<String>, min_len: usize);\npub fn drop_non_positive(map: &mut HashMap<String, i32>);\n```\n\n仕様は次のとおりです。\n\n- `keep_long_words`: 文字数(`chars().count()`)が `min_len` **以上** の単語だけを残し、それ以外を取り除きます。残った要素の順序は変えません\n- `drop_non_positive`: 値が **正**(`> 0`)のエントリだけを残し、`0` 以下の値を持つエントリを取り除きます\n\n入出力例:\n\n```rust\nlet mut words = vec![\"rust\".to_string(), \"go\".to_string(), \"python\".to_string()];\nkeep_long_words(&mut words, 3);\nassert_eq!(words, vec![\"rust\", \"python\"]);\n\nlet mut map = HashMap::new();\nmap.insert(\"a\".to_string(), 3);\nmap.insert(\"b\".to_string(), 0);\nmap.insert(\"c\".to_string(), -5);\ndrop_non_positive(&mut map);\nassert_eq!(map.len(), 1);\nassert_eq!(map.get(\"a\"), Some(&3));\n```\n\n注意事項:\n\n- どちらの関数も戻り値は `()` で、引数として受け取った可変参照の先を **その場で** 書き換えます\n- `Vec::retain` のクロージャは `&T` を、`HashMap::retain` のクロージャは `(&K, &mut V)` を受け取ります\n",
@@ -1248,6 +1317,7 @@
   },
   {
     "id": "a070",
+    "language": "rust",
     "level": "advanced",
     "title": "ビットフラグの操作",
     "description_md": "`u8` の各ビットを権限フラグ(たとえば bit 0 = 読み取り、bit 1 = 書き込み、bit 2 = 実行)に見立てて、個別のビットを **設定・解除・反転・検査** する 4 つの関数を実装してください。\n\n```rust\npub fn set_flag(flags: u8, bit: u8) -> u8;\npub fn clear_flag(flags: u8, bit: u8) -> u8;\npub fn toggle_flag(flags: u8, bit: u8) -> u8;\npub fn has_flag(flags: u8, bit: u8) -> bool;\n```\n\n仕様は次のとおりです。`bit` はビット位置で、`0`(最下位)から `7`(最上位)の範囲だけを渡すものとします。\n\n- `set_flag`: `bit` 番目のビットを `1` にした値を返します。他のビットは変えません\n- `clear_flag`: `bit` 番目のビットを `0` にした値を返します。他のビットは変えません\n- `toggle_flag`: `bit` 番目のビットを反転(`0` なら `1`、`1` なら `0`)した値を返します\n- `has_flag`: `bit` 番目のビットが `1` なら `true` を返します\n\n入出力例:\n\n```rust\nlet f = set_flag(0b0000_0000, 0);\nassert_eq!(f, 0b0000_0001);\nlet f = set_flag(f, 2);\nassert_eq!(f, 0b0000_0101);\nassert!(has_flag(f, 2));\nassert!(!has_flag(f, 1));\n\nlet f = clear_flag(f, 0);\nassert_eq!(f, 0b0000_0100);\n\nlet f = toggle_flag(f, 7);\nassert_eq!(f, 0b1000_0100);\nlet f = toggle_flag(f, 7);\nassert_eq!(f, 0b0000_0100);\n```\n\n注意事項:\n\n- 「`bit` 番目だけが `1` の値」は `1 << bit` で作れます。これを **マスク** と呼びます\n- 設定は OR(`|`)、解除は AND と NOT(`& !mask`)、反転は XOR(`^`)、検査は AND(`&`)で書けます\n",
@@ -1266,6 +1336,7 @@
   },
   {
     "id": "a071",
+    "language": "rust",
     "level": "advanced",
     "title": "ビットカウントとシフト",
     "description_md": "`u32` に対する組み込みのビット操作メソッドと、シフト・AND を使ったイディオムを組み合わせて、次の 3 つの関数を実装してください。\n\n```rust\npub fn popcount(x: u32) -> u32;\npub fn highest_bit(x: u32) -> Option<u32>;\npub fn is_power_of_two(x: u32) -> bool;\n```\n\n仕様は次のとおりです。\n\n- `popcount`: `x` の 2 進表現に含まれる `1` の個数を返します\n- `highest_bit`: `x` の最上位の `1` が何ビット目か(最下位を 0 とする)を返します。`x == 0` のときは `1` が 1 つもないので `None` を返します\n- `is_power_of_two`: `x` が 2 のべき乗(`1, 2, 4, 8, ...`)なら `true` を返します。`0` は 2 のべき乗ではないので `false` です\n\n入出力例:\n\n```rust\nassert_eq!(popcount(0), 0);\nassert_eq!(popcount(0b1011), 3);\nassert_eq!(popcount(u32::MAX), 32);\n\nassert_eq!(highest_bit(0), None);\nassert_eq!(highest_bit(1), Some(0));\nassert_eq!(highest_bit(8), Some(3));\nassert_eq!(highest_bit(u32::MAX), Some(31));\n\nassert!(is_power_of_two(1));\nassert!(is_power_of_two(64));\nassert!(!is_power_of_two(0));\nassert!(!is_power_of_two(6));\n```\n\n注意事項:\n\n- `popcount` は `u32::count_ones` で得られます\n- 最上位ビットの位置は `leading_zeros` から計算できます(`u32` は 32 ビットなので `31 - leading_zeros`)\n- 2 のべき乗判定は `x & (x - 1) == 0` というイディオムで書けますが、`x == 0` の扱いに注意してください(`0 - 1` はデバッグビルドで panic します)。`u32::is_power_of_two` という組み込みメソッドもありますが、この問題ではイディオムを自分で書いてみてください\n",
@@ -1284,6 +1355,7 @@
   },
   {
     "id": "a072",
+    "language": "rust",
     "level": "advanced",
     "title": "ビット集合としての整数",
     "description_md": "`u32` 1 個を「要素 `0..32` の集合」と見なす **ビットセット** を実装してください。`i` 番目のビットが `1` なら「要素 `i` が集合に含まれる」と解釈します。空集合は `0` です。\n\n```rust\npub fn bs_insert(set: u32, elem: u8) -> u32;\npub fn bs_contains(set: u32, elem: u8) -> bool;\npub fn bs_union(a: u32, b: u32) -> u32;\npub fn bs_intersection(a: u32, b: u32) -> u32;\npub fn bs_is_subset(a: u32, b: u32) -> bool;\npub fn bs_len(set: u32) -> u32;\n```\n\n仕様は次のとおりです。`elem` は `0` から `31` の範囲だけを渡すものとします。\n\n- `bs_insert`: 要素 `elem` を加えた集合を返します。すでに含まれていれば変わりません\n- `bs_contains`: 要素 `elem` が含まれていれば `true`\n- `bs_union`: 和集合(どちらかに含まれる要素の集合)\n- `bs_intersection`: 積集合(両方に含まれる要素の集合)\n- `bs_is_subset`: `a` のすべての要素が `b` に含まれていれば `true`(`a ⊆ b`)。空集合はあらゆる集合の部分集合です\n- `bs_len`: 集合の要素数\n\n入出力例:\n\n```rust\nlet a = bs_insert(bs_insert(0, 1), 3); // {1, 3}\nlet b = bs_insert(bs_insert(0, 3), 5); // {3, 5}\n\nassert!(bs_contains(a, 1));\nassert!(!bs_contains(a, 2));\nassert_eq!(bs_len(a), 2);\n\nassert_eq!(bs_union(a, b), 0b10_1010);        // {1, 3, 5}\nassert_eq!(bs_intersection(a, b), 0b1000);    // {3}\nassert!(bs_is_subset(bs_insert(0, 3), a));    // {3} ⊆ {1, 3}\nassert!(!bs_is_subset(a, b));                 // {1, 3} は {3, 5} の部分集合ではない\nassert!(bs_is_subset(0, a));                  // 空集合 ⊆ 任意の集合\n```\n\n注意事項:\n\n- 和集合は OR、積集合は AND という **1 命令** に対応します。`HashSet` で同じ処理をするより桁違いに高速です\n- 包含判定は「`a` と `b` の積集合が `a` 自身に等しい」ことで書けます\n",
@@ -1302,6 +1374,7 @@
   },
   {
     "id": "a073",
+    "language": "rust",
     "level": "advanced",
     "title": "Drop トレイトの実装",
     "description_md": "生成時と破棄時に共有ログへ記録を残す型 `Guard` を実装し、変数が **宣言と逆順に破棄される** ことをテストで確認できるようにしてください。\n\n```rust\npub struct Guard {\n    name: String,\n    log: Rc<RefCell<Vec<String>>>,\n}\n\nimpl Guard {\n    pub fn new(name: &str, log: Rc<RefCell<Vec<String>>>) -> Self;\n}\n\nimpl Drop for Guard {\n    fn drop(&mut self);\n}\n```\n\n仕様は次のとおりです。\n\n- `Guard::new(name, log)`: `log` に `\"create <name>\"` という文字列(例: `\"create a\"`)を追加してから、`name` と `log` を保持する `Guard` を返します\n- `Drop::drop`: `log` に `\"drop <name>\"` という文字列(例: `\"drop a\"`)を追加します\n\n`log` は `Rc<RefCell<Vec<String>>>` なので、複数の `Guard` と呼び出し側で共有できます。`Guard` の外からログを読み取れるように、呼び出し側は `Rc::clone(&log)` で複製を渡します。\n\n入出力例:\n\n```rust\nlet log = Rc::new(RefCell::new(Vec::new()));\n{\n    let _a = Guard::new(\"a\", Rc::clone(&log));\n    let _b = Guard::new(\"b\", Rc::clone(&log));\n} // ここで _b, _a の順に drop される\nassert_eq!(*log.borrow(), vec![\"create a\", \"create b\", \"drop b\", \"drop a\"]);\n\nlet log2 = Rc::new(RefCell::new(Vec::new()));\nlet a = Guard::new(\"a\", Rc::clone(&log2));\nlet _b = Guard::new(\"b\", Rc::clone(&log2));\ndrop(a); // 明示的に破棄すると、その場で drop が走る\nassert_eq!(*log2.borrow(), vec![\"create a\", \"create b\", \"drop a\"]);\n```\n\n注意事項:\n\n- `Drop::drop` を直接呼ぶことはできません。値を明示的に破棄したいときは `std::mem::drop(value)` を使います\n- ログへの追加は `log.borrow_mut().push(...)` で行います\n",
@@ -1320,6 +1393,7 @@
   },
   {
     "id": "a074",
+    "language": "rust",
     "level": "advanced",
     "title": "mem::drop による早期解放",
     "description_md": "Rust では値のデストラクタである `Drop::drop` メソッドを自分で直接呼ぶことはできません (二重解放を防ぐためにコンパイラが禁止しています)。代わりに、プレリュードにある `std::mem::drop` (単に `drop` と書けます) へ値を渡すことで、スコープの終わりを待たずに任意のタイミングで解放できます。\n\n以下の `Resource` 型は drop されたときに共有ログへ `\"drop:<名前>\"` を記録します (この部分は実装済みです)。`run_with_early_release` を完成させてください。\n\n仕様:\n\n1. 名前 `\"a\"` と `\"b\"` の `Resource` をこの順で生成する\n2. `\"a\"` だけを **早期解放** し、その後でログに `\"checkpoint\"` を記録する\n3. `\"b\"` は関数の終了時に自動で解放させる (明示的に drop しない)\n\nつまりログは次の順番になります。\n\n```rust\nlet log: Log = Rc::new(RefCell::new(Vec::new()));\nrun_with_early_release(&log);\nassert_eq!(*log.borrow(), [\"drop:a\", \"checkpoint\", \"drop:b\"]);\n```\n\n注意: `a.drop()` のようにメソッドとして呼ぶとコンパイルエラー (E0040) になります。関数呼び出しの `drop(a)` を使ってください。\n",
@@ -1338,6 +1412,7 @@
   },
   {
     "id": "a075",
+    "language": "rust",
     "level": "advanced",
     "title": "AsRef で柔軟な引数を取る",
     "description_md": "文字列を受け取る関数を `&str` だけで定義すると、呼び出し側が `String` を持っているときに毎回 `&s` や `s.as_str()` と書かなければなりません。`AsRef<str>` 境界を使うと、`&str` / `String` / `&String` のどれでもそのまま渡せる API を一つのシグネチャで定義できます。\n\n次の 2 つの関数を実装してください。\n\n- `shout(s: impl AsRef<str>) -> String`\n  - 受け取った文字列を大文字化 (`to_uppercase`) し、末尾に `\"!\"` を付けて返します\n- `total_len<S: AsRef<str>>(items: &[S]) -> usize`\n  - スライス内の各文字列の **UTF-8 バイト長** (`len()`) の合計を返します。空スライスなら `0` です\n\n```rust\nassert_eq!(shout(\"rust\"), \"RUST!\");\nassert_eq!(shout(String::from(\"hello\")), \"HELLO!\");\nlet owned = String::from(\"abc\");\nassert_eq!(shout(&owned), \"ABC!\"); // &String もそのまま渡せる\n\nassert_eq!(total_len(&[\"a\", \"bc\", \"def\"]), 6);\nassert_eq!(total_len(&[String::from(\"こんにちは\")]), 15); // 日本語は 1 文字 3 バイト\n```\n\n注意: 関数の中では `s.as_ref()` で `&str` を取り出してから処理します。\n",
@@ -1356,6 +1431,7 @@
   },
   {
     "id": "a076",
+    "language": "rust",
     "level": "advanced",
     "title": "Borrow と HashMap のキー検索",
     "description_md": "`HashMap<String, V>` は `map.get(\"key\")` のように `&str` で検索できます。これは `String` が `Borrow<str>` を実装しているためで、`HashMap::get` は「キー型 `K` が `Borrow<Q>` を実装していれば `&Q` で検索できる」というシグネチャになっています。\n\nユーザー ID を表す newtype `UserId(String)` をキーにした `HashMap` を、検索のたびに `UserId` を作らずに `&str` で引けるようにしてください。\n\n実装するもの:\n\n1. `impl Borrow<str> for UserId` — 内部の `String` を `&str` として返す\n2. `build_index(pairs: &[(&str, u32)]) -> HashMap<UserId, u32>` — `(ID 文字列, スコア)` の組から `HashMap` を作る\n3. `lookup(map: &HashMap<UserId, u32>, id: &str) -> Option<u32>` — `&str` で検索し、見つかればスコアのコピーを返す\n\n```rust\nlet map = build_index(&[(\"alice\", 90), (\"bob\", 75)]);\nassert_eq!(lookup(&map, \"alice\"), Some(90));\nassert_eq!(lookup(&map, \"carol\"), None);\n```\n\n注意: `Borrow` を実装する型は「借用前後で `Hash` と `Eq` の結果が一致する」必要があります。`UserId` は `#[derive(Hash, PartialEq, Eq)]` されており、内部の `String` と同じハッシュ値になるのでこの条件を満たします。\n",
@@ -1374,6 +1450,7 @@
   },
   {
     "id": "a077",
+    "language": "rust",
     "level": "advanced",
     "title": "独自エラー型と Error トレイト",
     "description_md": "アプリケーション固有のエラーは、種類ごとのバリアントを持つ `enum` として表現し、`Display` と `std::error::Error` を実装するのが基本形です。こうしておくと `Box<dyn Error>` に入れたり、`?` で伝播したりと、標準のエラーエコシステムにそのまま参加できます。\n\nユーザー名を検証する関数と、そのエラー型を実装してください。\n\n`ValidationError` (enum、定義済み):\n\n- `Empty` — 入力が空文字列\n- `TooLong(usize)` — 文字数 (`chars().count()`) が 10 を超えている。実際の文字数を保持する\n\n実装するもの:\n\n1. `impl Display for ValidationError` — 表示文字列は **厳密に** 次のとおり\n   - `Empty` → `input is empty`\n   - `TooLong(n)` → `input is too long: {n} chars` (例: `input is too long: 12 chars`)\n2. `impl std::error::Error for ValidationError`\n3. `validate_name(name: &str) -> Result<(), ValidationError>`\n   - 空なら `Err(Empty)`、文字数が 10 を超えるなら `Err(TooLong(文字数))`、それ以外は `Ok(())`\n\n```rust\nassert_eq!(validate_name(\"ferris\"), Ok(()));\nassert_eq!(validate_name(\"\"), Err(ValidationError::Empty));\nassert_eq!(validate_name(\"abcdefghijk\"), Err(ValidationError::TooLong(11)));\nassert_eq!(ValidationError::TooLong(12).to_string(), \"input is too long: 12 chars\");\n\nlet boxed: Box<dyn std::error::Error> = Box::new(ValidationError::Empty);\nassert_eq!(boxed.to_string(), \"input is empty\");\n```\n",
@@ -1392,6 +1469,7 @@
   },
   {
     "id": "a078",
+    "language": "rust",
     "level": "advanced",
     "title": "From によるエラー変換と ?",
     "description_md": "`?` 演算子は `Err(e)` を見つけると、`return Err(From::from(e))` を実行します。つまり関数の戻り値のエラー型 `E` に対して `impl From<下位エラー> for E` があれば、`?` が **自動で変換** してくれます。この仕組みを使うと、複数の下位エラーを一つの自作 enum に集約できます。\n\nポート番号の文字列を解析する関数を実装してください。\n\n`ConfigError` (enum、定義済み):\n\n- `Parse(ParseIntError)` — 数値として解析できなかった\n- `OutOfRange(i64)` — 数値だが 1〜65535 の範囲外。実際の値を保持する\n\n実装するもの:\n\n1. `impl From<ParseIntError> for ConfigError` — `Parse` バリアントに包む\n2. `parse_port(s: &str) -> Result<u16, ConfigError>`\n   - `s` を `i64` として解析する (`?` を使い、解析エラーは `From` 経由で `ConfigError::Parse` に変換する)\n   - 値が `1..=65535` の範囲外なら `Err(ConfigError::OutOfRange(値))`\n   - 範囲内なら `Ok(値 as u16)`\n\n```rust\nassert!(matches!(parse_port(\"8080\"), Ok(8080)));\nassert!(matches!(parse_port(\"abc\"), Err(ConfigError::Parse(_))));\nassert!(matches!(parse_port(\"0\"), Err(ConfigError::OutOfRange(0))));\nassert!(matches!(parse_port(\"70000\"), Err(ConfigError::OutOfRange(70000))));\n```\n\n注意: `map_err` を使っても動きますが、この問題では `From` を実装して `?` だけで変換させることが目的です。前後の空白は取り除かず、そのまま解析します (`\"80 \"` は解析エラーになります)。\n",
@@ -1410,6 +1488,7 @@
   },
   {
     "id": "a079",
+    "language": "rust",
     "level": "advanced",
     "title": "source によるエラー連鎖",
     "description_md": "上位のエラーが下位のエラーを「原因」として内包すると、`Error::source` を辿ることで根本原因までの連鎖を取り出せます。ログ出力や診断で「設定の読み込みに失敗 ← ファイル読み込みに失敗 ← ディスク障害」のように表示するための仕組みです。\n\n原因を保持できるエラー型 `AppError` と、連鎖を走査する関数を実装してください。\n\n`AppError` (struct、フィールド定義済み):\n\n- `message: String` — このエラー自身のメッセージ\n- `source: Option<Box<dyn Error + 'static>>` — 原因となった下位エラー (あれば)\n\n実装するもの:\n\n1. `AppError::new(message: &str) -> AppError` — 原因なし\n2. `AppError::with_source(message: &str, source: Box<dyn Error + 'static>) -> AppError` — 原因つき\n3. `impl Error for AppError` の `source` メソッド — 保持している原因を `Option<&(dyn Error + 'static)>` で返す\n4. `root_cause(err: &(dyn Error + 'static)) -> String` — `source` を辿れるだけ辿り、最も深いエラーの `to_string()` を返す。原因がなければ `err` 自身の文字列\n\n`Display` は `message` をそのまま出力します (実装済み)。\n\n```rust\nlet root = AppError::new(\"disk failure\");\nlet mid = AppError::with_source(\"read failed\", Box::new(root));\nlet top = AppError::with_source(\"config load failed\", Box::new(mid));\nassert_eq!(top.to_string(), \"config load failed\");\nassert_eq!(root_cause(&top), \"disk failure\");\nassert_eq!(root_cause(&AppError::new(\"alone\")), \"alone\");\n```\n",
@@ -1428,6 +1507,7 @@
   },
   {
     "id": "a080",
+    "language": "rust",
     "level": "advanced",
     "title": "Box<dyn Error> のダウンキャスト",
     "description_md": "`Box<dyn Error>` は「何らかのエラー」をまとめて扱える便利な型ですが、具象型の情報が消えているため、そのままでは `match` で種類ごとに分岐できません。`dyn Error` には `downcast_ref::<T>()` メソッドがあり、「実際の型が `T` なら `Some(&T)`」を返してくれます。これを使って型を取り戻し、エラーの種類に応じた処理を書けます。\n\n次の 2 つの関数を実装してください。`NegativeError` 型 (`Display` / `Error` 実装済み) はそのまま使ってください。\n\n1. `half(s: &str) -> Result<i32, Box<dyn Error>>`\n   - `s` を `i32` として解析する。失敗したら `ParseIntError` を `Box<dyn Error>` として返す (`?` が使えます)\n   - 値が負なら `Err(Box::new(NegativeError(値)))`\n   - それ以外は `Ok(値 / 2)` (整数除算)\n2. `classify(err: &(dyn Error + 'static)) -> String`\n   - `err` の実体が `ParseIntError` なら `\"parse\"`\n   - `NegativeError(n)` なら `\"negative:{n}\"` (例: `\"negative:-4\"`)\n   - それ以外なら `\"unknown\"`\n\n```rust\nassert_eq!(half(\"10\").unwrap(), 5);\n\nlet err = half(\"abc\").unwrap_err();\nassert_eq!(classify(err.as_ref()), \"parse\");\n\nlet err = half(\"-4\").unwrap_err();\nassert_eq!(classify(err.as_ref()), \"negative:-4\");\n\nassert_eq!(classify(&std::fmt::Error), \"unknown\");\n```\n",
@@ -1446,6 +1526,7 @@
   },
   {
     "id": "a081",
+    "language": "rust",
     "level": "advanced",
     "title": "const generics 入門",
     "description_md": "Rust では `[i32; 3]` と `[i32; 5]` は **別の型** です。そのため `fn sum(arr: [i32; 3])` と書いた関数には長さ 5 の配列を渡せません。const generics を使うと、配列の長さ `N` を型パラメータのように扱い、任意の長さの配列を一つの関数で受け取れます。\n\n```rust\nfn sum<const N: usize>(arr: [i32; N]) -> i32\n```\n\n次の 2 つの関数を実装してください。\n\n1. `sum<const N: usize>(arr: [i32; N]) -> i32` — 全要素の合計。空配列なら `0`\n2. `min_max<const N: usize>(arr: [i32; N]) -> Option<(i32, i32)>` — `(最小値, 最大値)` を返す。空配列 (`N == 0`) なら `None`\n\n```rust\nassert_eq!(sum([1, 2, 3]), 6);\nassert_eq!(sum([1, 2, 3, 4, 5]), 15);\nlet empty: [i32; 0] = [];\nassert_eq!(sum(empty), 0);\n\nassert_eq!(min_max([3, -1, 4, 1, 5]), Some((-1, 5)));\nassert_eq!(min_max([7]), Some((7, 7)));\n```\n\n注意: 配列は値渡し (ムーブ) で受け取ります。`i32` は `Copy` なので呼び出し後も元の配列は使えます。\n",
@@ -1464,6 +1545,7 @@
   },
   {
     "id": "a082",
+    "language": "rust",
     "level": "advanced",
     "title": "配列を生成する const generics",
     "description_md": "const generics は引数で受けるだけでなく、**戻り値の配列長** をジェネリックにすることもできます。`std::array::from_fn` は「インデックスを受け取って要素を返すクロージャ」から `[T; N]` を生成する関数で、`N` は戻り値の型注釈や turbofish から推論されます。\n\n```rust\nlet a: [u64; 4] = squares(); // N = 4 が戻り値の型から推論される\nlet b = steps::<3>(0, 7);    // turbofish で N = 3 を指定\n```\n\n次の 2 つの関数を実装してください。\n\n1. `squares<const N: usize>() -> [u64; N]` — `[1, 4, 9, ..., N*N]` (1 から N までの二乗) を返す。`N == 0` なら空配列\n2. `steps<const N: usize>(start: i32, step: i32) -> [i32; N]` — `[start, start + step, start + 2*step, ...]` を N 個返す\n\n```rust\nlet a: [u64; 4] = squares();\nassert_eq!(a, [1, 4, 9, 16]);\n\nassert_eq!(steps::<5>(10, -2), [10, 8, 6, 4, 2]);\nassert_eq!(steps::<3>(0, 7), [0, 7, 14]);\n```\n\n注意: 配列は `Vec` と違いヒープではなくスタックに置かれ、長さがコンパイル時に決まるため実行時の境界検査や再確保が不要です。`std::array::from_fn(|i| ...)` を使ってください。\n",
@@ -1482,6 +1564,7 @@
   },
   {
     "id": "a083",
+    "language": "rust",
     "level": "advanced",
     "title": "固定長リングバッファ",
     "description_md": "リングバッファ (循環バッファ) は固定長の配列を環状に使い回す FIFO キューです。先頭位置 `head` と要素数 `len` を持ち、末尾位置は `(head + len) % N` で求めます。配列の終端まで来たら剰余演算で先頭に戻るため、要素を移動させずに push / pop できます。\n\n`RingBuffer<T, const N: usize>` を実装してください。フィールドは定義済みです。\n\n- `buf: [Option<T>; N]` — 要素の格納先 (空きは `None`)\n- `head: usize` — 次に pop する位置\n- `len: usize` — 現在の要素数\n\n実装するメソッド:\n\n1. `new() -> Self` — 全要素 `None`、`head = 0`、`len = 0` (`std::array::from_fn(|_| None)` が使えます)\n2. `len(&self) -> usize` / `is_empty(&self) -> bool` / `is_full(&self) -> bool` (`len == N` で満杯)\n3. `push(&mut self, value: T) -> Result<(), T>` — 末尾に追加。満杯なら **値をそのまま `Err` で返す**\n4. `pop(&mut self) -> Option<T>` — 先頭の要素を取り出す。空なら `None`\n\n```rust\nlet mut rb: RingBuffer<i32, 3> = RingBuffer::new();\nassert_eq!(rb.push(1), Ok(()));\nassert_eq!(rb.push(2), Ok(()));\nassert_eq!(rb.push(3), Ok(()));\nassert_eq!(rb.push(4), Err(4));     // 満杯\nassert_eq!(rb.pop(), Some(1));      // FIFO\nassert_eq!(rb.push(4), Ok(()));     // 空きができたので入る (配列の先頭に回り込む)\nassert_eq!(rb.pop(), Some(2));\nassert_eq!(rb.pop(), Some(3));\nassert_eq!(rb.pop(), Some(4));\nassert_eq!(rb.pop(), None);\n```\n\n注意: `T` に `Copy` や `Default` を要求してはいけません (`String` でも使えること)。`Option::take` を使うと要素の所有権を配列から抜き取れます。\n",
@@ -1500,6 +1583,7 @@
   },
   {
     "id": "a084",
+    "language": "rust",
     "level": "advanced",
     "title": "PhantomData で ID を型分け",
     "description_md": "## 概要\n\nデータベースの主キーなどでは、ユーザー ID も注文 ID も実体はただの `u64` です。しかしそのまま `u64` を使うと、「ユーザー ID を渡すべき関数に注文 ID を渡してしまう」というバグをコンパイラが見逃してしまいます。\n\nこの問題では `PhantomData` を使い、**実行時にはただの `u64` なのに、型としては別物として扱われる ID 型 `Id<T>`** を実装します。\n\n## 実装するもの\n\n```rust\npub struct User;   // マーカー型 (中身はなし)\npub struct Order;  // マーカー型 (中身はなし)\n\npub struct Id<T> {\n    value: u64,\n    _marker: PhantomData<T>,\n}\n\npub type UserId = Id<User>;\npub type OrderId = Id<Order>;\n```\n\n- `Id::<T>::new(value: u64) -> Id<T>` : 値から ID を作ります\n- `Id::<T>::value(&self) -> u64` : 保持している値を返します\n- `find_user_name(id: UserId) -> String` : `\"user-<ID値>\"` という形式の文字列を返します (例: ID が 7 なら `\"user-7\"`)\n\n## 例\n\n```rust\nlet user_id: UserId = Id::new(42);\nassert_eq!(user_id.value(), 42);\n\nassert_eq!(find_user_name(Id::new(7)), \"user-7\");\n\nlet order_id: OrderId = Id::new(7);\n// find_user_name(order_id); // ← コンパイルエラーになる (OrderId は UserId ではない)\n```\n\n## 注意\n\n- `PhantomData<T>` はサイズ 0 の型です。`Id<T>` の実行時のサイズは `u64` と同じになります\n- 型パラメータ `T` は `PhantomData` 以外のフィールドでは使いません",
@@ -1518,6 +1602,7 @@
   },
   {
     "id": "a085",
+    "language": "rust",
     "level": "advanced",
     "title": "型状態パターン入門",
     "description_md": "## 概要\n\n「閉じているドアしか開けられない」「開いているドアしか閉められない」というルールを、実行時のチェックではなく**型で**表現します。これは**型状態パターン (typestate pattern)** と呼ばれる Rust の定番テクニックです。\n\n## 実装するもの\n\n```rust\npub struct Open;    // 開いた状態を表すマーカー型\npub struct Closed;  // 閉じた状態を表すマーカー型\n\npub struct Door<State> {\n    _state: PhantomData<State>,\n}\n```\n\n`Door<Closed>` にだけ定義するメソッド:\n\n- `Door::new() -> Door<Closed>` : ドアは**閉じた状態**で作られます\n- `open(self) -> Door<Open>` : 閉じたドアを開けます\n- `state_name(&self) -> &'static str` : `\"closed\"` を返します\n\n`Door<Open>` にだけ定義するメソッド:\n\n- `close(self) -> Door<Closed>` : 開いたドアを閉めます\n- `state_name(&self) -> &'static str` : `\"open\"` を返します\n\n## 例\n\n```rust\nlet door = Door::new();\nassert_eq!(door.state_name(), \"closed\");\n\nlet door = door.open();\nassert_eq!(door.state_name(), \"open\");\n\nlet door = door.close();\nassert_eq!(door.state_name(), \"closed\");\n\n// Door::new().close();       // ← コンパイルエラー (閉じたドアに close はない)\n// Door::new().open().open(); // ← コンパイルエラー (開いたドアに open はない)\n```\n\n## 注意\n\n- `open` / `close` は `self` を消費 (ムーブ) して新しい状態のドアを返します\n- `impl Door<Closed> { ... }` と `impl Door<Open> { ... }` のように、状態ごとに `impl` ブロックを分けて書きます",
@@ -1536,6 +1621,7 @@
   },
   {
     "id": "a086",
+    "language": "rust",
     "level": "advanced",
     "title": "型で強制する状態遷移",
     "description_md": "## 概要\n\n信号機は「赤 → 青 → 黄 → 赤 → ...」という順番でしか変わりません。この遷移の順序を型で表し、「赤から直接黄に変える」「青から赤に戻す」といった**不正な遷移をコンパイルエラーにする**状態機械を実装します。\n\n## 実装するもの\n\n```rust\npub struct Red;\npub struct Green;\npub struct Yellow;\n\npub struct TrafficLight<State> {\n    _state: PhantomData<State>,\n}\n```\n\n`TrafficLight<Red>` に定義するメソッド:\n\n- `TrafficLight::new() -> TrafficLight<Red>` : 信号は**赤**から始まります\n- `to_green(self) -> TrafficLight<Green>`\n- `color(&self) -> &'static str` : `\"red\"` を返します\n\n`TrafficLight<Green>` に定義するメソッド:\n\n- `to_yellow(self) -> TrafficLight<Yellow>`\n- `color(&self) -> &'static str` : `\"green\"` を返します\n\n`TrafficLight<Yellow>` に定義するメソッド:\n\n- `to_red(self) -> TrafficLight<Red>`\n- `color(&self) -> &'static str` : `\"yellow\"` を返します\n\n## 例\n\n```rust\nlet light = TrafficLight::new();\nassert_eq!(light.color(), \"red\");\n\nlet light = light.to_green();\nassert_eq!(light.color(), \"green\");\n\nlet light = light.to_yellow().to_red();\nassert_eq!(light.color(), \"red\");\n\n// TrafficLight::new().to_yellow(); // ← コンパイルエラー (赤から黄には行けない)\n// let g = TrafficLight::new().to_green();\n// let y = g.to_yellow();\n// g.to_yellow();                    // ← コンパイルエラー (g はムーブ済み)\n```\n\n## 注意\n\n- 各遷移メソッドは `self` を消費して、次の状態の `TrafficLight` を返します\n- 遷移できるのは 赤→青、青→黄、黄→赤 の 3 通りだけです",
@@ -1554,6 +1640,7 @@
   },
   {
     "id": "a087",
+    "language": "rust",
     "level": "advanced",
     "title": "ジェネリックスタック",
     "description_md": "## 概要\n\n任意の型 `T` の値を積める **スタック (後入れ先出し, LIFO)** `Stack<T>` を実装します。内部では `Vec<T>` を使いますが、利用者には `push` / `pop` / `peek` といったスタックの操作だけを公開します。\n\n## 実装するもの\n\n```rust\npub struct Stack<T> {\n    items: Vec<T>,\n}\n```\n\n- `Stack::new() -> Stack<T>` : 空のスタックを作ります\n- `push(&mut self, item: T)` : 一番上に要素を積みます\n- `pop(&mut self) -> Option<T>` : 一番上の要素を**取り出して**返します。空なら `None`\n- `peek(&self) -> Option<&T>` : 一番上の要素への**参照**を返します (取り出しません)。空なら `None`\n- `len(&self) -> usize` : 要素数\n- `is_empty(&self) -> bool` : 空なら `true`\n\n## 例\n\n```rust\nlet mut stack = Stack::new();\nassert!(stack.is_empty());\nassert_eq!(stack.pop(), None);\n\nstack.push(1);\nstack.push(2);\nstack.push(3);\nassert_eq!(stack.len(), 3);\nassert_eq!(stack.peek(), Some(&3));  // 参照を返すだけ\nassert_eq!(stack.len(), 3);          // 減っていない\nassert_eq!(stack.pop(), Some(3));    // 所有権ごと取り出す\nassert_eq!(stack.pop(), Some(2));\nassert_eq!(stack.pop(), Some(1));\nassert_eq!(stack.pop(), None);\n```\n\n## 注意\n\n- `pop` は `Option<T>` (値そのもの)、`peek` は `Option<&T>` (参照) を返します。この違いは所有権の観点で重要です\n- `T` にトレイト境界は必要ありません (どんな型でも積める)",
@@ -1572,6 +1659,7 @@
   },
   {
     "id": "a088",
+    "language": "rust",
     "level": "advanced",
     "title": "2スタックキュー",
     "description_md": "## 概要\n\n**スタック 2 本だけ**を使って **キュー (先入れ先出し, FIFO)** `Queue<T>` を実装します。これは面接などでも定番のアルゴリズム問題で、「入れる専用のスタック」と「出す専用のスタック」を組み合わせると、償却 O(1) でキュー操作ができます。\n\n## 実装するもの\n\n```rust\npub struct Queue<T> {\n    inbox: Vec<T>,   // enqueue された要素を積む\n    outbox: Vec<T>,  // dequeue のために逆順に積み直したもの\n}\n```\n\n- `Queue::new() -> Queue<T>` : 空のキュー\n- `enqueue(&mut self, item: T)` : 末尾に要素を追加します\n- `dequeue(&mut self) -> Option<T>` : **先頭 (最も早く入れた要素)** を取り出して返します。空なら `None`\n- `len(&self) -> usize` : キュー全体の要素数\n- `is_empty(&self) -> bool`\n\n## アルゴリズム\n\n- `enqueue` は `inbox` に `push` するだけです\n- `dequeue` は `outbox` から `pop` します。ただし `outbox` が空のときは、まず `inbox` の要素を**すべて** `pop` して `outbox` に `push` し直します (これで順序が反転し、最も古い要素が `outbox` の一番上に来ます)。移し替えても `outbox` が空なら `None` です\n\n## 例\n\n```rust\nlet mut queue = Queue::new();\nqueue.enqueue(1);\nqueue.enqueue(2);\nassert_eq!(queue.dequeue(), Some(1));\nqueue.enqueue(3);\nassert_eq!(queue.len(), 2);\nassert_eq!(queue.dequeue(), Some(2));\nassert_eq!(queue.dequeue(), Some(3));\nassert_eq!(queue.dequeue(), None);\n```\n\n## 注意\n\n- `Vec::remove(0)` や `VecDeque` は使わず、`Vec::push` / `Vec::pop` だけで実装してください (2 スタック方式を学ぶのが目的です)\n- `len` は `inbox` と `outbox` の**合計**です",
@@ -1590,6 +1678,7 @@
   },
   {
     "id": "a089",
+    "language": "rust",
     "level": "advanced",
     "title": "整列を保つコレクション",
     "description_md": "## 概要\n\n「中身が常に昇順に整列している」という不変条件を持つコレクション `SortedVec<T>` を実装します。要素の挿入位置は `binary_search` で決め、`contains` も二分探索で O(log n) に判定します。\n\n## 実装するもの\n\n```rust\npub struct SortedVec<T: Ord> {\n    items: Vec<T>,  // 常に昇順に整列している\n}\n```\n\n- `SortedVec::new() -> SortedVec<T>` : 空のコレクション\n- `insert(&mut self, value: T)` : 整列順を保ったまま挿入します。**同じ値が既にあっても挿入します** (重複を許す)\n- `contains(&self, value: &T) -> bool` : 値が含まれていれば `true`\n- `as_slice(&self) -> &[T]` : 中身を整列済みスライスとして返します\n- `len(&self) -> usize` : 要素数\n\n## 例\n\n```rust\nlet mut v = SortedVec::new();\nv.insert(3);\nv.insert(1);\nv.insert(2);\nv.insert(2);\nassert_eq!(v.as_slice(), &[1, 2, 2, 3]);\nassert_eq!(v.len(), 4);\nassert!(v.contains(&2));\nassert!(!v.contains(&5));\n```\n\n## 注意\n\n- 挿入位置は `Vec::binary_search` の戻り値 (`Result<usize, usize>`) から決めてください。`Ok(i)` は「同じ値が位置 i にある」、`Err(i)` は「位置 i に入れれば整列が保たれる」という意味です\n- `items` は非公開にし、整列していない状態を外部から作れないようにします\n- `T` には `Ord` 境界を付けます",
@@ -1608,6 +1697,7 @@
   },
   {
     "id": "a090",
+    "language": "rust",
     "level": "advanced",
     "title": "LRU キャッシュ",
     "description_md": "## 概要\n\n容量に上限のある **LRU (Least Recently Used) キャッシュ** を実装します。容量いっぱいのときに新しいキーを入れると、**最も長く使われていない**エントリを追い出します。「使われた」とは `get` でヒットしたか `put` で書き込まれたことを指します。\n\n## 実装するもの\n\n```rust\npub struct LruCache<K: Eq + Hash + Clone, V> {\n    capacity: usize,\n    map: HashMap<K, V>,     // キー → 値\n    order: VecDeque<K>,     // アクセス順 (先頭が最も古い、末尾が最新)\n}\n```\n\n- `LruCache::new(capacity: usize) -> LruCache<K, V>` : `capacity` は 1 以上とします\n- `get(&mut self, key: &K) -> Option<&V>` : キーがあれば値への参照を返し、そのキーを**最新に昇格**させます。なければ `None`\n- `put(&mut self, key: K, value: V)`\n  - キーが既にある場合: 値を上書きし、そのキーを最新に昇格させます (追い出しは起きません)\n  - キーがない場合: 要素数が `capacity` に達していれば最も古いキーを追い出してから追加します。追加したキーは最新になります\n- `len(&self) -> usize` : 現在の要素数\n\n## 例\n\n```rust\nlet mut cache = LruCache::new(2);\ncache.put(\"a\", 1);\ncache.put(\"b\", 2);\ncache.get(&\"a\");        // a を最新に昇格 → 古い順は b, a\ncache.put(\"c\", 3);      // 満杯なので最も古い b を追い出す\nassert_eq!(cache.get(&\"b\"), None);\nassert_eq!(cache.get(&\"a\"), Some(&1));\nassert_eq!(cache.get(&\"c\"), Some(&3));\nassert_eq!(cache.len(), 2);\n```\n\n## 注意\n\n- `map` と `order` の内容は常に一致させてください (`map` にあるキーは `order` にちょうど 1 回だけ現れる)\n- `get` は `&mut self` を取ります。読み取りでもアクセス順が変わるためです",
@@ -1626,6 +1716,7 @@
   },
   {
     "id": "a091",
+    "language": "rust",
     "level": "advanced",
     "title": "二分ヒープの自作",
     "description_md": "## 概要\n\n`Vec<T>` を使って**最小ヒープ (min-heap)** `MinHeap<T>` を自作します。ヒープは「親は子より小さいか等しい」という**ヒープ不変条件**を持つ完全二分木で、常に最小値を O(log n) で取り出せます。標準ライブラリの `BinaryHeap` は最大ヒープですが、ここでは中身を理解するために自分で実装します (`BinaryHeap` は使わないでください)。\n\n## 配列による完全二分木の表現\n\n`Vec` の添字 `i` の要素について:\n\n- 親: `(i - 1) / 2` (`i > 0` のとき)\n- 左の子: `2 * i + 1`\n- 右の子: `2 * i + 2`\n\n## 実装するもの\n\n```rust\npub struct MinHeap<T: Ord> {\n    items: Vec<T>,\n}\n```\n\n- `MinHeap::new() -> MinHeap<T>` : 空のヒープ\n- `push(&mut self, value: T)` : 末尾に追加してから **sift_up** (親より小さい間、親と交換して上へ) で不変条件を回復します\n- `pop(&mut self) -> Option<T>` : **最小値**を取り出します。空なら `None`。先頭と末尾を交換して末尾を取り出し、先頭から **sift_down** (子のうち小さい方より大きい間、交換して下へ) で不変条件を回復します\n- `peek(&self) -> Option<&T>` : 最小値への参照。空なら `None`\n- `len(&self) -> usize` : 要素数\n\n## 例\n\n```rust\nlet mut heap = MinHeap::new();\nheap.push(5);\nheap.push(1);\nheap.push(3);\nassert_eq!(heap.peek(), Some(&1));\nassert_eq!(heap.pop(), Some(1));\nassert_eq!(heap.pop(), Some(3));\nassert_eq!(heap.pop(), Some(5));\nassert_eq!(heap.pop(), None);\n```\n\n## 注意\n\n- `pop` を繰り返すと昇順に値が出てきます (ヒープソート)\n- 同じ値が複数あってもすべて取り出せること\n- `items` は非公開にし、不変条件を外から壊せないようにします",
@@ -1644,6 +1735,7 @@
   },
   {
     "id": "a092",
+    "language": "rust",
     "level": "advanced",
     "title": "隣接リストと幅優先探索",
     "description_md": "## 概要\n\n**無向グラフ**を隣接リスト `Vec<Vec<usize>>` で表現し、**幅優先探索 (BFS)** で始点から各頂点への最短距離 (辺の本数) を求める関数を実装します。\n\n## 実装するもの\n\n```rust\npub fn bfs_distances(n: usize, edges: &[(usize, usize)], start: usize) -> Vec<Option<usize>>\n```\n\n- `n` : 頂点数。頂点は `0..n` の番号で表します\n- `edges` : 無向辺のリスト。`(u, v)` は `u` と `v` が双方向につながっていることを表します\n- `start` : 始点 (`start < n` は保証されます)\n- 戻り値: 長さ `n` の `Vec`。`result[v]` は始点から頂点 `v` への最短距離 (辺の本数)。到達できない頂点は `None`。`result[start]` は `Some(0)`\n\n## 例\n\n```rust\n// 0 - 1 - 2   3 (孤立)\nlet dist = bfs_distances(4, &[(0, 1), (1, 2)], 0);\nassert_eq!(dist, vec![Some(0), Some(1), Some(2), None]);\n\n// 0-1-2-3 と 0-4-3 の 2 経路。3 へは 0→4→3 の 2 本が最短\nlet dist = bfs_distances(5, &[(0, 1), (1, 2), (2, 3), (0, 4), (4, 3)], 0);\nassert_eq!(dist[3], Some(2));\n```\n\n## 手順\n\n1. `vec![Vec::new(); n]` で隣接リストを作り、各辺について `adj[u].push(v)` と `adj[v].push(u)` の両方を行います (無向グラフ)\n2. `dist` を `vec![None; n]` で初期化し、`dist[start] = Some(0)` にして `VecDeque` に `start` を入れます\n3. キューの先頭を取り出し、隣接頂点のうち**まだ距離が決まっていない**ものに「現在の距離 + 1」を記録してキューに入れます。キューが空になるまで繰り返します\n\n## 注意\n\n- 辺は重複して与えられることや、自己ループ `(v, v)` が含まれることがあります。どちらも結果には影響しないように実装してください\n- `edges` が空でも動くこと",
@@ -1662,6 +1754,7 @@
   },
   {
     "id": "a093",
+    "language": "rust",
     "level": "advanced",
     "title": "逆ポーランド記法電卓",
     "description_md": "## 概要\n\n**逆ポーランド記法 (RPN)** の式を評価する電卓を実装します。RPN では演算子をオペランドの後ろに書きます。たとえば `3 4 + 2 *` は `(3 + 4) * 2 = 14` です。\n\n評価にはスタックを使います。トークンを左から順に読み、数値ならスタックに積み、演算子ならスタックから 2 つ取り出して計算し、結果を積み直します。パースや評価に失敗した場合は、失敗の種類を表す独自のエラー型で `Err` を返します。\n\n## 実装するもの\n\n```rust\n#[derive(Debug, PartialEq)]\npub enum RpnError {\n    InvalidToken(String),  // 数値でも演算子でもないトークン (そのトークン文字列を保持)\n    StackUnderflow,        // 演算に必要なオペランドが足りない / 結果がちょうど 1 個にならない\n    DivisionByZero,        // 0 で割ろうとした\n}\n\npub fn eval_rpn(input: &str) -> Result<i64, RpnError>\n```\n\n## 仕様\n\n- 入力は空白区切りのトークン列です (`split_whitespace` で分割してください)\n- トークンは `i64` としてパースできる整数 (負数 `-3` も含む) か、演算子 `+` `-` `*` `/` のいずれかです。それ以外は `InvalidToken(トークン文字列)` を返します\n- 演算子は、スタックの上から `rhs`、その次を `lhs` として `lhs op rhs` を計算します (`5 3 -` は `5 - 3 = 2`)\n- 割り算は `i64` の整数除算 (0 方向への切り捨て。`-7 2 /` は `-3`) です。`rhs` が 0 なら `DivisionByZero` を返します\n- 演算子を処理するときスタックに値が 2 個未満なら `StackUnderflow` を返します\n- すべてのトークンを処理したあと、スタックに値が**ちょうど 1 個**残っていればそれが結果です。0 個 (空入力など) または 2 個以上残っている場合は `StackUnderflow` を返します (式として不完全なため)\n- エラーは最初に見つかった時点で返します\n\n## 例\n\n```rust\nassert_eq!(eval_rpn(\"3 4 + 2 *\"), Ok(14));\nassert_eq!(eval_rpn(\"5 1 2 + 4 * + 3 -\"), Ok(14));\nassert_eq!(eval_rpn(\"-3 4 +\"), Ok(1));\nassert_eq!(eval_rpn(\"7 2 /\"), Ok(3));\nassert_eq!(eval_rpn(\"1 0 /\"), Err(RpnError::DivisionByZero));\nassert_eq!(eval_rpn(\"1 +\"), Err(RpnError::StackUnderflow));\nassert_eq!(eval_rpn(\"\"), Err(RpnError::StackUnderflow));\nassert_eq!(eval_rpn(\"1 2 3 +\"), Err(RpnError::StackUnderflow));\nassert_eq!(eval_rpn(\"1 2 &\"), Err(RpnError::InvalidToken(\"&\".to_string())));\n```\n\n## 注意\n\n- `unwrap` や `panic!` でエラーを表現せず、すべて `Result` で返してください\n- `?` 演算子や `Option::ok_or` を活用すると簡潔に書けます",
@@ -1680,6 +1773,7 @@
   },
   {
     "id": "a094",
+    "language": "rust",
     "level": "advanced",
     "title": "スレッドで単語カウント",
     "description_md": "テキストに含まれる単語の出現回数を、複数のスレッドで並列に数える関数 `word_count_parallel` を実装してください。数値の合計ではなく `HashMap` を各スレッドで作り、最後にマージする「map-reduce」の練習です。\n\n## 要件\n\n- `text` を空白 (`split_whitespace`) で単語に分割します\n- 単語列を **`n_threads` 個以下** のほぼ均等なチャンクに分け、チャンクごとに `thread::spawn` で別スレッドを起動します\n- 各スレッドは自分のチャンクだけを `HashMap<String, usize>` に集計して返します\n- メインスレッドはすべてのスレッドを `join` し、部分結果を 1 つの `HashMap<String, usize>` にマージして返します\n- 結果は **スレッド数に依らず同じ** になること (決定的であること)\n- `text` に単語が 1 つもない場合は空の `HashMap` を返します\n- `n_threads` には 1 以上の値が渡されます。単語数より大きくても正しく動くこと\n\n## 例\n\n```rust\nlet counts = word_count_parallel(\"apple banana apple cherry banana apple\", 2);\nassert_eq!(counts[\"apple\"], 3);\nassert_eq!(counts[\"banana\"], 2);\nassert_eq!(counts[\"cherry\"], 1);\n\n// スレッド数を変えても結果は同じ\nassert_eq!(word_count_parallel(\"a b a\", 1), word_count_parallel(\"a b a\", 8));\n```\n",
@@ -1699,6 +1793,7 @@
   },
   {
     "id": "a095",
+    "language": "rust",
     "level": "advanced",
     "title": "イテレータアダプタの自作",
     "description_md": "任意のイテレータを包んで「`step` 個ごとに 1 要素だけ返す」ように振る舞いを変えるアダプタ `StepBy<I>` を自作してください。標準ライブラリの `map` や `filter` も、内部イテレータをラップした構造体として同じ仕組みで作られています。\n\n## 要件\n\n- `StepBy<I>` は内部イテレータ `iter: I` と `step: usize` を持つ構造体です\n- `StepBy::new(iter, step)` でアダプタを作ります。`step` が 0 のときは `panic!` してください (`assert!` で構いません)\n- `impl<I: Iterator> Iterator for StepBy<I>` を実装し、`Item` は内部イテレータと同じ `I::Item` にします\n- **最初の要素は必ず返し**、以降は `step` 個ごとに 1 要素を返します。つまり内部イテレータの 0 番目, `step` 番目, `2*step` 番目, ... を返します\n- 内部イテレータが尽きたら `None` を返します\n\n## 例\n\n```rust\nlet v: Vec<i32> = StepBy::new(0..10, 3).collect();\nassert_eq!(v, vec![0, 3, 6, 9]);\n\nlet s: String = StepBy::new(\"abcdef\".chars(), 2).collect();\nassert_eq!(s, \"ace\");\n\n// step が要素数より大きければ最初の 1 つだけ\nlet v: Vec<i32> = StepBy::new(1..=4, 100).collect();\nassert_eq!(v, vec![1]);\n```\n",
@@ -1718,6 +1813,7 @@
   },
   {
     "id": "a096",
+    "language": "rust",
     "level": "advanced",
     "title": "const generics 行列型",
     "description_md": "行数 `R` と列数 `C` を **型の一部** として持つ行列型 `Matrix<const R: usize, const C: usize>` を完成させてください。次元が型に載っているので、次元の合わない行列同士の加算はコンパイルエラーになります。\n\n## 要件\n\n`Matrix<R, C>` は `pub data: [[i64; C]; R]` (行優先の 2 次元配列) を持ちます。次のメソッド・トレイト実装を作ってください。\n\n- `Matrix::new(data: [[i64; C]; R]) -> Self` (実装済み)\n- `Matrix::zeros() -> Self`: 全要素 0 の行列\n- `transpose(&self) -> Matrix<C, R>`: 転置行列 (`R×C` を `C×R` にする)。`data[r][c]` が結果の `data[c][r]` になります\n- `impl Add for Matrix<R, C>`: 同じ次元の行列同士の要素ごとの加算。`Output` は `Matrix<R, C>`\n\n## 例\n\n```rust\nlet a = Matrix::new([[1, 2, 3], [4, 5, 6]]);          // Matrix<2, 3>\nlet b = Matrix::new([[10, 20, 30], [40, 50, 60]]);    // Matrix<2, 3>\nlet c = a + b;\nassert_eq!(c.data, [[11, 22, 33], [44, 55, 66]]);\n\nlet t: Matrix<3, 2> = a.transpose();\nassert_eq!(t.data, [[1, 4], [2, 5], [3, 6]]);\n\nlet z = Matrix::<2, 3>::zeros();\nassert_eq!(a + z, a);\n\n// 次元が違う行列は足せない (型が違うのでコンパイルエラー E0308)\n// let x: Matrix<2, 3> = Matrix::zeros();\n// let y: Matrix<3, 2> = Matrix::zeros();\n// let _ = x + y; // error[E0308]: mismatched types\n```\n",
@@ -1737,6 +1833,7 @@
   },
   {
     "id": "a097",
+    "language": "rust",
     "level": "advanced",
     "title": "Box<dyn Fn> パイプライン",
     "description_md": "`i64 -> i64` の変換を実行時に好きな順番で追加し、まとめて適用できる `Pipeline` を実装してください。クロージャは型がすべて異なるため、`Box<dyn Fn(i64) -> i64>` としてトレイトオブジェクト化して `Vec` に集めます。\n\n## 要件\n\n- `Pipeline::new() -> Pipeline`: 段 (stage) が 1 つもないパイプラインを作ります\n- `add_stage<F: Fn(i64) -> i64 + 'static>(&mut self, f: F)`: 変換 `f` を **末尾に** 追加します。内部で `Box` に包んで `Vec<Box<dyn Fn(i64) -> i64>>` に保持してください\n- `run(&self, input: i64) -> i64`: 追加した順にすべての段を適用した結果を返します。段が 1 つもなければ `input` をそのまま返します\n- `run` は `&self` なので、同じパイプラインを何度でも実行できます\n\n## 例\n\n```rust\nlet mut p = Pipeline::new();\np.add_stage(|x| x + 1);\np.add_stage(|x| x * 2);\nassert_eq!(p.run(3), 8);   // (3 + 1) * 2\nassert_eq!(p.run(0), 2);   // (0 + 1) * 2\n\nlet offset = 10;\nlet mut q = Pipeline::new();\nq.add_stage(move |x| x + offset);   // 環境をキャプチャするクロージャも追加できる\nassert_eq!(q.run(5), 15);\n\nassert_eq!(Pipeline::new().run(42), 42); // 段がなければそのまま\n```\n",
@@ -1756,6 +1853,7 @@
   },
   {
     "id": "a098",
+    "language": "rust",
     "level": "advanced",
     "title": "連結リストにイテレータを実装",
     "description_md": "自作の単方向連結リスト `List<T>` に、要素を **参照 (`&T`) で** 先頭から順に返すイテレータ `Iter<'a, T>` を実装してください。リスト・ライフタイム・`Iterator` トレイトの 3 つを組み合わせる問題です。\n\n## 要件\n\n構造体 `List<T>`, `Node<T>`, `Iter<'a, T>` と、`List::new` / `push_front` は用意されています。次を実装してください。\n\n- `List::iter(&self) -> Iter<'_, T>`: 先頭ノードから走査を始めるイテレータを返します\n- `impl<'a, T> Iterator for Iter<'a, T>` で `type Item = &'a T;` とし、`next` は現在のノードの値への参照を返して次のノードへ進みます。末尾に達したら `None` を返します\n- `iter()` はリストを **共有借用** するだけなので、同じリストから同時に複数のイテレータを作れること、`for x in list.iter()` で走査できることが求められます\n\n`push_front` は先頭に追加するので、`push_front(3)`, `push_front(2)`, `push_front(1)` の順に呼ぶとリストは `1 -> 2 -> 3` になります。\n\n## 例\n\n```rust\nlet mut list = List::new();\nlist.push_front(3);\nlist.push_front(2);\nlist.push_front(1);\n\nlet v: Vec<i32> = list.iter().copied().collect();\nassert_eq!(v, vec![1, 2, 3]);\n\nlet mut sum = 0;\nfor x in list.iter() {\n    sum += *x;\n}\nassert_eq!(sum, 6);\n\nlet empty: List<String> = List::new();\nassert!(empty.iter().next().is_none());\n```\n",
@@ -1775,6 +1873,7 @@
   },
   {
     "id": "a099",
+    "language": "rust",
     "level": "advanced",
     "title": "型状態ビルダー",
     "description_md": "HTTP リクエストの設定を組み立てる `RequestBuilder` を **型状態 (typestate) パターン** で実装してください。必須項目である `url` が設定されていない状態では `build` が **メソッドとして存在しない** ようにし、設定漏れを実行時ではなくコンパイル時に検出します。\n\n## 要件\n\n- マーカー型 `Missing` (url 未設定) と `Set` (url 設定済み) を用意し、`RequestBuilder<UrlState>` の型パラメータとして使います。`PhantomData<UrlState>` で状態を追跡します\n- `RequestBuilder::new() -> RequestBuilder<Missing>`: 初期値は `method = \"GET\"`, `timeout_ms = 3000`, url 未設定\n- `url(self, url: &str) -> RequestBuilder<Set>`: 必須項目を設定し、状態を `Set` に進めます (どの状態からでも呼べます)\n- `method(self, method: &str) -> Self`, `timeout_ms(self, timeout_ms: u64) -> Self`: 任意項目。状態は変わらず、どの状態からでも呼べます\n- `build(self) -> Request`: **`RequestBuilder<Set>` にだけ** 実装します。`Request { url, method, timeout_ms }` を返します\n- 同じ項目を複数回設定した場合は、あとから設定した値が有効になります\n\n`Request` は `pub url: String`, `pub method: String`, `pub timeout_ms: u64` を持ちます。\n\n## 例\n\n```rust\nlet req = RequestBuilder::new()\n    .method(\"POST\")\n    .timeout_ms(500)\n    .url(\"https://api.example.com/users\")\n    .build();\nassert_eq!(req.url, \"https://api.example.com/users\");\nassert_eq!(req.method, \"POST\");\nassert_eq!(req.timeout_ms, 500);\n\n// 既定値\nlet req = RequestBuilder::new().url(\"http://localhost\").build();\nassert_eq!(req.method, \"GET\");\nassert_eq!(req.timeout_ms, 3000);\n\n// url を設定せずに build するとコンパイルエラー\n// let bad = RequestBuilder::new().method(\"GET\").build();\n// error[E0599]: no method named `build` found for struct `RequestBuilder<Missing>`\n```\n",
@@ -1794,6 +1893,7 @@
   },
   {
     "id": "a100",
+    "language": "rust",
     "level": "advanced",
     "title": "オブザーバーパターン総合演習",
     "description_md": "イベントが発生したら登録済みの購読者 (オブザーバー) 全員に通知する `EventBus` を実装してください。購読者は `Rc<dyn Observer>` として渡されますが、`EventBus` は **`Weak<dyn Observer>`** で保持し、購読者の寿命を延ばしたり循環参照を作ったりしないようにします。\n\n## 要件\n\n`Observer` トレイトと、イベント名を記録する購読者 `Logger` は用意されています。`EventBus` の次のメソッドを実装してください。\n\n- `EventBus::new() -> EventBus`: 購読者のいないバスを作ります\n- `subscribe(&self, observer: Rc<dyn Observer>)`: `Rc::downgrade` で `Weak` に変換して保持します。`&self` で呼べるように内部は `RefCell<Vec<Weak<dyn Observer>>>` です\n- `publish(&self, event: &str)`: **生きている** (`upgrade` できる) 購読者に、登録順で `notify(event)` を呼びます。すでに drop された購読者はリストから取り除きます\n- `subscriber_count(&self) -> usize`: いま生きている購読者の数を返します\n\n注意: `RefCell` を `borrow` したまま `notify` を呼ぶと、購読者の実装によっては二重借用で panic します (`already borrowed`)。通知先を先に集めてから借用を手放し、そのあとで `notify` を呼ぶ構成にしてください。\n\n## 例\n\n```rust\nlet bus = EventBus::new();\nlet logger = Logger::new();          // Rc<Logger>\nbus.subscribe(logger.clone());        // Rc<Logger> は Rc<dyn Observer> に自動変換される\nbus.publish(\"start\");\nbus.publish(\"stop\");\nassert_eq!(*logger.events.borrow(), vec![\"start\".to_string(), \"stop\".to_string()]);\nassert_eq!(bus.subscriber_count(), 1);\n\n{\n    let temp = Logger::new();\n    bus.subscribe(temp.clone());\n    assert_eq!(bus.subscriber_count(), 2);\n}   // temp はここで drop される\nassert_eq!(bus.subscriber_count(), 1);\nbus.publish(\"after\");                 // logger にだけ届く\n```\n",
