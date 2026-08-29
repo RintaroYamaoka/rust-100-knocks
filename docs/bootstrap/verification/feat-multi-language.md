@@ -21,7 +21,7 @@ DoD の各行に外部オラクルを与えて記録する。OPEN が 1 行で�
 | D12 | 実ブラウザで 7 言語それぞれ正解判定 | **PARTIAL** | Rust / JavaScript 完了 (`D12-rust.png` / `D12-javascript.png`)。残り 5 言語はデータ待ち |
 | D13 | 実ブラウザで実診断が出て、エラー行が着色される | **PARTIAL** | Rust / JavaScript 完了。Rust は `error[E0308]` が赤・`-->` が青・E0308 がリンク、JS は本物の `SyntaxError` |
 | D14 | 無作為抽出した問題が starter で不正解・answer で正解 | **PARTIAL** | Rust 3/3・JavaScript 3/3 (seed 固定で再現可能)。残り 5 言語はデータ待ち |
-| D15 | preview デプロイでも 7 言語が実診断を返す | **OPEN (利用者待ち)** | Vercel CLI のトークンが期限切れ (`propagateaiwebcreation-6019s-projects` への再認証を要求)。利用者が `vercel login` を実行すれば preview デプロイまで進められる |
+| D15 | preview デプロイでも 7 言語が実診断を返す | **OPEN (利用者の判断待ち)** | ブランチ push で preview は**ビルド成功** (`5b3dd13f`)。ただし Vercel の Deployment Protection が既定で有効なため、preview への HTTP は 401 (`Protected deployment`) になり自動検証できない。本番 (`rust-100-knocks.vercel.app`) は公開されている。下記「preview 検証の選択肢」参照 |
 | D16 | 「テスト未実行で exit 0」が正解にならない | **CLOSED** | `exit_zero_without_ok_marker_is_not_passed` / `empty_output_with_exit_zero_is_not_passed` / app 側 1 件。加えて verifier に実コンテナで `sys.exit(0)` を投げて検出されることを実測 |
 | D17 | 生成した問題に使い回しが無い | **CLOSED (機構)** | `validate_static` の title / answer_code 重複検査 + `merge-batches` の同検査 (テスト 10 件)。実データへの適用は D7 と同時 |
 | D18 | UI から Rust 固定の文言が消えている | **CLOSED** | `index.html` の grep 0 件。app 側の残りは規則を説明したコメントと `match backend()` の Rust 分岐のみ。スクリーンショットでブランドが「100本ノック」、stderr ラベルが「診断出力 (stderr)」であることを確認 |
@@ -62,3 +62,24 @@ DoD の各行に外部オラクルを与えて記録する。OPEN が 1 行で�
    1800 問の唯一の品質ゲートが実質機能していなかった。
 
 いずれも「テストは緑」「ローカルでは動く」状態で潜んでいた。実測とレビューの両方が要る種類のもの。
+
+
+## preview 検証の選択肢 (D15)
+
+ブランチ push → Vercel preview のビルドは **成功** した (Rust ランタイムの関数ビルドを含む)。
+つまり「Vercel でビルドが通るか」は確認できている。残るのは
+「Vercel の Function が実際に動くか」「Vercel から wandbox.org への egress が通るか」で、
+これには preview への HTTP アクセスが要る。
+
+preview は Vercel の Deployment Protection (既定で有効) により 401 を返す。取り得る道:
+
+1. **Deployment Protection を preview だけ無効にする** — Project Settings → Deployment Protection →
+   Vercel Authentication を Off。以後 push のたびに自動で検証できるようになる
+2. **Protection Bypass for Automation を発行する** — 同じ画面で secret を作り、
+   `x-vercel-protection-bypass` ヘッダで渡す。設定を公開側に緩めずに済む
+3. **7 言語が揃ってから main にマージし、本番で検証する** — 設定変更は不要だが、
+   実 Function の初回検証が本番になる。このリポジトリで唯一起きた事故が
+   「ローカルでは通る」本番専用障害だったことを踏まえると、いちばん危ない道
+
+検証ハーネスは `scratchpad/pw/verify-deploy.mjs` に用意済み。URL を渡せば
+7 言語の「正解→Passed / 壊れたコード→CompileError + 言語固有の診断」を一度に確認する。
