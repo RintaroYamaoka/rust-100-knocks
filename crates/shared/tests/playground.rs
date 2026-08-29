@@ -4,9 +4,9 @@
 
 use shared::language::Language;
 use shared::playground::{
-    classify, classify_line, extract_error_codes, has_compile_error, normalize_wandbox,
-    strip_csharp_build_noise, validate, ExecuteRequest, ExecuteResponse, LineKind, Outcome,
-    WandboxResponse, MAX_CODE_BYTES, TEST_FAILED_MARKER, TEST_OK_MARKER,
+    classify, classify_line, extract_error_codes, has_compile_error, has_separate_compile_phase,
+    normalize_wandbox, strip_csharp_build_noise, validate, ExecuteRequest, ExecuteResponse,
+    LineKind, Outcome, WandboxResponse, MAX_CODE_BYTES, TEST_FAILED_MARKER, TEST_OK_MARKER,
 };
 
 fn resp(success: bool, stdout: &str, stderr: &str, compile_failed: bool) -> ExecuteResponse {
@@ -155,6 +155,77 @@ fn clean_output_is_not_a_compile_error() {
 fn program_output_containing_the_word_error_is_not_a_compile_error() {
     // 診断テキストだけを見るので、プログラムが "error" と印字しても誤検出しない
     assert!(!has_compile_error(Language::Python, ""));
+}
+
+#[test]
+fn python_and_javascript_have_no_separate_compile_phase() {
+    // この 2 言語は構文エラーがインタプリタ起動時に「プログラムの stderr」へ出る。
+    // 上流の診断欄しか見ないと、構文エラーが実行時エラーに落ちる (実測で判明)
+    assert!(!has_separate_compile_phase(Language::Python));
+    assert!(!has_separate_compile_phase(Language::Javascript));
+    for l in [
+        Language::Rust,
+        Language::Cpp,
+        Language::Csharp,
+        Language::Java,
+        Language::Typescript,
+    ] {
+        assert!(has_separate_compile_phase(l), "{}", l.slug());
+    }
+}
+
+#[test]
+fn python_syntax_error_on_program_stderr_is_a_compile_error() {
+    // Wandbox 実測: 診断欄は空で、SyntaxError は program_error に来る
+    let raw = wb(
+        "1",
+        "",
+        "",
+        "",
+        "  File \"prog.py\", line 1\n    def add(a, b)\n                 ^\nSyntaxError: expected ':'\n",
+    );
+    let r = normalize_wandbox(Language::Python, &raw);
+    assert!(r.compile_failed, "構文エラーを検出できていない: {}", r.stderr);
+    assert_eq!(classify(&r), Outcome::CompileError);
+}
+
+#[test]
+fn javascript_syntax_error_on_program_stderr_is_a_compile_error() {
+    let raw = wb(
+        "1",
+        "",
+        "",
+        "",
+        "/home/wandbox/prog.js:2\n  return a + ;\n             ^\n\nSyntaxError: Unexpected token ';'\n    at wrapSafe (node:internal/modules/cjs/loader:1281:20)\n",
+    );
+    let r = normalize_wandbox(Language::Javascript, &raw);
+    assert!(r.compile_failed, "構文エラーを検出できていない: {}", r.stderr);
+    assert_eq!(classify(&r), Outcome::CompileError);
+}
+
+#[test]
+fn python_runtime_exception_stays_a_runtime_error() {
+    // starter_code の NotImplementedError は実行時エラーであってコンパイルエラーではない。
+    // ここを取り違えると「未実装」と「構文が壊れている」の区別が利用者に伝わらない
+    let raw = wb(
+        "1",
+        "",
+        "",
+        "",
+        "Traceback (most recent call last):\n  File \"prog.py\", line 12, in <module>\n    _check(add(1, 2) == 3, \"pos\")\n  File \"prog.py\", line 2, in add\n    raise NotImplementedError\nNotImplementedError\n",
+    );
+    let r = normalize_wandbox(Language::Python, &raw);
+    assert!(!r.compile_failed);
+    assert_eq!(classify(&r), Outcome::RuntimeError);
+}
+
+#[test]
+fn compiled_languages_do_not_scan_program_stderr_for_diagnostics() {
+    // C++ のプログラムが stderr に "error:" を印字しても、コンパイルは成功している
+    let raw = wb("1", "", "", "", "custom error: 入力が不正です\n");
+    let r = normalize_wandbox(Language::Cpp, &raw);
+    assert!(!r.compile_failed, "プログラム出力をコンパイル診断と誤認している");
+    assert_eq!(classify(&r), Outcome::RuntimeError);
 }
 
 // ---- C# のビルドノイズ除去 ----

@@ -81,35 +81,25 @@ a:hover { text-decoration: underline; }
 .level-tab.active { background: var(--bg-elev); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); }
 
 /* ---- 言語セレクタ (7 言語) ----
-   .level-tabs と同じ作り。ただし項目数が多くヘッダー幅を食い潰すので、
-   縮んだときは中で横スクロールさせ、進捗バーを押し出さないようにする。 */
-.lang-tabs {
-  display: flex;
-  gap: 4px;
-  background: var(--bg);
+   レベル (3個・固定) はタブのままだが、言語は 7 個あってタブだとヘッダーを
+   食い潰すのでドロップダウンにしてある。見た目は .level-tabs の枠に揃える。 */
+.lang-select {
+  appearance: none;
+  padding: 5px 28px 5px 12px;
+  background: var(--bg) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' fill='%2394a3b3'%3E%3Cpath d='M6 8.5 1.5 4h9z'/%3E%3C/svg%3E") no-repeat right 9px center / 10px;
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 3px;
-  min-width: 0;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.lang-tabs::-webkit-scrollbar { display: none; }
-.lang-tab {
-  flex-shrink: 0;
-  padding: 4px 11px;
-  border-radius: 6px;
-  color: var(--text-dim);
-  font-weight: 500;
+  color: var(--text);
+  font-family: inherit;
   font-size: 13px;
-  white-space: nowrap;
-  transition: background 0.15s, color 0.15s;
+  font-weight: 500;
+  line-height: 1.2;
+  cursor: pointer;
+  transition: border-color 0.15s, color 0.15s;
 }
-.lang-tab:hover { color: var(--text); }
-.lang-tab.active { background: var(--bg-elev); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); }
-/* データが未収録の言語 (一覧に出さない代わりに無効表示したい場合に使う) */
-.lang-tab:disabled, .lang-tab.disabled { color: var(--text-faint); cursor: not-allowed; }
-.lang-tab:disabled:hover, .lang-tab.disabled:hover { color: var(--text-faint); }
+.lang-select:hover { border-color: var(--border-strong); }
+.lang-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+.lang-select option { background: var(--bg-elev); color: var(--text); }
 
 .header-progress { display: flex; align-items: center; gap: 10px; margin-left: auto; color: var(--text-dim); font-size: 12px; white-space: nowrap; }
 .progress-track { width: 140px; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
@@ -349,6 +339,8 @@ a:hover { text-decoration: underline; }
 .outcome-banner.compile-error { background: rgb(248 81 73 / 0.15); color: var(--red); }
 .outcome-banner.runtime-error { background: rgb(248 81 73 / 0.15); color: var(--red); }
 .outcome-banner.upstream-error { background: var(--bg-elev); color: var(--text-dim); }
+/* テストが最後まで走らなかった: 不正解ではあるが「間違い」とは別物なので中間色にする */
+.outcome-banner.no-tests-run { background: rgb(88 166 255 / 0.15); color: var(--blue); }
 .line-error { color: var(--red); }
 .line-warning { color: var(--yellow); }
 .line-note { color: var(--blue); }
@@ -407,4 +399,17 @@ a:hover { text-decoration: underline; }
   .editor-host { min-height: 360px; }
   .splitter-h { display: none; }
   body { overflow: auto; }
+}
+
+/* 判定結果の補足説明 (例: テストが実行されなかった理由) */
+.console-note {
+  margin: 6px 0 10px;
+  padding: 8px 10px;
+  background: var(--bg-elev);
+  border-left: 3px solid var(--blue);
+  border-radius: 4px;
+  color: var(--text-dim);
+  font-family: var(--font-sans);
+  font-size: 12px;
+  line-height: 1.6;
 }

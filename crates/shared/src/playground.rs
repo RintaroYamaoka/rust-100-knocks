@@ -107,6 +107,17 @@ pub fn has_compile_error(language: Language, diagnostics: &str) -> bool {
     diagnostics.lines().any(|line| is_error_line(language, line))
 }
 
+/// その言語に「実行前の独立したコンパイル段階」があるか。
+///
+/// Python と JavaScript には無く、構文エラーはインタプリタ起動時に
+/// **プログラムの stderr** に出る。したがってこの 2 言語だけは、上流の診断欄が
+/// 空でもプログラムの stderr を構文エラーとして走査する必要がある。
+/// これをしないと、構文エラーが `RuntimeError` に落ちて
+/// 「未実装で落ちた」のか「構文が壊れている」のか利用者に伝わらない (実測で判明)。
+pub fn has_separate_compile_phase(language: Language) -> bool {
+    !matches!(language, Language::Python | Language::Javascript)
+}
+
 /// 1 行がその言語のエラー診断かどうか。
 ///
 /// rustc は行頭が `error`、gcc / javac は `file:line:col: error:`、
@@ -243,7 +254,11 @@ pub fn normalize_wandbox(language: Language, raw: &WandboxResponse) -> ExecuteRe
         diagnostics = strip_csharp_build_noise(&diagnostics);
     }
 
-    let compile_failed = has_compile_error(language, &diagnostics);
+    // Python / JavaScript は構文エラーがプログラムの stderr に出るので、そこも走査する。
+    // コンパイル段階を持つ言語では走査しない (プログラムが "error:" を印字しただけで
+    // コンパイルエラーと誤判定してしまうため)。
+    let compile_failed = has_compile_error(language, &diagnostics)
+        || (!has_separate_compile_phase(language) && has_compile_error(language, &raw.program_error));
 
     let mut stderr = diagnostics;
     if !raw.program_error.trim().is_empty() {
