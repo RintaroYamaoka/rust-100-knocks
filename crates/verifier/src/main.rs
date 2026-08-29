@@ -33,7 +33,7 @@ struct Totals {
     container_runs: usize,
 }
 
-fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
+fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) -> Vec<Problem> {
     let json = match std::fs::read_to_string(&job.path) {
         Ok(s) => s,
         Err(e) => {
@@ -41,7 +41,7 @@ fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
             // 「0 問検証 / 問題なし」= 緑になり、未検証データが収録される
             eprintln!("✗ {} を読めません ({e})", job.path.display());
             totals.failed += 1;
-            return;
+            return Vec::new();
         }
     };
     let problems: Vec<Problem> = match load_problems_str(&json) {
@@ -49,7 +49,7 @@ fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
         Err(e) => {
             eprintln!("✗ {} のパースに失敗: {e}", job.path.display());
             totals.failed += 1;
-            return;
+            return Vec::new();
         }
     };
     println!(
@@ -72,7 +72,7 @@ fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
         // 無言 return にすると、空ファイルが「問題なし」で通る
         eprintln!("✗ {} に問題が 1 件も入っていません", job.path.display());
         totals.failed += 1;
-        return;
+        return Vec::new();
     }
 
     if job.language == Language::Rust {
@@ -80,6 +80,7 @@ fn verify_job(job: &Job, scratch: &PathBuf, totals: &mut Totals) {
     } else {
         verify_via_docker(job, &problems, scratch, totals);
     }
+    problems
 }
 
 fn verify_rust(problems: &[Problem], scratch: &PathBuf, totals: &mut Totals) {
@@ -226,6 +227,7 @@ fn main() -> ExitCode {
         }
     }
 
+    let single_file = file.is_some();
     let jobs: Vec<Job> = if let Some(path) = file {
         match (language, level) {
             (Some(language), Some(level)) => vec![Job { path, language, level, is_release_file: false }],
@@ -267,8 +269,24 @@ fn main() -> ExitCode {
     }
 
     let mut totals = Totals::default();
+    // 言語ごとに全難易度を集めて、難易度をまたぐ重複を検査する。
+    // ファイル単位の検査だけだと「初級と中級に同じ問題」が素通りする
+    let mut per_language: std::collections::HashMap<Language, Vec<Problem>> =
+        std::collections::HashMap::new();
     for job in &jobs {
-        verify_job(job, &scratch, &mut totals);
+        let problems = verify_job(job, &scratch, &mut totals);
+        per_language.entry(job.language).or_default().extend(problems);
+    }
+
+    // 3 難易度すべてを見たときだけ意味がある検査なので、揃っている言語に限る
+    let full_language_run = level.is_none() && !single_file;
+    if full_language_run {
+        for (language, problems) in &per_language {
+            for issue in verifier::validate_across_levels(problems) {
+                eprintln!("✗ [{}/{}] {}", language.slug(), issue.id, issue.message);
+                totals.failed += 1;
+            }
+        }
     }
 
     println!(

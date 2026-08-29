@@ -219,3 +219,40 @@ fn file_with_wrong_problem_count_is_rejected() {
     );
     assert!(messages(&issues).contains("問題数が 1 件"), "{}", messages(&issues));
 }
+
+// ---- 難易度をまたぐ重複 ----
+
+#[test]
+fn cross_level_duplicate_titles_are_detected() {
+    use verifier::validate_across_levels;
+    // validate_static はファイル単位なので、初級と中級に同じ問題を置いても素通りする。
+    // 実際に既存 Rust 300 問で b077/i058 と b083/i062 がこれで見逃されていた
+    let mut b = rust_problem("b001");
+    let mut i = rust_problem("i001");
+    b.title = "文字列を反転する".into();
+    i.title = "文字列を反転する".into();
+    i.level = Level::Intermediate;
+    let issues = validate_across_levels(&[b, i]);
+    assert!(messages(&issues).contains("title"), "{}", messages(&issues));
+}
+
+#[test]
+fn cross_level_duplicate_answers_are_detected() {
+    use verifier::validate_across_levels;
+    let mut b = rust_problem("b001");
+    let mut i = rust_problem("i001");
+    b.answer_code = "pub fn f() -> i32 { 42 }".into();
+    i.answer_code = "pub fn f() -> i32 { 42 }".into();
+    i.level = Level::Intermediate;
+    let issues = validate_across_levels(&[b, i]);
+    assert!(messages(&issues).contains("answer_code"), "{}", messages(&issues));
+}
+
+#[test]
+fn distinct_problems_across_levels_are_accepted() {
+    use verifier::validate_across_levels;
+    let b = rust_problem("b001");
+    let mut i = rust_problem("i001");
+    i.level = Level::Intermediate;
+    assert!(validate_across_levels(&[b, i]).is_empty());
+}

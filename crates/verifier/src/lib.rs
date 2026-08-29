@@ -147,6 +147,47 @@ pub fn validate_static_with_expected(
     issues
 }
 
+/// 難易度をまたいだ重複を検査する。
+///
+/// `validate_static` はファイル単位 (= 難易度ごと) に呼ばれるので、初級と中級に
+/// 同じ問題を置いても素通りしてしまう。実際、既存 Rust 300 問には
+/// 「文字列を反転する」(b077 / i058) と「単語の出現回数を数える」(b083 / i062) が
+/// **題名も模範解答も同一**のまま両方に収録されていた。利用者は同じ問題を 2 回解かされる。
+pub fn validate_across_levels(problems: &[Problem]) -> Vec<ProblemIssue> {
+    let mut issues = Vec::new();
+    let mut titles: HashMap<&str, &Problem> = HashMap::new();
+    let mut answers: HashMap<&str, &Problem> = HashMap::new();
+
+    for p in problems {
+        if let Some(prev) = titles.insert(p.title.as_str(), p) {
+            if prev.level != p.level {
+                issues.push(ProblemIssue::new(
+                    &p.id,
+                    format!(
+                        "title が {} ({}) と重複しています: 「{}」",
+                        prev.id,
+                        prev.level.label_ja(),
+                        p.title
+                    ),
+                ));
+            }
+        }
+        if let Some(prev) = answers.insert(p.answer_code.as_str(), p) {
+            if prev.level != p.level {
+                issues.push(ProblemIssue::new(
+                    &p.id,
+                    format!(
+                        "answer_code が {} ({}) と完全に同一です",
+                        prev.id,
+                        prev.level.label_ja()
+                    ),
+                ));
+            }
+        }
+    }
+    issues
+}
+
 /// `hidden_tests` に現れる「検査名らしい文字列リテラル」の種類数。
 ///
 /// どのテンプレートも `check(<条件>, "名前")` の形なので、判定の目印そのもの
