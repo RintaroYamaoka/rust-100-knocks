@@ -1,5 +1,7 @@
 use serde::{Deserialize, Serialize};
 
+use crate::language::Language;
+
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "lowercase")]
 pub enum Level {
@@ -28,6 +30,14 @@ impl Level {
         }
     }
 
+    pub fn slug(&self) -> &'static str {
+        match self {
+            Level::Beginner => "beginner",
+            Level::Intermediate => "intermediate",
+            Level::Advanced => "advanced",
+        }
+    }
+
     pub fn file_name(&self) -> &'static str {
         match self {
             Level::Beginner => "beginner.json",
@@ -35,16 +45,32 @@ impl Level {
             Level::Advanced => "advanced.json",
         }
     }
+
+    pub fn from_slug(s: &str) -> Option<Level> {
+        Level::ALL.into_iter().find(|l| l.slug() == s)
+    }
+}
+
+/// 問題データの配置。パスが `language` / `level` の正本で、`Problem` のフィールドは
+/// その冗長コピー (verifier が両者の一致を検査する)。
+pub fn problems_rel_path(language: Language, level: Level) -> String {
+    format!("data/problems/{}/{}", language.slug(), level.file_name())
+}
+
+/// フロントが取得する URL。
+pub fn problems_url(language: Language, level: Level) -> String {
+    format!("/data/problems/{}/{}", language.slug(), level.file_name())
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct Problem {
     pub id: String,
+    pub language: Language,
     pub level: Level,
     pub title: String,
     pub description_md: String,
     pub starter_code: String,
-    /// ユーザーコードに結合して正誤判定に使う #[test] 群。フロントには配信されるが UI には出さない。
+    /// ユーザーコードに結合して正誤判定に使うコード。フロントには配信されるが UI には出さない。
     pub hidden_tests: String,
     pub answer_code: String,
     pub explanation_md: String,
@@ -55,7 +81,11 @@ pub struct Problem {
 }
 
 /// ユーザーコードと判定用テストを 1 つの提出コードに合成する。
-/// 区切りコメントはエラー行番号のずれをユーザーが把握できるよう目印になる。
-pub fn compose_submission(user_code: &str, hidden_tests: &str) -> String {
-    format!("{user_code}\n\n// ===== 判定用テスト (自動付加) =====\n{hidden_tests}\n")
+///
+/// ユーザーコードを**先**に置くのは、コンパイラ診断の行番号をユーザーが書いた行と
+/// 一致させるため。区切りコメントの記号は言語別 — Python に `//` を入れると
+/// SyntaxError になり、その言語の問題が全滅する。
+pub fn compose_submission(language: Language, user_code: &str, hidden_tests: &str) -> String {
+    let c = language.line_comment();
+    format!("{user_code}\n\n{c} ===== 判定用テスト (自動付加) =====\n{hidden_tests}\n")
 }
