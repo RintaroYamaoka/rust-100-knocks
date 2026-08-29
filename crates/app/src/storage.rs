@@ -48,8 +48,14 @@ pub fn load_progress_migrated() -> (ProgressMap, bool) {
             }
         }
     }
+    let migrated = migrate_legacy_keys(&mut map);
+    // 旧フラットキーは v1 に残す一方、v2 には持ち込まない。
+    // 新しい版は `b001` を誰も読まないので、抱えると下書きの分だけ
+    // localStorage を無駄に食う (2100 問あるのでクォータに近づく)
+    map.retain(|k, _| k.contains('/'));
+
     let mut save_failed = false;
-    if migrate_legacy_keys(&mut map) > 0 {
+    if migrated > 0 {
         save_failed = !save_progress(&map);
     }
     (map, save_failed)

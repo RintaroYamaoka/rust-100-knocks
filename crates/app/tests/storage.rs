@@ -36,18 +36,22 @@ fn empty_storage_loads_as_empty_map() {
 
 #[test]
 fn legacy_flat_keys_are_migrated_to_the_rust_namespace() {
-    // 多言語化前の利用者の進捗 (`b001`) が、起動時に `rust/b001` へ移ること
-    let mut map = load_progress();
-    map.insert("i042".to_string(), entry("legacy", ProblemStatus::Passed));
-    save_progress(&map);
+    use app::storage::{raw_get, LEGACY_PROGRESS_KEY};
+    // 多言語化前の利用者の進捗は v1 に入っている。それが `rust/i042` として読めること
+    app::storage::raw_set(
+        LEGACY_PROGRESS_KEY,
+        r#"{"i042":{"status":"passed","saved_code":"legacy","updated_at_ms":1.0}}"#,
+    );
 
     let (migrated, save_failed) = load_progress_migrated();
     assert!(!save_failed, "移行を保存できていない");
-    // 旧キーは意図的に残す (切り戻したとき前の版がこれを読む)
-    assert!(migrated.contains_key("i042"), "旧キーを消してしまっている");
     let e = migrated.get("rust/i042").expect("旧進捗が失われた");
     assert_eq!(e.status, ProblemStatus::Passed);
     assert_eq!(e.saved_code.as_deref(), Some("legacy"));
+
+    // v1 は無傷 (切り戻したとき前の版がこれを読む)
+    let v1 = raw_get(LEGACY_PROGRESS_KEY).expect("v1 が消えている");
+    assert!(v1.contains("\"i042\""), "v1 の中身が壊れている: {v1}");
 
     // 移行結果が保存され、次回以降の読み込みでも保たれること
     assert!(load_progress().contains_key("rust/i042"));
@@ -98,5 +102,23 @@ fn new_key_wins_when_both_exist() {
         map.get("rust/b002").map(|e| e.status),
         Some(shared::progress::ProblemStatus::Passed),
         "新しいキーの内容が旧キーで上書きされている"
+    );
+}
+
+#[test]
+fn v2_holds_only_namespaced_keys() {
+    use app::storage::{load_progress, load_progress_migrated, raw_set, LEGACY_PROGRESS_KEY};
+    // 旧フラットキーは v1 に残すが、v2 に持ち込むのは無駄
+    // (新しい版は "b003" を誰も読まない。下書きを含むので容量が数倍になる)
+    raw_set(
+        LEGACY_PROGRESS_KEY,
+        r#"{"b003":{"status":"passed","saved_code":"長い下書き","updated_at_ms":1.0}}"#,
+    );
+    let (_, _) = load_progress_migrated();
+    let saved = load_progress();
+    assert!(saved.contains_key("rust/b003"), "移行されていない");
+    assert!(
+        !saved.contains_key("b003"),
+        "v2 に旧フラットキーが保存されている (容量が無駄に増える)"
     );
 }
