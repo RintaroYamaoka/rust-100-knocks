@@ -79,6 +79,38 @@ a:hover { text-decoration: underline; }
 }
 .level-tab:hover { color: var(--text); }
 .level-tab.active { background: var(--bg-elev); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); }
+
+/* ---- 言語セレクタ (7 言語) ----
+   .level-tabs と同じ作り。ただし項目数が多くヘッダー幅を食い潰すので、
+   縮んだときは中で横スクロールさせ、進捗バーを押し出さないようにする。 */
+.lang-tabs {
+  display: flex;
+  gap: 4px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 3px;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.lang-tabs::-webkit-scrollbar { display: none; }
+.lang-tab {
+  flex-shrink: 0;
+  padding: 4px 11px;
+  border-radius: 6px;
+  color: var(--text-dim);
+  font-weight: 500;
+  font-size: 13px;
+  white-space: nowrap;
+  transition: background 0.15s, color 0.15s;
+}
+.lang-tab:hover { color: var(--text); }
+.lang-tab.active { background: var(--bg-elev); color: var(--accent); box-shadow: 0 1px 3px rgb(0 0 0 / 0.4); }
+/* データが未収録の言語 (一覧に出さない代わりに無効表示したい場合に使う) */
+.lang-tab:disabled, .lang-tab.disabled { color: var(--text-faint); cursor: not-allowed; }
+.lang-tab:disabled:hover, .lang-tab.disabled:hover { color: var(--text-faint); }
+
 .header-progress { display: flex; align-items: center; gap: 10px; margin-left: auto; color: var(--text-dim); font-size: 12px; white-space: nowrap; }
 .progress-track { width: 140px; height: 6px; background: var(--bg); border-radius: 3px; overflow: hidden; border: 1px solid var(--border); }
 .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent-dim), var(--accent)); border-radius: 3px; transition: width 0.4s ease; }
@@ -363,6 +395,9 @@ a:hover { text-decoration: underline; }
 
 /* narrow screens: stack panes */
 @media (max-width: 1100px) {
+  /* 言語タブが増えた分ヘッダーが詰まるので、間隔だけ詰めて折り返さない */
+  .header { gap: 12px; }
+  .progress-track { width: 90px; }
   .main { flex-direction: column; overflow-y: auto; }
   .sidebar { width: 100%; max-height: 300px; }
   .problem-pane, .workbench { min-width: 0; width: 100%; }

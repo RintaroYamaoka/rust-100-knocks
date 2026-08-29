@@ -5,6 +5,9 @@
 # Trunk output
 /dist
 
+# エディタバンドルのビルド依存 (package.json / package-lock.json はコミットする)
+/node_modules
+
 # Vercel
 .vercel
 
@@ -14,3 +17,6 @@ docs/bootstrap/sprint/.gate
 
 # OS/editor
 .DS_Store
+
+# 並列 lane の隔離 worktree (ephemeral)
+.claude/worktrees/

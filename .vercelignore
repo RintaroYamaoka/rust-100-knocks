@@ -4,3 +4,4 @@ target/**
 dist
 docs
 .bootstrap
+node_modules

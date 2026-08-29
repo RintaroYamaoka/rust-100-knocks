@@ -6,7 +6,14 @@ dist = "dist"
 addresses = ["127.0.0.1"]
 port = 8080
 
-# ローカル開発: /api/execute を Playground へ直接プロキシ (契約が Playground 互換なので成立する)
+# ローカル開発: /api/* を vercel dev (既定 127.0.0.1:3000) に流す。
+#
+# 以前は Playground へ直結していたが、それは /api/execute の契約が Playground と
+# 同形だったから成立していた前提であって、多言語化で契約が {language, code} に
+# 変わった時点で崩れる (Rust 以外は Wandbox へ振り分ける必要があり、その分岐は
+# api/execute.rs の中にしかない)。したがって開発時も本物の関数を通す。
+#
+# 使い方: 別ターミナルで `vercel dev` を起動してから `trunk serve`。
 [[proxy]]
-rewrite = "/api/execute"
-backend = "https://play.rust-lang.org/execute"
+rewrite = "/api/"
+backend = "http://127.0.0.1:3000/api/"
