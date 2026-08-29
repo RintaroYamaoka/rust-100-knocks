@@ -25,7 +25,8 @@ Rust しか練習できない現状を埋め、C++ / C# / Java / Python / TypeSc
 - `crates/shared/**`
 - `crates/app/**`
 - `crates/verifier/**`
-- `api/**`
+- `api/execute.rs`
+- `tools/**`
 - `assets/**`
 - `data/problems/**`
 - `scripts/**`
@@ -268,7 +269,7 @@ D6/D7/D12/D13/D15 の「7 言語」は **完成宣言した言語について 10
 
 ## 2.1 作業範囲の変更記録
 
-**2026-08-30 — `api/execute.rs` → `api/**` に拡大**
+**2026-08-30 — `tools/**` を追加 (`api/` は `execute.rs` のまま)**
 
 理由: D12/D13/D14 (実ブラウザでの 7 言語検証) を満たすにはローカルで
 `/api/execute` を動かす必要があるが、`vercel dev` は別チームスコープを要求して使えない。
@@ -277,11 +278,15 @@ TypeScript のフラグ修正を入れたときハーネス側が取り残され
 ブラウザ検証だけが落ちる偽の失敗が出た** (typescript/i065)。
 
 判定に関わるコードを二重に持つ限り同じズレが再発するので、検証サーバーを
-`api/execute.rs` の `dispatch` を直接呼ぶ形に置き換える。そのために `api/` 配下に
-1 ファイル追加する必要があり、2 節を拡大した。
+`api/execute.rs` の `dispatch` を直接呼ぶ形に置き換える。
 
-`vercel.json` は無変更 (3 節の変更禁止範囲のまま)。追加するバイナリは
-Vercel のビルド対象にしない。
+**置き場所は `tools/` にする。`api/` ではない。** Vercel の Rust ランタイムは
+`api/` 配下の `.rs` を関数として自動検出するので、そこに TCP リスナーを置くと
+デプロイ対象に混入する (2026-08-25 のデプロイ失敗と同じ種類の事故)。
+`tools/local_server.rs` は Cargo の `[[bin]]` としてだけ存在し、
+`#[path = "../api/execute.rs"]` で本番のコードを取り込む。
+
+`vercel.json` は無変更 (3 節の変更禁止範囲のまま)。
 
 ## 11.5 エスカレーション記録
 
