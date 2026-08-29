@@ -1,7 +1,12 @@
-//! 実行結果コンソール。rustc 出力を行種別で色分けし、エラーコードは公式解説へリンクする。
+//! 実行結果コンソール。コンパイラ / ランタイムの出力を行種別で色分けする。
+//! 行の分類は言語共通 (shared::playground::classify_line)、エラーコードのリンクは
+//! 公式のコード別ページがある Rust だけ。
 
 use leptos::prelude::*;
+use shared::language::Language;
 use shared::playground::{classify_line, ExecuteResponse, LineKind, Outcome};
+
+use crate::lang::{console_idle_hint, console_running_hint, links_error_codes};
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum RunState {
@@ -55,9 +60,16 @@ fn line_class(kind: LineKind) -> &'static str {
     }
 }
 
-fn render_stderr_line(line: &str) -> impl IntoView {
+/// 診断 1 行の描画。`link_codes` が false の言語ではエラーコードを素のテキストで出す
+/// (rustc の error_codes に相当する公式ページが無いので、リンクにすると 404 に飛ばす)。
+fn render_stderr_line(line: &str, link_codes: bool) -> impl IntoView {
     let class = line_class(classify_line(line));
-    let segs = split_error_codes(line)
+    let segs = if link_codes {
+        split_error_codes(line)
+    } else {
+        vec![ConsoleSegment::Text(line.to_string())]
+    };
+    let segs = segs
         .into_iter()
         .map(|seg| match seg {
             ConsoleSegment::Text(t) => view! { <span>{t}</span> }.into_any(),
@@ -73,18 +85,40 @@ fn render_stderr_line(line: &str) -> impl IntoView {
     view! { <div class=class>{segs}</div> }
 }
 
-fn outcome_banner(outcome: Outcome) -> impl IntoView {
-    let (class, label) = match outcome {
+/// 判定結果バナーの (CSS クラス, 表示文言)。
+pub fn outcome_banner_parts(outcome: Outcome) -> (&'static str, &'static str) {
+    match outcome {
         Outcome::Passed => ("outcome-banner passed", "✓ 正解!"),
         Outcome::TestsFailed => ("outcome-banner tests-failed", "△ テスト失敗 — もう一歩"),
         Outcome::CompileError => ("outcome-banner compile-error", "✗ コンパイルエラー"),
         Outcome::RuntimeError => ("outcome-banner runtime-error", "✗ 実行時エラー"),
-    };
+        Outcome::NoTestsRun => ("outcome-banner no-tests-run", "✗ テストが実行されませんでした"),
+    }
+}
+
+/// 結果だけでは理由が分からない種別に、なぜそうなったかの補足を出す。
+pub fn outcome_note(outcome: Outcome) -> Option<&'static str> {
+    match outcome {
+        Outcome::NoTestsRun => Some(
+            "判定用テストは 1 件も実行されませんでした。テストはあなたのコードの後ろに連結されるので、\
+             途中でプログラムを終了させる (exit / process.exit / System.exit など) と、そこから先が走りません。\
+             終了処理を消すか、関数の中だけで完結する形に書き直してください。",
+        ),
+        _ => None,
+    }
+}
+
+fn outcome_banner(outcome: Outcome) -> impl IntoView {
+    let (class, label) = outcome_banner_parts(outcome);
     view! { <span class=class>{label}</span> }
 }
 
 #[component]
-pub fn ConsolePane(state: Signal<RunState>, on_next: Callback<()>) -> impl IntoView {
+pub fn ConsolePane(
+    state: Signal<RunState>,
+    language: Signal<Language>,
+    on_next: Callback<()>,
+) -> impl IntoView {
     let head_extra = move || match state.get() {
         RunState::Running => Some(view! { <span class="outcome-banner"><span class="spinner"></span>" コンパイル・実行中…"</span> }.into_any()),
         RunState::Done { outcome, .. } => Some(outcome_banner(outcome).into_any()),
@@ -94,19 +128,26 @@ pub fn ConsolePane(state: Signal<RunState>, on_next: Callback<()>) -> impl IntoV
 
     let body = move || match state.get() {
         RunState::Idle => view! {
-            <div class="console-placeholder">"コードを書いて「実行して判定」(Ctrl+Enter) を押すと、ここに rustc の出力と判定結果が表示されます。"</div>
+            <div class="console-placeholder">{console_idle_hint()}</div>
         }
         .into_any(),
         RunState::Running => view! {
-            <div class="console-placeholder">"Rust Playground でコンパイル・実行しています…"</div>
+            <div class="console-placeholder">{console_running_hint(language.get())}</div>
         }
         .into_any(),
         RunState::Failed(msg) => view! { <div class="line-error">{msg}</div> }.into_any(),
         RunState::Done { resp, outcome } => {
+            let link_codes = links_error_codes(language.get());
+            let note_view = outcome_note(outcome)
+                .map(|note| view! { <div class="console-note">{note}</div> });
             let stderr_view = (!resp.stderr.trim().is_empty()).then(|| {
-                let lines = resp.stderr.lines().map(render_stderr_line).collect_view();
+                let lines = resp
+                    .stderr
+                    .lines()
+                    .map(|l| render_stderr_line(l, link_codes))
+                    .collect_view();
                 view! {
-                    <div class="console-section-label">"コンパイラ出力 (stderr)"</div>
+                    <div class="console-section-label">"診断出力 (stderr)"</div>
                     <div>{lines}</div>
                 }
             });
@@ -119,12 +160,14 @@ pub fn ConsolePane(state: Signal<RunState>, on_next: Callback<()>) -> impl IntoV
             // コンパイルエラー時は stderr を先に、それ以外はテスト結果 (stdout) を先に見せる
             if outcome == Outcome::CompileError {
                 view! {
+                    {note_view}
                     {stderr_view}
                     {stdout_view}
                 }
                 .into_any()
             } else {
                 view! {
+                    {note_view}
                     {stdout_view}
                     {stderr_view}
                 }

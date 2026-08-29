@@ -5,6 +5,7 @@ pub mod api;
 pub mod app;
 pub mod console;
 pub mod editor;
+pub mod lang;
 pub mod layout;
 pub mod list;
 pub mod md;

@@ -1,6 +1,8 @@
 //! CodeMirror 6 (assets/js/editor.js の window.RustKnocksEditor) への interop 層。
 //! host ビルドでは no-op スタブになり、実挙動は wasm + 実ブラウザでのみ成立する。
 
+use shared::language::Language;
+
 #[cfg(target_arch = "wasm32")]
 mod ffi {
     use wasm_bindgen::prelude::*;
@@ -10,6 +12,8 @@ mod ffi {
         pub fn mount(parent_id: &str, initial_code: &str) -> bool;
         #[wasm_bindgen(js_name = setValue)]
         pub fn set_value(code: &str);
+        #[wasm_bindgen(js_name = setLanguage)]
+        pub fn set_language(mode: &str);
         #[wasm_bindgen(js_name = getValue)]
         pub fn get_value() -> String;
         pub fn focus();
@@ -50,6 +54,33 @@ pub fn set_value(code: &str) {
     if ready() {
         ffi::set_value(code);
     }
+}
+
+/// エディタのシンタックスハイライトを言語に追従させる。
+///
+/// **再マウントはしない**。JS 側は CodeMirror の Compartment を reconfigure する
+/// 契約で、再マウントすると編集中の下書きが失われる。JS 側が未実装 (旧 glue) でも
+/// ここが panic しないよう、関数の存在を確認してから呼ぶ。
+#[cfg(target_arch = "wasm32")]
+pub fn set_language(language: Language) {
+    if has_fn("setLanguage") {
+        ffi::set_language(language.editor_mode());
+    }
+}
+
+/// `window.RustKnocksEditor` に指定名の関数があるか。
+#[cfg(target_arch = "wasm32")]
+fn has_fn(name: &str) -> bool {
+    use wasm_bindgen::JsValue;
+    let Some(w) = web_sys::window() else {
+        return false;
+    };
+    let Ok(ed) = js_sys::Reflect::get(&w, &JsValue::from_str("RustKnocksEditor")) else {
+        return false;
+    };
+    js_sys::Reflect::get(&ed, &JsValue::from_str(name))
+        .map(|v| v.is_function())
+        .unwrap_or(false)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -107,6 +138,9 @@ pub fn mount_retrying(_parent_id: &'static str, _initial_code: String, _on_mount
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn set_value(_code: &str) {}
+
+#[cfg(not(target_arch = "wasm32"))]
+pub fn set_language(_language: Language) {}
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn get_value() -> String {

@@ -4,7 +4,7 @@ use std::collections::HashSet;
 
 use leptos::prelude::*;
 use shared::problem::Problem;
-use shared::progress::{status_of, ProblemStatus, ProgressMap};
+use shared::progress::{progress_key, status_of, ProblemStatus, ProgressMap};
 
 use crate::md::render_markdown;
 
@@ -28,9 +28,11 @@ pub fn ProblemPane(
     let tab = RwSignal::new(PaneTab::Statement);
     let hints_shown = RwSignal::new(0usize);
 
-    // 問題が切り替わったらタブとヒント開示をリセット
+    // 問題が切り替わったらタブとヒント開示をリセット。
+    // 同一性は progress_key で見る — id だけだと言語を切り替えても `b001` のままで、
+    // 別言語の問題に移ったのに開いたヒントが残る。
     Effect::new(move |prev: Option<Option<String>>| {
-        let id = problem.with(|p| p.as_ref().map(|p| p.id.clone()));
+        let id = problem.with(|p| p.as_ref().map(progress_key));
         if let Some(prev_id) = prev {
             if prev_id != id {
                 tab.set(PaneTab::Statement);
@@ -82,15 +84,17 @@ pub fn ProblemPane(
     };
 
     let solution_view = move |p: Problem| {
-        let pid = p.id.clone();
-        let status = progress.with(|m| status_of(m, &pid));
-        let is_revealed = revealed.with(|r| r.contains(&pid));
+        let status = progress.with(|m| status_of(m, &p));
+        // 開示状態も言語をまたいで衝突しないキーで持つ (b001 は 7 言語に存在する)
+        let reveal_key = progress_key(&p);
+        let is_revealed = revealed.with(|r| r.contains(&reveal_key));
+        let code_class = format!("language-{}", p.language.slug());
         if answer_visible(status, is_revealed) {
             view! {
                 <div class="answer-section">
                     <h2>"回答例"</h2>
                     <div class="md">
-                        <pre><code class="language-rust">{p.answer_code.clone()}</code></pre>
+                        <pre><code class=code_class>{p.answer_code.clone()}</code></pre>
                     </div>
                     <h2>"解説"</h2>
                     <div class="md" inner_html=render_markdown(&p.explanation_md)></div>
@@ -98,7 +102,7 @@ pub fn ProblemPane(
             }
             .into_any()
         } else {
-            let pid_reveal = p.id.clone();
+            let pid_reveal = reveal_key.clone();
             view! {
                 <div class="answer-gate">
                     <div class="gate-note">"まだ正解していません。自力で解いてから見るのがおすすめですが、行き詰まったら開いてもOK。"</div>

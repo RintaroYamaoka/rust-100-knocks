@@ -2,7 +2,9 @@
 
 use leptos::prelude::*;
 use shared::problem::Problem;
-use shared::progress::{filter_problems, status_of, ProblemStatus, ProgressMap, StatusFilter};
+use shared::progress::{
+    filter_problems, progress_key, status_of, ProblemStatus, ProgressMap, StatusFilter,
+};
 
 const FILTERS: [(StatusFilter, &str); 4] = [
     (StatusFilter::All, "すべて"),
@@ -76,19 +78,23 @@ pub fn Sidebar(
                 }}
                 <For
                     each=move || filtered.get()
-                    key=|p| p.id.clone()
+                    // 言語をまたいで一意なキーで引く。素の id だと `b001` が全言語に
+                    // あるので、言語を切り替えても For が行を再利用してしまい、
+                    // 前の言語のタイトルが残る
+                    key=|p| progress_key(p)
                     children=move |p: Problem| {
-                        let pid = p.id.clone();
-                        let pid_for_status = p.id.clone();
+                        let key = progress_key(&p);
+                        // 進捗は必ず Problem 経由で引く (素の id では言語をまたいで衝突する)
+                        let p_for_status = p.clone();
                         let pid_label = p.id.clone();
                         let title = p.title.clone();
                         view! {
                             <button
                                 class="problem-item"
-                                class:selected=move || selected_id.get().as_deref() == Some(pid.as_str())
+                                class:selected=move || selected_id.get().as_deref() == Some(key.as_str())
                                 on:click=move |_| on_select.run(p.clone())
                             >
-                                {move || progress.with(|m| status_badge(status_of(m, &pid_for_status)))}
+                                {move || progress.with(|m| status_badge(status_of(m, &p_for_status)))}
                                 <span class="pid">{pid_label}</span>
                                 <span class="ptitle">{title}</span>
                             </button>

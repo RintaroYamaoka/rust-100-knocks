@@ -1,7 +1,10 @@
 //! 永続化。wasm では localStorage、host (テスト) ではメモリ内フォールバック。
 //! どちらも同じシリアライズ形式を通る。
 
-use shared::progress::ProgressMap;
+use shared::language::Language;
+use shared::progress::{migrate_legacy_keys, ProgressMap};
+
+use crate::lang::LANGUAGE_STORAGE_KEY;
 
 const PROGRESS_KEY: &str = "rust100knocks.progress.v1";
 
@@ -9,6 +12,28 @@ pub fn load_progress() -> ProgressMap {
     raw_get(PROGRESS_KEY)
         .and_then(|s| serde_json::from_str(&s).ok())
         .unwrap_or_default()
+}
+
+/// 起動時の読み込み口。旧フラットキー (`b001`) を `rust/b001` に移行し、
+/// 移行が起きたらその場で保存し直す。
+///
+/// 多言語化前からの利用者の進捗はこの 1 回で救われる。移行し忘れると症状は
+/// 「一覧の正解マークが静かに全部消える」なので、読み込み経路を 1 本に絞る。
+pub fn load_progress_migrated() -> ProgressMap {
+    let mut map = load_progress();
+    if migrate_legacy_keys(&mut map) > 0 {
+        save_progress(&map);
+    }
+    map
+}
+
+/// 前回選択していた言語 (無ければ None)。
+pub fn load_language() -> Option<String> {
+    raw_get(LANGUAGE_STORAGE_KEY)
+}
+
+pub fn save_language(language: Language) {
+    raw_set(LANGUAGE_STORAGE_KEY, language.slug());
 }
 
 pub fn save_progress(map: &ProgressMap) {
