@@ -21,7 +21,7 @@ DoD の各行に外部オラクルを与えて記録する。OPEN が 1 行で�
 | D12 | 実ブラウザで 7 言語それぞれ正解判定 | **CLOSED** | 7/7。各言語のスクリーンショット `D12-<lang>.png` |
 | D13 | 実ブラウザで実診断が出て、エラー行が着色される | **CLOSED** | 7/7。rustc `error[E0308]` / gcc `prog.cc:2:13: error:` / Roslyn `error CS0029` / javac `prog.java:3: error:` / CPython `File "prog.py", line 1` / tsc `error TS2322` / Node `SyntaxError`。いずれも `.line-error` で着色 |
 | D14 | 無作為抽出した問題が starter で不正解・answer で正解 | **CLOSED** | 21/21 (7 言語 × 3 問、seed 固定で再現可能) |
-| D15 | preview デプロイでも 7 言語が実診断を返す | **OPEN (利用者の判断待ち)** | ブランチ push で preview は**ビルド成功** (`5b3dd13f`)。ただし Vercel の Deployment Protection が既定で有効なため、preview への HTTP は 401 (`Protected deployment`) になり自動検証できない。本番 (`rust-100-knocks.vercel.app`) は公開されている。下記「preview 検証の選択肢」参照 |
+| D15 | preview デプロイでも 7 言語が実診断を返す | **OPEN (利用者の判断待ち)** | ブランチ push で preview は**ビルド成功** (`5b3dd13f`、および 2 つ目の `[[bin]]` を含む `0951e76` でも成功)。ただし Vercel の Deployment Protection が既定で有効なため、preview への HTTP は 401 (`Protected deployment`) になり自動検証できない。本番 (`rust-100-knocks.vercel.app`) は公開されている。下記「preview 検証の選択肢」参照 |
 | D16 | 「テスト未実行で exit 0」が正解にならない | **CLOSED** | `exit_zero_without_ok_marker_is_not_passed` / `empty_output_with_exit_zero_is_not_passed` / app 側 1 件。加えて verifier に実コンテナで `sys.exit(0)` を投げて検出されることを実測 |
 | D17 | 生成した問題に使い回しが無い | **CLOSED** | 全 2100 問で題名の重複 0・模範解答の重複 0 を機械確認。難易度をまたぐ重複の検査 (`validate_across_levels`) も追加し、既存 Rust の 2 組を検出して差し替えた |
 | D18 | UI から Rust 固定の文言が消えている | **CLOSED** | `index.html` の grep 0 件。app 側の残りは規則を説明したコメントと `match backend()` の Rust 分岐のみ。スクリーンショットでブランドが「100本ノック」、stderr ラベルが「診断出力 (stderr)」であることを確認 |

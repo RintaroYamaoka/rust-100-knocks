@@ -209,7 +209,12 @@ pub fn App() -> impl IntoView {
         let Some(p) = selected.get_untracked() else {
             return;
         };
-        if run_state.with_untracked(|s| matches!(s, RunState::Running)) || !editor_ready.get_untracked()
+        // 取得中は実行させない。ボタンだけ無効化してもキーボード (Ctrl+Enter) から
+        // 入れるので、ここで塞ぐ。押せると「新しい言語を表示しながら
+        // 前の言語の問題を実行する」状態になる
+        if run_state.with_untracked(|s| matches!(s, RunState::Running))
+            || !editor_ready.get_untracked()
+            || loading.get_untracked()
         {
             return;
         }
