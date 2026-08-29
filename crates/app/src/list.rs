@@ -30,6 +30,7 @@ pub fn Sidebar(
     query: RwSignal<String>,
     selected_id: Signal<Option<String>>,
     load_error: RwSignal<Option<String>>,
+    loading: RwSignal<bool>,
     on_select: Callback<Problem>,
 ) -> impl IntoView {
     let filtered = Memo::new(move |_| {
@@ -102,8 +103,16 @@ pub fn Sidebar(
                     }
                 />
                 {move || {
+                    // 取得中に「該当なし」と出すと嘘になる (数百KB の JSON を
+                    // 落とし切るまで一覧は空)。読み込み中は読み込み中と言う
                     (filtered.get().is_empty() && load_error.get().is_none())
-                        .then(|| view! { <div class="list-empty">"条件に合う問題がありません"</div> })
+                        .then(|| {
+                            if loading.get() {
+                                view! { <div class="list-empty">"問題を読み込んでいます…"</div> }
+                            } else {
+                                view! { <div class="list-empty">"条件に合う問題がありません"</div> }
+                            }
+                        })
                 }}
             </div>
         </aside>

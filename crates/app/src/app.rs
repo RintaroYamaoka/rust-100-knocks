@@ -53,13 +53,18 @@ pub fn App() -> impl IntoView {
     let filter = RwSignal::new(StatusFilter::All);
     let query = RwSignal::new(String::new());
     // 旧フラットキー (Rust 専用時代の `b001`) はここで `rust/b001` に移行される
-    let progress: RwSignal<ProgressMap> = RwSignal::new(storage::load_progress_migrated());
+    let (initial_progress, migration_save_failed) = storage::load_progress_migrated();
+    let progress: RwSignal<ProgressMap> = RwSignal::new(initial_progress);
     let run_state: RwSignal<RunState> = RwSignal::new(RunState::Idle);
     let revealed: RwSignal<HashSet<String>> = RwSignal::new(HashSet::new());
     let editor_ready = RwSignal::new(false);
+    // 問題データを取得中か。これが無いと、切替直後に「一覧が空 = 該当なし」と
+    // 表示しつつ前の言語の問題を実行できてしまう
+    let loading = RwSignal::new(false);
     // 進捗を保存できなかったか (localStorage のクォータ超過など)。
-    // 握り潰すと、画面上は成功と区別が付かないまま進捗が消える
-    let storage_failed = RwSignal::new(false);
+    // 握り潰すと、画面上は成功と区別が付かないまま進捗が消える。
+    // 起動時の取り込みが保存できなかった場合もここに乗せる
+    let storage_failed = RwSignal::new(migration_save_failed);
     let mount_started = RwSignal::new(false);
     // データが 3 レベル揃っていることを確認できた言語 (確認前は空)
     let available: RwSignal<Vec<Language>> = RwSignal::new(Vec::new());
@@ -101,16 +106,20 @@ pub fn App() -> impl IntoView {
             load_error.set(None);
             return;
         }
+        // 取得を始める時点で前のエラーを消す。残すと、失敗した言語のエラー文が
+        // 次に選んだ言語の読み込み中ずっと表示されたままになる
+        load_error.set(None);
+        loading.set(true);
         spawn_local(async move {
             match api::fetch_problems(key.0, key.1).await {
                 Ok(ps) => {
-                    load_error.set(None);
                     cache.update(|c| {
                         c.insert(key, ps);
                     });
                 }
                 Err(e) => load_error.set(Some(e)),
             }
+            loading.set(false);
         });
     });
 
@@ -244,10 +253,12 @@ pub fn App() -> impl IntoView {
 
     let nav = move |delta: i64| {
         let ps = problems.get_untracked();
-        let Some(cur) = selected.with_untracked(|s| s.as_ref().map(|p| p.id.clone())) else {
+        // 素の id で探さない。b001 は 7 言語すべてに存在するので、一覧が別言語に
+        // 切り替わった直後に押されると、別言語の同じ番号へ飛ぶ
+        let Some(cur) = selected.with_untracked(|s| s.as_ref().map(progress_key)) else {
             return;
         };
-        if let Some(idx) = ps.iter().position(|p| p.id == cur) {
+        if let Some(idx) = ps.iter().position(|p| progress_key(p) == cur) {
             let target = idx as i64 + delta;
             if target >= 0 && (target as usize) < ps.len() {
                 select_problem.run(ps[target as usize].clone());
@@ -381,6 +392,7 @@ pub fn App() -> impl IntoView {
                     query=query
                     selected_id=selected_id
                     load_error=load_error
+                    loading=loading
                     on_select=select_problem
                 />
                 <Splitter target=SplitTarget::Sidebar sizes=layout/>
@@ -391,7 +403,11 @@ pub fn App() -> impl IntoView {
                         <button
                             class="run-btn"
                             prop:disabled=move || {
-                                matches!(run_state.get(), RunState::Running) || selected.with(|s| s.is_none())
+                                // 取得中は押させない。押せると、切替直後に
+                                // 「新しい言語を表示しながら前の言語の問題を実行する」
+                                matches!(run_state.get(), RunState::Running)
+                                    || selected.with(|s| s.is_none())
+                                    || loading.get()
                             }
                             on:click=move |_| run()
                         >

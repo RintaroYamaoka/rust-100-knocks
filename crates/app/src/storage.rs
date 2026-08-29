@@ -6,25 +6,53 @@ use shared::progress::{migrate_legacy_keys, ProgressMap};
 
 use crate::lang::LANGUAGE_STORAGE_KEY;
 
-const PROGRESS_KEY: &str = "rust100knocks.progress.v1";
+/// 多言語化後の進捗。キーは `<言語>/<問題id>`。
+///
+/// v1 と別のキーにしてあるのは**切り戻しのため**。同じキーを使い回すと、この版が
+/// 書いた `rust/b001` 形式を前の版が読めず、利用者には進捗が全部消えたように見える。
+/// 実行基盤を本番で初めて検証する以上、切り戻しは唯一の復旧手段なので壊してはいけない。
+pub const PROGRESS_KEY: &str = "rust100knocks.progress.v2";
 
-pub fn load_progress() -> ProgressMap {
-    raw_get(PROGRESS_KEY)
+/// Rust 専用時代の進捗。キーは `b001` のようなフラットな id。
+/// **読むだけで、消さない。** 前の版に戻した利用者がこれを読む。
+pub const LEGACY_PROGRESS_KEY: &str = "rust100knocks.progress.v1";
+
+fn read_map(key: &str) -> ProgressMap {
+    raw_get(key)
         .and_then(|s| serde_json::from_str(&s).ok())
         .unwrap_or_default()
 }
 
-/// 起動時の読み込み口。旧フラットキー (`b001`) を `rust/b001` に移行し、
-/// 移行が起きたらその場で保存し直す。
+pub fn load_progress() -> ProgressMap {
+    read_map(PROGRESS_KEY)
+}
+
+/// 起動時の読み込み口。v2 を読み、v1 (Rust 専用時代) のエントリを取り込む。
 ///
-/// 多言語化前からの利用者の進捗はこの 1 回で救われる。移行し忘れると症状は
+/// 多言語化前からの利用者の進捗はこの 1 回で救われる。取り込み忘れると症状は
 /// 「一覧の正解マークが静かに全部消える」なので、読み込み経路を 1 本に絞る。
-pub fn load_progress_migrated() -> ProgressMap {
+///
+/// v1 は**読むだけで消さない**。前の版に戻した利用者がそれを読む。
+/// 衝突したときは `updated_at_ms` が新しい方を採る (戻していた間の学習を捨てないため)。
+///
+/// 戻り値は (進捗, 保存に失敗したか)。保存失敗を握り潰すと、クォータ超過中の利用者は
+/// 取り込みが永久に保存されないまま毎回やり直すことになる。
+pub fn load_progress_migrated() -> (ProgressMap, bool) {
     let mut map = load_progress();
-    if migrate_legacy_keys(&mut map) > 0 {
-        let _ = save_progress(&map);
+    // v1 のエントリを取り込む (v2 に無いものだけ、または v1 の方が新しいもの)
+    for (k, v) in read_map(LEGACY_PROGRESS_KEY) {
+        match map.get(&k) {
+            Some(existing) if existing.updated_at_ms >= v.updated_at_ms => {}
+            _ => {
+                map.insert(k, v);
+            }
+        }
     }
-    map
+    let mut save_failed = false;
+    if migrate_legacy_keys(&mut map) > 0 {
+        save_failed = !save_progress(&map);
+    }
+    (map, save_failed)
 }
 
 /// 前回選択していた言語 (無ければ None)。

@@ -4,7 +4,7 @@
   "type": "module",
   "description": "CodeMirror 6 エディタバンドルのビルド専用。配信物 assets/js/editor.js を再現可能に生成する。",
   "scripts": {
-    "build:editor": "esbuild assets/js/editor-src.mjs --bundle --format=iife --minify --target=es2020 --outfile=assets/js/editor.js",
+    "build:editor": "esbuild assets/js/editor-src.mjs --bundle --format=iife --minify --target=es2020 --outfile=assets/js/editor.js && node -e \"const c=require('crypto'),f=require('fs');const h=c.createHash('md5').update(f.readFileSync('assets/js/editor.js')).digest('hex').slice(0,8);console.log('bundle hash: '+h+'  → index.html の ?v= をこの値にすること');\"",
     "test:editor": "node --test tests/editor-src.test.mjs",
     "test:merge": "node --test scripts/merge-batches.test.mjs",
     "test": "npm run test:editor && npm run test:merge"

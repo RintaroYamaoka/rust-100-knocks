@@ -49,24 +49,37 @@ pub fn progress_key(problem: &Problem) -> String {
     format!("{}/{}", problem.language.slug(), problem.id)
 }
 
-/// 旧形式 (Rust 専用時代のフラットな `b001`) のキーを `rust/b001` に移行する。
+/// 旧形式 (Rust 専用時代のフラットな `b001`) のキーを `rust/b001` に**複製**する。
 ///
-/// 移行済みキーが既にある場合は既存を優先する (二重移行で上書きしない)。
+/// **旧キーは消さない。** 消すと、この版を一度でも開いた利用者を前の版に戻したとき、
+/// 旧コードが読めるエントリが 1 つも無くなり「進捗が全部消えた」ように見える
+/// (旧コードは `b001` を引くので、静かに 0 件になる)。
+/// 実行基盤を本番で初めて検証する以上、切り戻しは唯一の復旧手段なので壊してはいけない。
+///
+/// 両方にエントリがある場合は `updated_at_ms` が新しい方を採る。
+/// 前の版に戻していた間に旧コードが `b001` を更新していることがあり、
+/// 単純に既存優先にするとその間の学習が黙って捨てられる。
+///
+/// 戻り値は新しく作られた (または更新された) エントリの数。
 pub fn migrate_legacy_keys(map: &mut ProgressMap) -> usize {
-    let legacy: Vec<String> = map
-        .keys()
-        .filter(|k| !k.contains('/'))
-        .cloned()
+    let legacy: Vec<(String, ProgressEntry)> = map
+        .iter()
+        .filter(|(k, _)| !k.contains('/'))
+        .map(|(k, v)| (k.clone(), v.clone()))
         .collect();
-    let mut moved = 0;
-    for old in legacy {
+
+    let mut migrated = 0;
+    for (old, entry) in legacy {
         let new = format!("{}/{}", Language::Rust.slug(), old);
-        if let Some(entry) = map.remove(&old) {
-            map.entry(new).or_insert(entry);
-            moved += 1;
+        match map.get(&new) {
+            Some(existing) if existing.updated_at_ms >= entry.updated_at_ms => {}
+            _ => {
+                map.insert(new, entry);
+                migrated += 1;
+            }
         }
     }
-    moved
+    migrated
 }
 
 pub fn status_of(map: &ProgressMap, problem: &Problem) -> ProblemStatus {

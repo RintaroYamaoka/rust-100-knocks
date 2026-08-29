@@ -41,8 +41,10 @@ fn legacy_flat_keys_are_migrated_to_the_rust_namespace() {
     map.insert("i042".to_string(), entry("legacy", ProblemStatus::Passed));
     save_progress(&map);
 
-    let migrated = load_progress_migrated();
-    assert!(!migrated.contains_key("i042"), "旧キーが残っている");
+    let (migrated, save_failed) = load_progress_migrated();
+    assert!(!save_failed, "移行を保存できていない");
+    // 旧キーは意図的に残す (切り戻したとき前の版がこれを読む)
+    assert!(migrated.contains_key("i042"), "旧キーを消してしまっている");
     let e = migrated.get("rust/i042").expect("旧進捗が失われた");
     assert_eq!(e.status, ProblemStatus::Passed);
     assert_eq!(e.saved_code.as_deref(), Some("legacy"));
@@ -58,5 +60,43 @@ fn language_selection_roundtrips() {
     assert_eq!(
         load_language().as_deref().and_then(Language::from_slug),
         Some(Language::Typescript)
+    );
+}
+
+// ---- 切り戻しても旧版が読めること ----
+
+#[test]
+fn legacy_storage_key_is_left_intact_after_migration() {
+    use app::storage::{load_progress_migrated, raw_get, raw_set, LEGACY_PROGRESS_KEY, PROGRESS_KEY};
+
+    // 前の版が書いた進捗
+    raw_set(
+        LEGACY_PROGRESS_KEY,
+        r#"{"b001":{"status":"passed","saved_code":"fn f(){}","updated_at_ms":1.0}}"#,
+    );
+
+    let (map, _) = load_progress_migrated();
+    assert_eq!(map.get("rust/b001").map(|e| e.status), Some(shared::progress::ProblemStatus::Passed));
+
+    // 新しいキーに書かれ、**旧キーはそのまま残っている**。
+    // 消すと、この版を開いた利用者を前の版に戻したとき進捗が全部消える
+    assert!(raw_get(PROGRESS_KEY).is_some(), "新しいキーに保存されていない");
+    let legacy = raw_get(LEGACY_PROGRESS_KEY).expect("旧キーが消えている (切り戻すと進捗が全滅する)");
+    assert!(legacy.contains("\"b001\""), "旧キーの中身が壊れている: {legacy}");
+}
+
+#[test]
+fn new_key_wins_when_both_exist() {
+    use app::storage::{load_progress_migrated, raw_set, LEGACY_PROGRESS_KEY, PROGRESS_KEY};
+    raw_set(LEGACY_PROGRESS_KEY, r#"{"b002":{"status":"attempted","updated_at_ms":1.0}}"#);
+    raw_set(
+        PROGRESS_KEY,
+        r#"{"rust/b002":{"status":"passed","updated_at_ms":9.0}}"#,
+    );
+    let (map, _) = load_progress_migrated();
+    assert_eq!(
+        map.get("rust/b002").map(|e| e.status),
+        Some(shared::progress::ProblemStatus::Passed),
+        "新しいキーの内容が旧キーで上書きされている"
     );
 }

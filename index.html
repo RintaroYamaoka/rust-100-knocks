@@ -20,7 +20,11 @@
     <link data-trunk rel="css" href="assets/css/main.css" />
     <link data-trunk rel="copy-dir" href="data" />
     <link data-trunk rel="copy-file" href="assets/js/editor.js" data-target-path="assets/js" />
-    <script defer src="/assets/js/editor.js"></script>
+    <!-- ?v= はキャッシュ破棄用。この値はバンドルを再生成したら必ず更新する
+         (旧バンドルには setLanguage が無く、キャッシュに残っていると
+          7 言語すべてが Rust のハイライトで描かれる)。
+         npm run build:editor が md5 を出すので、その先頭 8 桁を入れる -->
+    <script defer src="/assets/js/editor.js?v=2d2ae2d3"></script>
   </head>
   <body></body>
 </html>

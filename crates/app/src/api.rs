@@ -40,9 +40,16 @@ pub async fn problems_exist(language: Language, level: Level) -> bool {
     let Ok(req) = RequestBuilder::new(&url).method(Method::HEAD).build() else {
         return false;
     };
+    // ネットワークの瞬断を「その言語が無い」と解釈すると、セッション中ずっと
+    // セレクタから消える。送信自体に失敗したときだけ 1 回やり直す
     match req.send().await {
         Ok(resp) => resp.ok(),
-        Err(_) => false,
+        Err(_) => {
+            let Ok(retry) = RequestBuilder::new(&url).method(Method::HEAD).build() else {
+                return false;
+            };
+            matches!(retry.send().await, Ok(resp) if resp.ok())
+        }
     }
 }
 

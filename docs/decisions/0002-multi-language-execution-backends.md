@@ -81,8 +81,9 @@ stdout に出すため、`#[test]` 形式のまま既存 300 問に手を入れ�
 - **C#**: `using` はファイル先頭にしか置けず、harness はユーザーコードの後ろに来る。
   → harness は `System.Console` のように**完全修飾**で書く
 - **C#**: `dotnetcore` は成功時も `dotnet new` / MSBuild の定型出力を
-  `compiler_output` に吐く。→ プロキシ側で `.cs(行,列): error|warning CSnnnn`
-  にマッチする行だけ残して除去する
+  `compiler_output` に吐く。→ プロキシ側で定型行を除去する。
+  除去は**ホワイトリスト方向** (`error` / `warning` を含む行は必ず残す) で行う。
+  詳しい規則は下の「ADR 0001 との関係」節が正本
 - **C# `dotnetcore-8.0.402` は使用不可**: `dotnet new console` が
   `File size limit exceeded (core dumped)` で落ちる (Wandbox 側の制約)
 - **TypeScript**: Node の型定義が無く `process` が `TS2580` になる。

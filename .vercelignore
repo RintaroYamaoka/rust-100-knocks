@@ -5,3 +5,7 @@ dist
 docs
 .bootstrap
 node_modules
+
+# 問題生成の中間成果物 (統合後は <難易度>.json が正本)。
+# vercel deploy を手元から打つ経路で 9MB 余計に上がるのを防ぐ
+data/problems/*/_batches
