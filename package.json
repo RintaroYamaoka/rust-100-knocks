@@ -5,7 +5,9 @@
   "description": "CodeMirror 6 エディタバンドルのビルド専用。配信物 assets/js/editor.js を再現可能に生成する。",
   "scripts": {
     "build:editor": "esbuild assets/js/editor-src.mjs --bundle --format=iife --minify --target=es2020 --outfile=assets/js/editor.js",
-    "test:editor": "node --test tests/editor-src.test.mjs"
+    "test:editor": "node --test tests/editor-src.test.mjs",
+    "test:merge": "node --test scripts/merge-batches.test.mjs",
+    "test": "npm run test:editor && npm run test:merge"
   },
   "devDependencies": {
     "@codemirror/commands": "6.11.0",
