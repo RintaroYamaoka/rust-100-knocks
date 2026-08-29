@@ -9,7 +9,7 @@ mod ffi {
 
     #[wasm_bindgen(js_namespace = ["window", "RustKnocksEditor"])]
     extern "C" {
-        pub fn mount(parent_id: &str, initial_code: &str) -> bool;
+        pub fn mount(parent_id: &str, initial_code: &str, language_slug: &str) -> bool;
         #[wasm_bindgen(js_name = setValue)]
         pub fn set_value(code: &str);
         #[wasm_bindgen(js_name = setLanguage)]
@@ -35,15 +35,23 @@ pub fn ready() -> bool {
 
 /// glue script のロード完了を待ってエディタをマウントする (80ms 間隔でリトライ)。
 #[cfg(target_arch = "wasm32")]
-pub fn mount_retrying(parent_id: &'static str, initial_code: String, on_mounted: std::rc::Rc<dyn Fn()>) {
+pub fn mount_retrying(
+    parent_id: &'static str,
+    initial_code: String,
+    language: Language,
+    on_mounted: std::rc::Rc<dyn Fn()>,
+) {
     use wasm_bindgen::prelude::*;
     use wasm_bindgen::JsCast;
 
-    if ready() && ffi::mount(parent_id, &initial_code) {
+    // 最初から正しい言語で立ち上げる。マウント後に setLanguage で直すと、
+    // 一瞬だけ別の言語のハイライトで描かれる
+    if ready() && ffi::mount(parent_id, &initial_code, language.slug()) {
         on_mounted();
         return;
     }
-    let cb = Closure::once_into_js(move || mount_retrying(parent_id, initial_code, on_mounted));
+    let cb =
+        Closure::once_into_js(move || mount_retrying(parent_id, initial_code, language, on_mounted));
     if let Some(w) = web_sys::window() {
         let _ = w.set_timeout_with_callback_and_timeout_and_arguments_0(cb.unchecked_ref(), 80);
     }
@@ -134,7 +142,13 @@ pub fn ready() -> bool {
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub fn mount_retrying(_parent_id: &'static str, _initial_code: String, _on_mounted: std::rc::Rc<dyn Fn()>) {}
+pub fn mount_retrying(
+    _parent_id: &'static str,
+    _initial_code: String,
+    _language: Language,
+    _on_mounted: std::rc::Rc<dyn Fn()>,
+) {
+}
 
 #[cfg(not(target_arch = "wasm32"))]
 pub fn set_value(_code: &str) {}

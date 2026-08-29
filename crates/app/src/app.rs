@@ -277,7 +277,10 @@ pub fn App() -> impl IntoView {
             editor::on_change(save_draft_code);
             editor::focus();
         });
-        editor::mount_retrying("editor-host", String::new(), on_mounted);
+        let initial_lang = selected
+            .get_untracked()
+            .map_or_else(|| language.get_untracked(), |p| p.language);
+        editor::mount_retrying("editor-host", String::new(), initial_lang, on_mounted);
     });
 
     let layout: RwSignal<LayoutSizes> = RwSignal::new(load_layout());

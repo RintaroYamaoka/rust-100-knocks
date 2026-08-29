@@ -4,7 +4,7 @@
 
 use shared::language::Language;
 use shared::playground::{
-    classify, classify_line, extract_error_codes, harness_ran, has_compile_error, has_separate_compile_phase,
+    classify, classify_line, harness_ran, has_compile_error, has_separate_compile_phase,
     normalize_playground, normalize_wandbox, strip_csharp_build_noise, validate, ExecuteRequest,
     ExecuteResponse, LineKind, Outcome, PlaygroundResponse, WandboxResponse, MAX_CODE_BYTES,
     TEST_FAILED_MARKER, TEST_OK_MARKER,
@@ -394,11 +394,6 @@ fn classify_line_handles_other_compilers() {
     assert_eq!(classify_line("    2 | int main(){ int x = \"nope\"; }"), LineKind::Plain);
 }
 
-#[test]
-fn extract_error_codes_dedups_in_order() {
-    let stderr = "error[E0308]: a\nerror[E0502]: b\nerror[E0308]: c\nerror: aborting";
-    assert_eq!(extract_error_codes(stderr), vec!["E0308", "E0502"]);
-}
 
 // ---- cargo test の要約行をコンパイルエラーと取り違えない ----
 

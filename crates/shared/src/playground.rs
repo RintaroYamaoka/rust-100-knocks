@@ -371,27 +371,6 @@ pub fn normalize_playground(raw: &PlaygroundResponse) -> ExecuteResponse {
 
 // ---- コンソール表示 ----
 
-/// stderr から rustc エラーコード (E0308 等) を出現順・重複なしで抜き出す。
-/// UI が公式 error_codes ドキュメントへのリンクを張るのに使う (Rust 専用)。
-pub fn extract_error_codes(stderr: &str) -> Vec<String> {
-    let mut codes: Vec<String> = Vec::new();
-    let mut rest = stderr;
-    while let Some(pos) = rest.find("error[") {
-        rest = &rest[pos + "error[".len()..];
-        if let Some(end) = rest.find(']') {
-            let code = &rest[..end];
-            if code.len() == 5
-                && code.starts_with('E')
-                && code[1..].chars().all(|c| c.is_ascii_digit())
-                && !codes.iter().any(|c| c == code)
-            {
-                codes.push(code.to_string());
-            }
-        }
-    }
-    codes
-}
-
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum LineKind {
     Error,
