@@ -7,6 +7,10 @@
 各言語 初級/中級/上級 各100問 (計2100問)、回答例と解説つき。
 Vercel にデプロイ(静的 WASM フロント + Rust Functions)。
 
+- 本番: https://100-cord-knocks.vercel.app
+- リポジトリ: `RintaroYamaoka/100-cord-knocks` (旧 `rust-100-knocks` から改称。
+  docs/bootstrap 配下の古い記録に出てくる `rust-100-knocks.vercel.app` は現在 404)
+
 ## 技術スタック
 
 - 言語: アプリ本体は Rust。フロントは Leptos (CSR) を wasm32-unknown-unknown + Trunk でビルド
