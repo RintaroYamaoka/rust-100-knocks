@@ -17,6 +17,7 @@ use crate::console::{ConsolePane, RunState};
 use crate::lang::{initial_language, resolve_selection, selector_languages};
 use crate::layout::{load_layout, LayoutSizes, SplitTarget};
 use crate::list::Sidebar;
+use crate::mobile::{pane_after_problem_change, MobilePane};
 use crate::problem_view::ProblemPane;
 use crate::splitter::Splitter;
 use crate::{api, editor, storage};
@@ -42,6 +43,35 @@ pub fn code_for(p: &Problem, map: &ProgressMap) -> String {
 
 /// 選択中の言語・レベルの問題データを覚えておくキー。
 type CacheKey = (Language, Level);
+
+/// レベル切替 (初級/中級/上級)。
+///
+/// デスクトップではヘッダーに、スマホでは一覧ペインの中に置く。狭い画面では
+/// ヘッダーに 3 タブ + 言語セレクタ + 進捗を並べると溢れて横スクロールが出るうえ、
+/// レベルは一覧の絞り込みなので、一覧と一緒にあるほうが操作としても素直。
+/// 表示の出し分けは CSS (`class` で渡す修飾クラス) が行う。
+#[component]
+pub fn LevelTabs(level: RwSignal<Level>, #[prop(into)] class: String) -> impl IntoView {
+    view! {
+        <div class=format!("level-tabs {class}")>
+            {Level::ALL
+                .iter()
+                .map(|lv| {
+                    let lv = *lv;
+                    view! {
+                        <button
+                            class="level-tab"
+                            class:active=move || level.get() == lv
+                            on:click=move |_| level.set(lv)
+                        >
+                            {lv.label_ja()}
+                        </button>
+                    }
+                })
+                .collect_view()}
+        </div>
+    }
+}
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -69,6 +99,8 @@ pub fn App() -> impl IntoView {
     // データが 3 レベル揃っていることを確認できた言語 (確認前は空)
     let available: RwSignal<Vec<Language>> = RwSignal::new(Vec::new());
     let probe_started = RwSignal::new(false);
+    // スマホ幅で全画面表示するペイン (デスクトップ幅では CSS が参照しないので無害)
+    let pane = RwSignal::new(MobilePane::List);
 
     // 起動時に一度だけ、収録済み言語のマニフェストを読む。
     //
@@ -184,6 +216,14 @@ pub fn App() -> impl IntoView {
         }
     });
 
+    // スマホでは、一覧から**明示的に**選んだときだけ問題ペインへ移る。すぐ下の
+    // 自動選択 (データ到着時 / 言語・レベル切替時) で移すと、レベルを切り替えただけで
+    // 一覧から問題文へ飛ばされ、続けて別の問題を選べなくなる
+    let select_from_list = Callback::new(move |p: Problem| {
+        select_problem.run(p);
+        pane.set(pane_after_problem_change());
+    });
+
     // 問題データ到着時 / 言語・レベル切替時:
     // 未選択か、いま表示している言語・レベルと違う問題が残っていたら先頭を自動選択
     Effect::new(move |_| {
@@ -273,6 +313,7 @@ pub fn App() -> impl IntoView {
             let target = idx as i64 + delta;
             if target >= 0 && (target as usize) < ps.len() {
                 select_problem.run(ps[target as usize].clone());
+                pane.set(pane_after_problem_change());
             }
         }
     };
@@ -331,7 +372,7 @@ pub fn App() -> impl IntoView {
             <header class="header">
                 <div class="brand">
                     <span class="mark" inner_html=crate::GEAR_SVG></span>
-                    <span><span class="knocks">"100本ノック"</span></span>
+                    <span class="brand-text"><span class="knocks">"100本ノック"</span></span>
                 </div>
                 <select
                     class="lang-select"
@@ -360,23 +401,7 @@ pub fn App() -> impl IntoView {
                         }
                     />
                 </select>
-                <div class="level-tabs">
-                    {Level::ALL
-                        .iter()
-                        .map(|lv| {
-                            let lv = *lv;
-                            view! {
-                                <button
-                                    class="level-tab"
-                                    class:active=move || level.get() == lv
-                                    on:click=move |_| level.set(lv)
-                                >
-                                    {lv.label_ja()}
-                                </button>
-                            }
-                        })
-                        .collect_view()}
-                </div>
+                <LevelTabs level=level class="header-level-tabs"/>
                 {move || {
                     storage_failed
                         .get()
@@ -389,22 +414,39 @@ pub fn App() -> impl IntoView {
                         })
                 }}
                 <div class="header-progress">
-                    <span>{move || format!("{} / {} 問クリア", passed_in_level.get(), problems.with(|p| p.len()))}</span>
+                    <span class="progress-label">
+                        <span class="progress-count">
+                            {move || {
+                                // 総数を先に読む。passed_in_level (Memo) を先に読むと、
+                                // その初回計算の中で problems が読まれ、外側 (この表示) の
+                                // 購読が張られないまま固まる (0 / 0 のまま更新されない)
+                                let total = problems.with(|p| p.len());
+                                format!("{} / {}", passed_in_level.get(), total)
+                            }}
+                        </span>
+                        <span class="progress-unit">" 問クリア"</span>
+                    </span>
                     <div class="progress-track">
                         <div class="progress-fill" style:width=move || format!("{}%", progress_pct())></div>
                     </div>
                 </div>
             </header>
-            <div class="main" class:resizing=move || layout_dragging.get() style=move || layout.with(|l| l.css_vars())>
+            <div
+                class="main"
+                class:resizing=move || layout_dragging.get()
+                data-pane=move || pane.get().slug()
+                style=move || layout.with(|l| l.css_vars())
+            >
                 <Sidebar
                     problems=problems
                     progress=progress
+                    level=level
                     filter=filter
                     query=query
                     selected_id=selected_id
                     load_error=load_error
                     loading=loading
-                    on_select=select_problem
+                    on_select=select_from_list
                 />
                 <Splitter target=SplitTarget::Sidebar sizes=layout/>
                 <ProblemPane problem=selected.into() progress=progress revealed=revealed/>
@@ -434,8 +476,12 @@ pub fn App() -> impl IntoView {
                         <span class="toolbar-hint">"Ctrl+Enter"</span>
                         <div class="toolbar-spacer"></div>
                         <div class="nav-btns">
-                            <button class="nav-btn" on:click=move |_| nav(-1)>"← 前の問題"</button>
-                            <button class="nav-btn" on:click=move |_| nav(1)>"次の問題 →"</button>
+                            <button class="nav-btn" on:click=move |_| nav(-1) title="前の問題">
+                                "←"<span class="nav-label">" 前の問題"</span>
+                            </button>
+                            <button class="nav-btn" on:click=move |_| nav(1) title="次の問題">
+                                <span class="nav-label">"次の問題 "</span>"→"
+                            </button>
                         </div>
                         <button class="reset-btn" on:click=reset_code title="コードを初期状態に戻す">"リセット"</button>
                     </div>
@@ -451,6 +497,32 @@ pub fn App() -> impl IntoView {
                     />
                 </section>
             </div>
+            <nav class="mobile-tabs" aria-label="表示の切替">
+                {MobilePane::ALL
+                    .iter()
+                    .map(|mp| {
+                        let mp = *mp;
+                        let icon = match mp {
+                            MobilePane::List => crate::ICON_LIST,
+                            MobilePane::Problem => crate::ICON_DOC,
+                            MobilePane::Code => crate::ICON_CODE,
+                        };
+                        view! {
+                            <button
+                                class="mobile-tab"
+                                class:active=move || pane.get() == mp
+                                // 見た目 (色と上線) だけでなく、支援技術にも
+                                // 「いまどのペインか」を渡す
+                                aria-current=move || (pane.get() == mp).then_some("page")
+                                on:click=move |_| pane.set(mp)
+                            >
+                                <span class="mobile-tab-icon" inner_html=icon></span>
+                                <span>{mp.label_ja()}</span>
+                            </button>
+                        }
+                    })
+                    .collect_view()}
+            </nav>
         </div>
     }
 }

@@ -1,10 +1,12 @@
 //! 左ペイン: 状態フィルタ・検索・問題一覧。絞り込みロジックは shared::progress に委譲。
 
 use leptos::prelude::*;
-use shared::problem::Problem;
+use shared::problem::{Level, Problem};
 use shared::progress::{
     filter_problems, progress_key, status_of, ProblemStatus, ProgressMap, StatusFilter,
 };
+
+use crate::app::LevelTabs;
 
 const FILTERS: [(StatusFilter, &str); 4] = [
     (StatusFilter::All, "すべて"),
@@ -26,6 +28,9 @@ fn status_badge(status: ProblemStatus) -> impl IntoView {
 pub fn Sidebar(
     problems: Memo<Vec<Problem>>,
     progress: RwSignal<ProgressMap>,
+    /// スマホ幅ではレベル切替をここに置く (ヘッダーには入り切らない)。
+    /// デスクトップ幅では CSS で隠され、ヘッダー側のタブが見える。
+    level: RwSignal<Level>,
     filter: RwSignal<StatusFilter>,
     query: RwSignal<String>,
     selected_id: Signal<Option<String>>,
@@ -47,10 +52,15 @@ pub fn Sidebar(
     view! {
         <aside class="sidebar">
             <div class="sidebar-controls">
+                <LevelTabs level=level class="sidebar-level-tabs"/>
                 <input
                     class="search-input"
                     type="search"
                     placeholder="検索 (id / タイトル / タグ)"
+                    // スマホのソフトキーボードで改行キーを「検索」にし、
+                    // 日本語の問題名を打つので自動大文字化は切る
+                    enterkeyhint="search"
+                    autocapitalize="off"
                     prop:value=move || query.get()
                     on:input=move |ev| query.set(event_target_value(&ev))
                 />

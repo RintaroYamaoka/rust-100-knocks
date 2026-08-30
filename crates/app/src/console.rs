@@ -184,9 +184,30 @@ pub fn ConsolePane(
         })
     };
 
+    // スマホ幅では画面の高さが足りないので、コンソールは既定で畳んでおき、
+    // 実行したときだけ開く (畳んだ状態は見出しの帯だけが残る)。
+    // デスクトップ幅では CSS がこのクラスを見ないため、常に開いた表示のまま。
+    let open = RwSignal::new(false);
+    Effect::new(move |_| {
+        if !matches!(state.get(), RunState::Idle) {
+            open.set(true);
+        }
+    });
+
     view! {
-        <div class="console">
-            <div class="console-head">"実行結果" {head_extra} <span class="toolbar-spacer"></span> {next_cta}</div>
+        <div class="console" class:open=move || open.get()>
+            <div class="console-head">
+                "実行結果" {head_extra} <span class="toolbar-spacer"></span> {next_cta}
+                <button
+                    class="console-toggle"
+                    on:click=move |_| open.update(|o| *o = !*o)
+                    title="実行結果の開閉"
+                    aria-label="実行結果の開閉"
+                    aria-expanded=move || open.get().to_string()
+                >
+                    {move || if open.get() { "▼" } else { "▲" }}
+                </button>
+            </div>
             <div class="console-body">{body}</div>
         </div>
     }

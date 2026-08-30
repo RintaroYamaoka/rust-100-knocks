@@ -2,7 +2,13 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <!-- interactive-widget=resizes-content: ソフトキーボードが出たときにレイアウトごと
+         縮める (Chrome/Android)。既定の resizes-visual だと下部タブと実行ボタンが
+         キーボードの裏に隠れたまま、画面だけがスクロールする -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
     <title>コーディング100本ノック</title>
     <meta
       name="description"

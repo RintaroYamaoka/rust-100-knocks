@@ -43,6 +43,9 @@ a:hover { text-decoration: underline; }
   display: flex;
   flex-direction: column;
   height: 100vh;
+  /* モバイルはアドレスバーの伸縮で 100vh が画面より高くなる。dvh が使える環境では
+     そちらを使う (下部タブが画面外に落ちない) */
+  height: 100dvh;
 }
 
 /* ---- header ---- */
@@ -379,13 +382,20 @@ a:hover { text-decoration: underline; }
 .empty-pane .mark { margin-bottom: 12px; color: var(--text-faint); }
 .empty-pane .mark svg { width: 52px; height: 52px; }
 
+/* モバイル専用パーツ (デスクトップ幅では出さない) */
+.mobile-tabs { display: none; }
+.sidebar-level-tabs { display: none; }
+.console-toggle { display: none; }
+
 /* nav buttons */
 .nav-btns { display: flex; gap: 4px; }
 .nav-btn { padding: 4px 10px; border: 1px solid var(--border); border-radius: 6px; color: var(--text-dim); font-size: 12px; }
 .nav-btn:hover:not(:disabled) { color: var(--text); border-color: var(--border-strong); }
 .nav-btn:disabled { opacity: 0.4; cursor: default; }
 
-/* narrow screens: stack panes */
+/* 中間幅 (タブレット〜小さいノート): 3 ペインを縦に積む。
+   スマホ幅はこの下の「mobile shell」で 1 画面 1 ペインに切り替えるため、ここは
+   821px 以上 (かつ縦に余裕がある端末) にだけ効く */
 @media (max-width: 1100px) {
   /* 言語タブが増えた分ヘッダーが詰まるので、間隔だけ詰めて折り返さない */
   .header { gap: 12px; }
@@ -422,4 +432,177 @@ a:hover { text-decoration: underline; }
   color: var(--yellow);
   font-size: 12px;
   white-space: nowrap;
+}
+
+/* ============ mobile shell (スマホ) ============
+   狭い画面では 3 ペインを縦に積まず、**1 画面 1 ペイン + 下部タブ**に切り替える。
+
+   縦積み (上の 1100px ブロック) を 375px 幅で開くと、
+     - ヘッダーが横に溢れて「上級」タブと進捗が画面外に出る (横スクロールが要る)
+     - エディタに届くまで 2〜3 画面ぶんスクロールする
+     - 問題文とコードを往復するたびに読んでいた位置を見失う
+   という状態になる。ペインを切り替える操作にすれば、どの画面も 1 画面に収まる。
+
+   適用条件は「幅が狭い」だけでなく「横向きのスマホ (高さが足りない)」も含める。 */
+@media (max-width: 820px), (max-height: 500px) and (max-width: 1100px) {
+  html, body { overflow: hidden; overscroll-behavior: none; -webkit-text-size-adjust: 100%; }
+
+  /* タップ後 300ms の待ちとダブルタップ拡大を殺す (誤爆と取りこぼしの元) */
+  button, .problem-item, .mobile-tab, .lang-select, .pane-tab, .search-input {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* ---- ヘッダー: 1 行に必ず収める ---- */
+  .header {
+    gap: 10px;
+    height: 50px;
+    padding-left: max(12px, env(safe-area-inset-left));
+    padding-right: max(12px, env(safe-area-inset-right));
+    overflow: hidden;
+  }
+  .brand { font-size: 15px; }
+  /* レベルは一覧の絞り込みなので、狭い画面では一覧ペインの中へ移す */
+  .header-level-tabs { display: none; }
+  .lang-select {
+    /* 16px 未満だと iOS がフォーカス時に画面を勝手に拡大する */
+    font-size: 16px;
+    padding: 7px 26px 7px 10px;
+    max-width: 42vw;
+  }
+  .header-progress { gap: 8px; min-width: 0; }
+  .progress-unit { display: none; }
+  .progress-track { width: 54px; }
+
+  /* ---- 1 画面 1 ペイン ---- */
+  .main { flex-direction: column; overflow: hidden; }
+  .sidebar, .problem-pane, .workbench {
+    display: none;
+    width: 100%;
+    max-width: none;
+    max-height: none;
+    min-width: 0;
+    min-height: 0;
+    flex: 1 1 auto;
+    border-right: none;
+  }
+  .main[data-pane="list"] .sidebar,
+  .main[data-pane="problem"] .problem-pane,
+  .main[data-pane="code"] .workbench { display: flex; }
+  /* 幅も高さもドラッグで変えない (指では狙えないうえ、1 ペインなので意味がない) */
+  .splitter { display: none; }
+  .problem-list, .problem-body, .console-body { overscroll-behavior: contain; }
+
+  /* ---- 一覧ペイン ---- */
+  .sidebar-level-tabs { display: flex; }
+  .sidebar-level-tabs .level-tab { flex: 1; text-align: center; padding: 8px 0; }
+  .sidebar-controls { padding: 10px 12px; gap: 8px; }
+  .search-input { font-size: 16px; padding: 10px 12px; }
+  .status-filter { padding: 9px 0; font-size: 13px; }
+  .problem-list { padding: 6px 8px 16px; }
+  .problem-item { padding: 12px 10px; gap: 12px; }
+  .problem-item .pid { font-size: 12px; }
+  .status-badge { width: 20px; height: 20px; }
+
+  /* ---- 問題ペイン ---- */
+  .pane-tabs { padding: 6px 10px 0; }
+  .pane-tab { padding: 9px 16px; font-size: 14px; }
+  .problem-body { padding: 16px 16px 32px; }
+  .problem-heading h1 { font-size: 18px; }
+  .hint-toggle, .reveal-btn { padding: 10px 16px; }
+
+  /* ---- コードペイン ---- */
+  .workbench-toolbar { gap: 8px; padding: 8px 10px; }
+  .run-btn { flex: 1; justify-content: center; padding: 10px 14px; }
+  /* 実行の主役はボタン。ショートカット表記と「前の問題」等の語は畳む */
+  .toolbar-hint, .nav-label { display: none; }
+  .workbench-toolbar .toolbar-spacer { display: none; }
+  .nav-btn { padding: 10px 13px; font-size: 14px; }
+  .reset-btn { padding: 10px 12px; font-size: 13px; }
+  .editor-host { min-height: 0; }
+  /* 16px: iOS のフォーカス時ズーム回避。折り返し: 横スクロールしながらの編集は
+     指では実用にならないので、長い行は折り返す (CodeMirror は white-space を見て
+     折り返しモードを判定するため、CSS だけで切り替えられる) */
+  .editor-host .cm-content {
+    font-size: 16px;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    /* CodeMirror は非折り返しモードだと content を flex-shrink:0 + 最長行ぶんの
+       min-width で置くので、white-space だけ変えても行箱が画面より広いままになる。
+       縮められるようにして初めて折り返す (幅の計測は CodeMirror が
+       computed white-space を見て自動で折り返しモードに切り替える) */
+    min-width: 0 !important;
+    flex-shrink: 1;
+  }
+  .editor-host .cm-gutters { font-size: 13px; }
+
+  /* コンソールは既定で畳んでおき、実行したときに開く (畳むと見出しの帯だけ残る)。
+     常時 260px 取ると、縦 844px の端末ではエディタが 300px 程度しか残らない */
+  .console { height: auto; flex: 0 0 auto; min-height: 0; border-top: 1px solid var(--border); }
+  .console-body { display: none; }
+  .console.open { height: min(46dvh, 380px); }
+  .console.open .console-body { display: block; }
+  .console-head { padding: 0 4px 0 12px; min-height: 42px; }
+  .console-body { font-size: 13px; padding: 10px 12px 16px; }
+  .console-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 42px;
+    height: 42px;
+    color: var(--text-dim);
+    font-size: 11px;
+  }
+
+  /* ---- 下部タブ (一覧 / 問題 / コード) ---- */
+  .mobile-tabs {
+    display: flex;
+    flex-shrink: 0;
+    background: var(--bg-panel);
+    border-top: 1px solid var(--border);
+    padding-bottom: env(safe-area-inset-bottom);
+  }
+  .mobile-tab {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 2px;
+    padding: 7px 0 8px;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text-dim);
+    border-top: 2px solid transparent;
+  }
+  .mobile-tab-icon svg { display: block; width: 22px; height: 22px; }
+  .mobile-tab.active { color: var(--accent); border-top-color: var(--accent); background: var(--bg-elev); }
+}
+
+/* 進捗バーはスマホでは数字だけで足りる。外した幅をブランド名に回す */
+@media (max-width: 480px) {
+  .progress-track { display: none; }
+}
+
+/* 特に狭い端末: ブランド名を落としてヘッダーの溢れを防ぐ */
+@media (max-width: 360px) {
+  .brand-text { display: none; }
+}
+
+/* 横向きのスマホ: 縦が足りないので、ヘッダー・下部タブ・一覧の余白を薄くする */
+@media (max-height: 500px) and (max-width: 1100px) {
+  .header { height: 44px; }
+  .mobile-tab { flex-direction: row; gap: 6px; padding: 6px 0; font-size: 12px; }
+  .mobile-tab-icon svg { width: 18px; height: 18px; }
+  .console.open { height: min(62dvh, 260px); }
+  /* 横向きではノッチが左右に来る (viewport-fit=cover のぶんを避ける) */
+  .main, .mobile-tabs {
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+  /* 一覧: 絞り込みで画面を使い切らないよう、行を見せることを優先する */
+  .sidebar-controls { padding: 6px 10px; gap: 6px; }
+  .sidebar-level-tabs .level-tab, .status-filter { padding: 5px 0; }
+  .search-input { padding: 6px 12px; }
+  .problem-item { padding: 8px 10px; }
+  .problem-body { padding: 12px 16px 24px; }
 }
