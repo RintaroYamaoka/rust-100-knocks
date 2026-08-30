@@ -88,3 +88,10 @@ trunk serve            # :8080 でフロント (API は vercel dev へプロキ�
   テストは `--exclude app` で回し、app の純ロジックは shared 側に置く
 - WSL で Playwright を使うときは `libnspr4` 等が不足する。sudo 不要の回避策は
   `apt-get download libnspr4 libnss3 libasound2t64` → `dpkg-deb -x` → `LD_LIBRARY_PATH`
+- **起動時に N 本のリクエストを逐次投げない**。言語一覧を 21 本の HEAD で決めていたとき、
+  遅い回線で 16 秒間 Rust しか選べなかった。収録済み言語は
+  `data/problems/index.json` (ビルド時に `scripts/gen-manifest.mjs` が生成) を 1 本読む
+- **ブラウザ検証で `waitForTimeout(N)` を使わない**。待ち時間を入れると、それより遅い
+  問題が永久に見えなくなる (上記の 16 秒はこれで隠れていた)。
+  「揃うまでの時間」を測って上限で判定し、回線を絞った計測も 1 本入れる
+  (詳細: `docs/bootstrap/incidents/2026-08-30-language-selector-slow-network.md`)
