@@ -14,7 +14,7 @@ use shared::progress::{
 };
 
 use crate::console::{ConsolePane, RunState};
-use crate::lang::{initial_language, languages_with_full_data, resolve_selection, selector_languages};
+use crate::lang::{initial_language, resolve_selection, selector_languages};
 use crate::layout::{load_layout, LayoutSizes, SplitTarget};
 use crate::list::Sidebar;
 use crate::problem_view::ProblemPane;
@@ -70,27 +70,22 @@ pub fn App() -> impl IntoView {
     let available: RwSignal<Vec<Language>> = RwSignal::new(Vec::new());
     let probe_started = RwSignal::new(false);
 
-    // 起動時に一度だけ、各言語のデータが 3 レベル揃っているかを確認する。
-    // 揃っていない言語をセレクタに出すと、選んだ瞬間に空の一覧を見せることになる。
+    // 起動時に一度だけ、収録済み言語のマニフェストを読む。
+    //
+    // 以前は 21 本の HEAD を**逐次**投げて確かめていたが、揃うまで数秒かかり、
+    // その間セレクタには Rust しか出ない。回線が遅いほど長く、1 本でも瞬断すれば
+    // その言語は消える。リクエスト 1 本にして、待ち時間も取りこぼしも構造的に無くす。
     Effect::new(move |_| {
         if probe_started.get_untracked() {
             return;
         }
         probe_started.set(true);
         spawn_local(async move {
-            let mut found = HashSet::new();
-            for lang in Language::ALL {
-                for lv in Level::ALL {
-                    if !api::problems_exist(lang, lv).await {
-                        // 1 レベルでも欠けたらその言語は出さないので、残りは問わない
-                        break;
-                    }
-                    found.insert((lang, lv));
-                }
-            }
-            let langs = languages_with_full_data(&found);
-            // データの無い言語が選ばれていたら有効な言語へ寄せる (確認が
-            // 効かなかった = 空のときは動かさない)
+            // 取得や解釈に失敗したら None。そのときはセレクタを触らない
+            // (フォールバックは selector_languages が持つ)
+            let Some(langs) = api::fetch_language_manifest().await else {
+                return;
+            };
             let resolved = resolve_selection(language.get_untracked(), &langs);
             available.set(langs);
             if resolved != language.get_untracked() {
@@ -111,15 +106,26 @@ pub fn App() -> impl IntoView {
         load_error.set(None);
         loading.set(true);
         spawn_local(async move {
-            match api::fetch_problems(key.0, key.1).await {
+            let result = api::fetch_problems(key.0, key.1).await;
+            // 取得中に別の言語へ切り替わっていたら、その結果で画面を触らない。
+            // 触ると「Java の取得に失敗 → Python に切替」で Python を表示しながら
+            // Java のエラー文が出る (キャッシュへの投入だけは有効なので行う)
+            let still_current = (language.get_untracked(), level.get_untracked()) == key;
+            match result {
                 Ok(ps) => {
                     cache.update(|c| {
                         c.insert(key, ps);
                     });
                 }
-                Err(e) => load_error.set(Some(e)),
+                Err(e) => {
+                    if still_current {
+                        load_error.set(Some(e));
+                    }
+                }
             }
-            loading.set(false);
+            if still_current {
+                loading.set(false);
+            }
         });
     });
 

@@ -4,54 +4,11 @@
 //! rustc 専用のリンクを張らない」は、いずれも UI を動かさずに決まる規則なので
 //! ここで固定する。
 
-use std::collections::HashSet;
-
 use app::lang::{
     backend_label, console_idle_hint, console_running_hint, initial_language,
-    languages_with_full_data, links_error_codes, resolve_selection, selector_languages,
+    links_error_codes, resolve_selection, selector_languages,
 };
 use shared::language::Language;
-use shared::problem::Level;
-
-fn found(pairs: &[(Language, &[Level])]) -> HashSet<(Language, Level)> {
-    let mut set = HashSet::new();
-    for (lang, levels) in pairs {
-        for lv in *levels {
-            set.insert((*lang, *lv));
-        }
-    }
-    set
-}
-
-const ALL_LEVELS: &[Level] = &[Level::Beginner, Level::Intermediate, Level::Advanced];
-
-#[test]
-fn language_needs_all_three_levels_to_appear() {
-    let set = found(&[
-        (Language::Rust, ALL_LEVELS),
-        // 初級だけしか無い言語は未完成なので出さない
-        (Language::Python, &[Level::Beginner]),
-    ]);
-    assert_eq!(languages_with_full_data(&set), vec![Language::Rust]);
-}
-
-#[test]
-fn available_languages_keep_the_canonical_order() {
-    let set = found(&[
-        (Language::Javascript, ALL_LEVELS),
-        (Language::Rust, ALL_LEVELS),
-        (Language::Java, ALL_LEVELS),
-    ]);
-    assert_eq!(
-        languages_with_full_data(&set),
-        vec![Language::Rust, Language::Java, Language::Javascript]
-    );
-}
-
-#[test]
-fn no_data_means_no_languages() {
-    assert!(languages_with_full_data(&HashSet::new()).is_empty());
-}
 
 #[test]
 fn initial_language_restores_stored_slug() {
@@ -164,4 +121,71 @@ fn selector_prefers_confirmed_languages_when_available() {
         selector_languages(&avail, Language::Python, true),
         vec![Language::Rust, Language::Python]
     );
+}
+
+// ---- マニフェストからの言語一覧 ----
+
+#[test]
+fn manifest_lists_languages_with_all_three_levels() {
+    use app::lang::languages_from_manifest;
+    let json = r#"{"languages":[
+        {"slug":"rust","levels":["beginner","intermediate","advanced"]},
+        {"slug":"cpp","levels":["beginner","intermediate","advanced"]}
+    ]}"#;
+    assert_eq!(
+        languages_from_manifest(json),
+        Some(vec![Language::Rust, Language::Cpp])
+    );
+}
+
+#[test]
+fn manifest_drops_languages_missing_a_level() {
+    use app::lang::languages_from_manifest;
+    // 3 レベル揃っていない言語は出さない (選んだ瞬間に空の一覧を見せることになる)
+    let json = r#"{"languages":[
+        {"slug":"rust","levels":["beginner","intermediate","advanced"]},
+        {"slug":"java","levels":["beginner"]}
+    ]}"#;
+    assert_eq!(languages_from_manifest(json), Some(vec![Language::Rust]));
+}
+
+#[test]
+fn manifest_ignores_unknown_slugs() {
+    use app::lang::languages_from_manifest;
+    let json = r#"{"languages":[
+        {"slug":"cobol","levels":["beginner","intermediate","advanced"]},
+        {"slug":"rust","levels":["beginner","intermediate","advanced"]}
+    ]}"#;
+    assert_eq!(languages_from_manifest(json), Some(vec![Language::Rust]));
+}
+
+#[test]
+fn manifest_keeps_the_canonical_language_order() {
+    use app::lang::languages_from_manifest;
+    // 表示順は Language::ALL の順に揃える (マニフェストの並びに引きずられない)
+    let json = r#"{"languages":[
+        {"slug":"python","levels":["beginner","intermediate","advanced"]},
+        {"slug":"rust","levels":["beginner","intermediate","advanced"]},
+        {"slug":"cpp","levels":["beginner","intermediate","advanced"]}
+    ]}"#;
+    assert_eq!(
+        languages_from_manifest(json),
+        Some(vec![Language::Rust, Language::Cpp, Language::Python])
+    );
+}
+
+#[test]
+fn broken_manifest_yields_none_not_an_empty_list() {
+    use app::lang::languages_from_manifest;
+    // None = 「判定できなかった」。空 Vec = 「1 言語も無い」と区別する。
+    // 混同すると、取得に失敗しただけでセレクタが空になる
+    assert_eq!(languages_from_manifest("{壊れ"), None);
+    assert_eq!(languages_from_manifest(""), None);
+    assert_eq!(languages_from_manifest(r#"{"languages":"not an array"}"#), None);
+}
+
+#[test]
+fn manifest_with_no_languages_is_an_empty_list() {
+    use app::lang::languages_from_manifest;
+    assert_eq!(languages_from_manifest(r#"{"languages":[]}"#), Some(vec![]));
 }

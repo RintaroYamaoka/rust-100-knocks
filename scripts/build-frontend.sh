@@ -24,4 +24,8 @@ if ! command -v trunk >/dev/null 2>&1; then
     | tar -xz -C "$BIN_DIR"
 fi
 
+# 収録済み言語のマニフェストを実ファイルから生成する (フロントはこれ 1 本で
+# セレクタの中身を決める)。node は Vercel の build image に入っている
+node scripts/gen-manifest.mjs
+
 trunk build --release

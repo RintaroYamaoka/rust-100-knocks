@@ -7,8 +7,9 @@
     "build:editor": "esbuild assets/js/editor-src.mjs --bundle --format=iife --minify --target=es2020 --outfile=assets/js/editor.js && node -e \"const c=require('crypto'),f=require('fs');const h=c.createHash('md5').update(f.readFileSync('assets/js/editor.js')).digest('hex').slice(0,8);console.log('bundle hash: '+h+'  → index.html の ?v= をこの値にすること');\"",
     "test:editor": "node --test tests/editor-src.test.mjs",
     "test:merge": "node --test scripts/merge-batches.test.mjs",
-    "test": "npm run test:editor && npm run test:merge && npm run test:bundle",
-    "test:bundle": "node --test scripts/check-bundle-hash.test.mjs"
+    "test": "npm run test:editor && npm run test:merge && npm run test:bundle && npm run test:manifest",
+    "test:bundle": "node --test scripts/check-bundle-hash.test.mjs",
+    "test:manifest": "node --test scripts/gen-manifest.test.mjs"
   },
   "devDependencies": {
     "@codemirror/commands": "6.11.0",

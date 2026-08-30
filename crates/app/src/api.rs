@@ -33,24 +33,17 @@ pub async fn fetch_problems(language: Language, level: Level) -> Result<Vec<Prob
 /// 21 回叩いても起動が重くならないようにしている (GET だと数 MB を無駄に読む)。
 /// 失敗はすべて「無い」に倒す — 無いものを出すより、あるものを出し損ねるほうが安全。
 #[cfg(target_arch = "wasm32")]
-pub async fn problems_exist(language: Language, level: Level) -> bool {
-    use gloo_net::http::{Method, RequestBuilder};
-
-    let url = shared::problem::problems_url(language, level);
-    let Ok(req) = RequestBuilder::new(&url).method(Method::HEAD).build() else {
-        return false;
-    };
-    // ネットワークの瞬断を「その言語が無い」と解釈すると、セッション中ずっと
-    // セレクタから消える。送信自体に失敗したときだけ 1 回やり直す
-    match req.send().await {
-        Ok(resp) => resp.ok(),
-        Err(_) => {
-            let Ok(retry) = RequestBuilder::new(&url).method(Method::HEAD).build() else {
-                return false;
-            };
-            matches!(retry.send().await, Ok(resp) if resp.ok())
-        }
+pub async fn fetch_language_manifest() -> Option<Vec<shared::language::Language>> {
+    // 収録済み言語の一覧。1 リクエストで済むので、起動直後からセレクタが埋まる
+    let resp = gloo_net::http::Request::get(shared::problem::MANIFEST_URL)
+        .send()
+        .await
+        .ok()?;
+    if !resp.ok() {
+        return None;
     }
+    let text = resp.text().await.ok()?;
+    crate::lang::languages_from_manifest(&text)
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -77,8 +70,8 @@ pub async fn fetch_problems(_language: Language, _level: Level) -> Result<Vec<Pr
 }
 
 #[cfg(not(target_arch = "wasm32"))]
-pub async fn problems_exist(_language: Language, _level: Level) -> bool {
-    false
+pub async fn fetch_language_manifest() -> Option<Vec<shared::language::Language>> {
+    None
 }
 
 #[cfg(not(target_arch = "wasm32"))]

@@ -57,6 +57,9 @@ pub fn problems_rel_path(language: Language, level: Level) -> String {
     format!("data/problems/{}/{}", language.slug(), level.file_name())
 }
 
+/// 収録済み言語のマニフェスト。ビルド時に scripts/gen-manifest.mjs が生成する。
+pub const MANIFEST_URL: &str = "/data/problems/index.json";
+
 /// フロントが取得する URL。
 pub fn problems_url(language: Language, level: Level) -> String {
     format!("/data/problems/{}/{}", language.slug(), level.file_name())

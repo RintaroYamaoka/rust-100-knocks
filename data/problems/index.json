@@ -1,0 +1,60 @@
+{
+  "languages": [
+    {
+      "slug": "rust",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "cpp",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "csharp",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "java",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "python",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "typescript",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    },
+    {
+      "slug": "javascript",
+      "levels": [
+        "beginner",
+        "intermediate",
+        "advanced"
+      ]
+    }
+  ]
+}

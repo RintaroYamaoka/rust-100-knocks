@@ -11,16 +11,36 @@ use shared::problem::Level;
 /// 選択中の言語を保存する localStorage キー。進捗キーと同じ名前空間に置く。
 pub const LANGUAGE_STORAGE_KEY: &str = "rust100knocks.language.v1";
 
-/// 3 レベル分のデータが**実際に取得できた**言語だけを `Language::ALL` の順で返す。
+/// 収録済み言語のマニフェスト (`/data/problems/index.json`) を解釈する。
 ///
-/// 未完成の言語 (`data/problems/<lang>/` が無い・レベルが欠けている) をセレクタに
-/// 出さないための唯一の判定。1 レベルでも欠けたら出さない。
-pub fn languages_with_full_data(found: &HashSet<(Language, Level)>) -> Vec<Language> {
-    Language::ALL
-        .into_iter()
-        .filter(|lang| Level::ALL.iter().all(|lv| found.contains(&(*lang, *lv))))
-        .collect()
+/// マニフェストはビルド時に実ファイルから生成する。以前は起動時に 21 本の HEAD を
+/// **逐次**投げて確かめていたが、それだと揃うまで数秒かかり、その間セレクタには
+/// Rust しか出ない。回線が遅いほど長く、1 本でも瞬断すればその言語は消える。
+/// リクエスト 1 本にすれば、この待ち時間も取りこぼしも構造的に無くなる。
+///
+/// 戻り値の `None` は「判定できなかった」で、`Some(vec![])` の「1 言語も無い」とは別。
+/// 混同すると、取得に失敗しただけでセレクタが空になる。
+pub fn languages_from_manifest(json: &str) -> Option<Vec<Language>> {
+    let v: serde_json::Value = serde_json::from_str(json).ok()?;
+    let entries = v.get("languages")?.as_array()?;
+
+    let mut complete = HashSet::new();
+    for e in entries {
+        let Some(slug) = e.get("slug").and_then(|s| s.as_str()) else { continue };
+        let Some(lang) = Language::from_slug(slug) else { continue };
+        let levels: HashSet<&str> = e
+            .get("levels")
+            .and_then(|l| l.as_array())
+            .map(|a| a.iter().filter_map(|x| x.as_str()).collect())
+            .unwrap_or_default();
+        if Level::ALL.iter().all(|lv| levels.contains(lv.slug())) {
+            complete.insert(lang);
+        }
+    }
+    // 表示順は Language::ALL に揃える (マニフェストの並びに引きずられない)
+    Some(Language::ALL.into_iter().filter(|l| complete.contains(l)).collect())
 }
+
 
 /// 起動時に選ぶ言語。まだ存在確認が済んでいない段階で呼ばれるので、
 /// 保存値が読めればそれ、駄目なら Rust (従来からの既定) に落とす。
