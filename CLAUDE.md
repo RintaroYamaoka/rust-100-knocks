@@ -58,6 +58,10 @@ trunk serve            # :8080 でフロント (API は vercel dev へプロキ�
   **終了コードと stdout の目印**で分類する。判定順序と言語別の制約は ADR 0002 が正本
 - `crates/app` は wasm32 専用ターゲット。純ロジック(フィルタ・進捗集計・出力パース)は
   host でもテストできるよう UI から分離して書く
+- 画面は同じ DOM のまま、**幅で 2 つのレイアウトを切り替える**: 広い画面は 3 ペイン
+  (サイドバー | 問題 | ワークベンチ、ドラッグで分割)、スマホ幅は 1 画面 1 ペイン +
+  下部タブ。どちらを出すかは CSS だけが決め、Rust 側は「いまどのペインか」
+  (`crates/app/src/mobile.rs`) しか持たない
 
 ## 既知の地雷
 
@@ -91,6 +95,22 @@ trunk serve            # :8080 でフロント (API は vercel dev へプロキ�
 - **起動時に N 本のリクエストを逐次投げない**。言語一覧を 21 本の HEAD で決めていたとき、
   遅い回線で 16 秒間 Rust しか選べなかった。収録済み言語は
   `data/problems/index.json` (ビルド時に `scripts/gen-manifest.mjs` が生成) を 1 本読む
+- **スマホ幅 (≤820px、および横向きスマホ) は「1 画面 1 ペイン + 下部タブ」**。
+  どのペインを見せるかは `.main[data-pane=list|problem|code]` (CSS) が決め、状態は
+  `crates/app/src/mobile.rs`。3 ペインの縦積みに戻すと、375px ではヘッダーが横に溢れて
+  「上級」タブと進捗が画面外に出るうえ、エディタまで 2〜3 画面スクロールすることになる
+- **Leptos: 1 つのクロージャで Memo とその材料を読むときは、材料を先に読む**。
+  `format!("{} / {}", passed_in_level.get(), problems.with(|p| p.len()))` と書くと、
+  Memo の初回計算の中で `problems` が読まれるせいで外側の購読が張られず、表示が初期値の
+  まま固まる (ヘッダーの進捗が本番でずっと `0 / 0` だった)。詳細:
+  `docs/bootstrap/incidents/2026-08-30-header-progress-frozen.md`
+- **スマホのエディタ折り返しは CSS だけで実現している**。`.cm-content` に
+  `white-space: pre-wrap` を当てるだけでは効かず、`min-width: 0 !important` と
+  `flex-shrink: 1` が要る (CodeMirror は非折り返し時、最長行ぶんの min-width を
+  inline style で付け、content を `flex-shrink: 0` で置く)。1 つでも欠けると横スクロールに戻る
+- **入力要素のフォントをスマホ幅で 16px 未満にしない**。iOS がフォーカス時に画面を
+  勝手に拡大し、戻すのはピンチ操作しかない。`.search-input` / `.lang-select` /
+  `.cm-content` はスマホ幅で 16px に上げてある
 - **ブラウザ検証で `waitForTimeout(N)` を使わない**。待ち時間を入れると、それより遅い
   問題が永久に見えなくなる (上記の 16 秒はこれで隠れていた)。
   「揃うまでの時間」を測って上限で判定し、回線を絞った計測も 1 本入れる
